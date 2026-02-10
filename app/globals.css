@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  /* White to blue gradient background */
+  background: linear-gradient(180deg, #faf7ed 20%, #b8e5ff 100%);
+  background-attachment: fixed;
+  @apply text-gray-900;
+}
