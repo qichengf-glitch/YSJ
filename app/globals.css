@@ -3,8 +3,15 @@
 @tailwind utilities;
 
 body {
-  /* White to blue gradient background */
-  background: linear-gradient(180deg, #faf7ed 20%, #b8e5ff 100%);
+  /* Muted light blue-grey gradient */
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 30%, #cbd5e1 100%);
   background-attachment: fixed;
   @apply text-gray-900;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

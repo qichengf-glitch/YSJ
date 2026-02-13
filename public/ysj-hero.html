@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YSJ Lab — Hero</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #EAF2FB 0%, #C9DAF2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6rem 5% 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-inner {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .sphere-wrap {
+      width: clamp(320px, 55vw, 480px);
+      position: relative;
+      z-index: 0;
+    }
+
+    .sphere-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      filter: drop-shadow(0 24px 48px rgba(30, 64, 175, 0.15)) drop-shadow(0 12px 24px rgba(0,0,0,0.08));
+    }
+
+    .hero-content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      text-align: center;
+    }
+
+    .hero-ysj {
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: clamp(3.5rem, 8vw, 5.5rem);
+      font-weight: 400;
+      color: #1a2744;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .hero-lab {
+      font-family: Inter, -apple-system, sans-serif;
+      font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+      font-weight: 500;
+      color: #1a2744;
+      letter-spacing: 0.25em;
+      margin-top: 0.4rem;
+    }
+
+    .hero-tagline {
+      font-family: Inter, -apple-system, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 300;
+      color: #3d5a80;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 700px) {
+      .sphere-wrap {
+        width: clamp(260px, 80vw, 360px);
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="sphere-wrap">
+        <svg class="sphere-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-hidden="true">
+          <defs>
+            <linearGradient id="blue-main" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="50%" stop-color="#2563eb"/>
+              <stop offset="100%" stop-color="#1d4ed8"/>
+            </linearGradient>
+            <linearGradient id="blue-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1d4ed8"/>
+              <stop offset="100%" stop-color="#1e40af"/>
+            </linearGradient>
+            <linearGradient id="blue-band" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#1e40af"/>
+              <stop offset="50%" stop-color="#60a5fa"/>
+              <stop offset="100%" stop-color="#1e40af"/>
+            </linearGradient>
+          </defs>
+
+          <g transform="translate(200, 200)">
+            <ellipse cx="0" cy="-96" rx="72" ry="16" fill="url(#blue-dark)" opacity="0.5"/>
+            <ellipse cx="0" cy="-78" rx="88" ry="18" fill="url(#blue-dark)" opacity="0.55"/>
+            <ellipse cx="0" cy="-60" rx="100" ry="20" fill="url(#blue-dark)" opacity="0.65"/>
+            <ellipse cx="0" cy="-42" rx="108" ry="22" fill="url(#blue-dark)" opacity="0.75"/>
+            <ellipse cx="0" cy="-24" rx="114" ry="24" fill="url(#blue-dark)" opacity="0.85"/>
+            <ellipse cx="0" cy="-6" rx="118" ry="26" fill="url(#blue-dark)" opacity="0.9"/>
+
+            <ellipse cx="0" cy="-96" rx="72" ry="16" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="-78" rx="88" ry="18" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="-60" rx="100" ry="20" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="-42" rx="108" ry="22" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="-24" rx="114" ry="24" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="-6" rx="118" ry="26" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="12" rx="118" ry="26" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="30" rx="114" ry="24" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="48" rx="108" ry="22" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="66" rx="100" ry="20" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="84" rx="88" ry="18" fill="url(#blue-main)"/>
+            <ellipse cx="0" cy="102" rx="72" ry="16" fill="url(#blue-main)"/>
+
+            <ellipse cx="0" cy="-24" rx="110" ry="22" fill="url(#blue-band)" opacity="0.3"/>
+            <ellipse cx="0" cy="-6" rx="114" ry="24" fill="url(#blue-band)" opacity="0.25"/>
+            <ellipse cx="0" cy="12" rx="114" ry="24" fill="url(#blue-band)" opacity="0.25"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="hero-content">
+        <h1 class="hero-ysj">YSJ</h1>
+        <h2 class="hero-lab">LAB</h2>
+        <p class="hero-tagline">Invest with Assurance</p>
+      </div>
+    </div>
+  </section>
+</body>
+</html>

@@ -1,37 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import Section from "@/components/Section";
 import { useLanguage } from "@/contexts/LanguageContext";
+import FocusCards from "@/components/FocusCards";
 
 const content = {
   en: {
     hero: {
-      title: "YSJ Lab",
-      subtitle: "Invest with Assurance",
+      label: "YSJ Lab",
+      title: "Invest with Assurance",
+      subtitle:
+        "A disciplined, research-driven partner for investors navigating public and private markets.",
     },
     whatWeDo: {
       title: "What We Do",
-      cards: [
-        {
-          title: "Research",
-          description:
-            "Presenting theoretical research and case studies for strategies suiting personal investors, small funds, and private equities.",
-          href: "/research",
-        },
-        {
-          title: "Strategy",
-          description:
-            "Selected strategies for investors interested in Stocks and Commodities, Options and Futures, in the US market as well as emerging markets.",
-          href: "/strategy",
-        },
-        {
-          title: "Prediction Markets",
-          description:
-            "Presenting Musashi: Your best companion for trading on Prediction Markets.",
-          href: "/prediction-markets",
-        },
-      ],
     },
     philosophy: {
       title: "Our Mission",
@@ -43,8 +25,9 @@ const content = {
   },
   zh: {
     hero: {
-      title: "YSJ Lab",
-      subtitle: "Invest with Assurance",
+      label: "YSJ Lab",
+      title: "Invest with Assurance",
+      subtitle: "以研究为驱动的严谨伙伴，助您穿越公开与私募市场。",
     },
     whatWeDo: {
       title: "我们的工作",
@@ -86,48 +69,42 @@ export default function Home() {
   return (
     <main className="min-h-screen">
       {/* Hero Section */}
-      <Section className="pt-24 pb-16">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="font-playfair text-5xl sm:text-6xl lg:text-7xl font-normal text-gray-900 mb-6 tracking-tight">
+      <section className="relative isolate min-h-[75vh] overflow-hidden">
+        <video
+          className="absolute inset-0 h-full w-full object-cover"
+          src="/ysj-hero.mp4"
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/40 to-black/70" />
+
+        <div className="absolute bottom-0 left-0 z-10 px-6 sm:px-8 lg:px-12 pb-12 sm:pb-16 lg:pb-20">
+          <h1 className="font-playfair text-4xl sm:text-5xl lg:text-6xl font-normal text-white drop-shadow-md tracking-tight">
             {t.hero.title}
           </h1>
-          <p className="text-lg sm:text-xl text-gray-700 leading-relaxed max-w-2xl mx-auto font-light">
-            {t.hero.subtitle}
-          </p>
         </div>
-      </Section>
+      </section>
 
       {/* What We Do */}
-      <Section>
-        <h2 className="font-playfair text-4xl sm:text-5xl font-normal text-gray-900 mb-12 tracking-tight">
+      <Section fullWidth>
+        <h2 className="font-playfair text-4xl sm:text-5xl font-normal text-gray-900 mb-12 tracking-tight text-center">
           {t.whatWeDo.title}
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {t.whatWeDo.cards.map((card, index) => (
-            <Link
-              key={index}
-              href={card.href}
-              className="group bg-[#b8e5ff] p-8 rounded-lg border-2 border-primary hover:border-primary-dark transition-colors block"
-              style={{
-                boxShadow: '0 4px 0 rgba(30, 58, 138, 0.4), 0 8px 0 rgba(30, 58, 138, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-              }}
-            >
-              <h3 className="text-2xl font-semibold text-gray-900 mb-4 group-hover:text-primary">
-                {card.title}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">{card.description}</p>
-            </Link>
-          ))}
+        <div className="w-full">
+          <FocusCards />
         </div>
       </Section>
 
       {/* Philosophy */}
-      <Section>
-        <div className="max-w-3xl">
-          <h2 className="font-playfair text-4xl sm:text-5xl font-normal text-gray-900 mb-8 tracking-tight">
+      <Section fullWidth>
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="font-playfair text-5xl sm:text-6xl lg:text-7xl font-normal text-gray-900 mb-10 tracking-tight">
             {t.philosophy.title}
           </h2>
-          <p className="text-xl text-gray-600 leading-relaxed">
+          <p className="text-2xl sm:text-3xl text-gray-700 leading-relaxed">
             {t.philosophy.text}
           </p>
         </div>
