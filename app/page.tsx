@@ -8,8 +8,7 @@ const content = {
   en: {
     hero: {
       title: "YSJ Lab",
-      subtitle:
-        "YSJ Lab is an independent financial research and strategy studio, focused on data-driven insights, systematic thinking, and forward-looking market analysis.",
+      subtitle: "Invest with Assurance",
     },
     whatWeDo: {
       title: "What We Do",
@@ -17,36 +16,35 @@ const content = {
         {
           title: "Research",
           description:
-            "Deep-dive analysis into market dynamics, economic indicators, and investment opportunities.",
+            "Presenting theoretical research and case studies for strategies suiting personal investors, small funds, and private equities.",
           href: "/research",
         },
         {
           title: "Strategy",
           description:
-            "Systematic approaches to portfolio management and risk-adjusted returns.",
+            "Selected strategies for investors interested in Stocks and Commodities, Options and Futures, in the US market as well as emerging markets.",
           href: "/strategy",
         },
         {
           title: "Prediction Markets",
           description:
-            "Data-driven predictions and probabilistic modeling for informed decision-making.",
+            "Presenting Musashi: Your best companion for trading on Prediction Markets.",
           href: "/prediction-markets",
         },
       ],
     },
     philosophy: {
-      title: "Our Philosophy",
-      text: "We believe in rigorous analysis, disciplined execution, and continuous learning. Our approach combines quantitative methods with qualitative insights to navigate complex financial markets.",
+      title: "Our Mission",
+      text: "We believe in rigorous analysis, disciplined execution, and continuous research. Through quantitative methods and qualitative insights, we aim to be the best companion for investors, no matter what market you're in.",
     },
     footer: {
-      copyright: "© 2024 YSJ Lab. All rights reserved.",
+      copyright: "© 2026 YSJ Holdings LLC, all rights reserved",
     },
   },
   zh: {
     hero: {
       title: "YSJ Lab",
-      subtitle:
-        "YSJ Lab 是一家独立的金融研究与策略工作室，专注于数据驱动的洞察、系统化思维，以及前瞻性的市场分析。",
+      subtitle: "Invest with Assurance",
     },
     whatWeDo: {
       title: "我们的工作",
@@ -72,11 +70,11 @@ const content = {
       ],
     },
     philosophy: {
-      title: "我们的理念",
-      text: "我们相信严谨的分析、纪律性的执行和持续的学习。我们的方法结合定量分析和定性洞察，以应对复杂的金融市场。",
+      title: "我们的使命",
+      text: "我们相信严谨的分析、纪律性的执行和持续的研究。通过定量方法与定性洞察，我们致力于成为投资者的最佳伙伴，无论您身处何种市场。",
     },
     footer: {
-      copyright: "© 2024 YSJ Lab。保留所有权利。",
+      copyright: "© 2026 YSJ Holdings LLC，保留所有权利。",
     },
   },
 };
