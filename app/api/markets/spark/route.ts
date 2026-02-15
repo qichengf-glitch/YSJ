@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export type SparkResp = {
   updatedAt: number;
   series: Record<string, number[]>;
@@ -22,7 +24,13 @@ async function fetchSeries(symbol: string): Promise<number[] | null> {
     symbol
   )}?range=1d&interval=5m&includePrePost=false`;
 
-  const res = await fetch(url, { cache: "no-store" });
+  const res = await fetch(url, {
+    cache: "no-store",
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    },
+  });
   if (!res.ok) return null;
 
   const json = await res.json();

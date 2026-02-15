@@ -1,5 +1,7 @@
 import type { NextRequest } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 type QuoteItem = {
   symbol: string;
   longName?: string;
@@ -62,7 +64,13 @@ export async function GET(_req: NextRequest) {
   )}`;
 
   try {
-    const res = await fetch(url, { next: { revalidate: 60 } });
+    const res = await fetch(url, {
+      next: { revalidate: 60 },
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      },
+    });
     if (!res.ok) {
       throw new Error(`Yahoo quote error: ${res.status}`);
     }
