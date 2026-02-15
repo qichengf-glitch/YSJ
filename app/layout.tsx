@@ -1,14 +1,8 @@
+import React from "react";
 import type { Metadata } from "next";
-import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
-
-const inter = Inter({ subsets: ["latin"] });
-const playfair = Playfair_Display({ 
-  subsets: ["latin"],
-  variable: "--font-playfair",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.ysjlab.com"),
@@ -26,7 +20,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} ${playfair.variable}`}>
+      <body
+        className="font-sans"
+        style={
+          {
+            "--font-playfair": "'Playfair Display', Georgia, serif",
+          } as React.CSSProperties
+        }
+      >
         <LanguageProvider>
           <Navbar />
           {children}
