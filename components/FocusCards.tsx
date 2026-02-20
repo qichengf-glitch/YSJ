@@ -29,11 +29,20 @@ const items = [
       "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80",
     alt: "Person holding tablet with financial dashboard",
   },
+  {
+    title: "Ongoing Thesis",
+    description:
+      "Current research projects and investment theses under development with community-driven frameworks.",
+    href: "/research/ongoing-thesis",
+    image:
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+    alt: "Analyst reviewing ongoing thesis notes and market data",
+  },
 ];
 
 export default function FocusCards() {
   return (
-    <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7 xl:gap-8">
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-7">
       {items.map((item) => (
         <Link
           key={item.href}
@@ -46,7 +55,7 @@ export default function FocusCards() {
               src={item.image}
               alt={item.alt}
               fill
-              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
               className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"
               priority
             />
