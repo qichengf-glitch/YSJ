@@ -11,6 +11,12 @@ type RouteContext = {
 const BACKEND_URL =
   process.env.MARKET_RADAR_BACKEND_URL ?? "http://127.0.0.1:8000";
 
+const corsHeaders = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+  "access-control-allow-headers": "content-type, authorization",
+};
+
 async function proxyToMarketRadarBackend(
   request: NextRequest,
   context: RouteContext
@@ -39,6 +45,9 @@ async function proxyToMarketRadarBackend(
 
     responseHeaders.delete("content-encoding");
     responseHeaders.delete("transfer-encoding");
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      responseHeaders.set(key, value);
+    });
 
     return new Response(response.body, {
       status: response.status,
@@ -55,7 +64,7 @@ async function proxyToMarketRadarBackend(
           "Market Radar backend is not reachable. Start the FastAPI service in jin10_us_dashboard_site_v4_2, or set MARKET_RADAR_BACKEND_URL.",
         error: message,
       },
-      { status: 502 }
+      { status: 502, headers: corsHeaders }
     );
   }
 }
@@ -65,3 +74,6 @@ export const POST = proxyToMarketRadarBackend;
 export const PUT = proxyToMarketRadarBackend;
 export const PATCH = proxyToMarketRadarBackend;
 export const DELETE = proxyToMarketRadarBackend;
+export function OPTIONS() {
+  return new Response(null, { status: 204, headers: corsHeaders });
+}

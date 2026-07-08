@@ -436,13 +436,26 @@ async function api(path, options = {}) {
   const proxiedPath = path.startsWith('/api/')
     ? `${API_PROXY_PREFIX}${path.slice('/api'.length)}`
     : path;
-  const res = await fetch(proxiedPath, { headers: { 'Content-Type': 'application/json' }, ...options });
+  const headers = { Accept: 'application/json', ...(options.headers || {}) };
+  const res = await fetch(proxiedPath, { ...options, headers });
+  const text = await res.text();
+
   if (!res.ok) {
-    let text = await res.text();
-    try { text = JSON.parse(text).detail || text; } catch (_) {}
-    throw new Error(text || `HTTP ${res.status}`);
+    let message = text;
+    try { message = JSON.parse(text).detail || text; } catch (_) {}
+    throw new Error(message || `HTTP ${res.status}`);
   }
-  return await res.json();
+
+  if (!text.trim()) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    const preview = text.slice(0, 120).replace(/\s+/g, ' ');
+    throw new Error(`Invalid JSON response${preview ? `: ${preview}` : ''}`);
+  }
 }
 
 function toast(msg) {
