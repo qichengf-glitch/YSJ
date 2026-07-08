@@ -44,6 +44,7 @@ async function proxyToMarketRadarBackend(
     const responseHeaders = new Headers(response.headers);
 
     responseHeaders.delete("content-encoding");
+    responseHeaders.delete("content-length");
     responseHeaders.delete("transfer-encoding");
     Object.entries(corsHeaders).forEach(([key, value]) => {
       responseHeaders.set(key, value);
