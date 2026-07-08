@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>US Event Intelligence</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+
+  <header class="topbar glass">
+    <div class="brand">
+      <div class="brand-mark">US</div>
+      <div>
+        <div class="brand-title">Market Calendar Intelligence</div>
+        <div class="brand-subtitle">美股事件驱动 Dashboard</div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-view="dashboard">Dashboard</button>
+      <button class="tab" data-view="earnings">Earnings</button>
+      <button class="tab" data-view="updates">Updates</button>
+      <button class="tab" data-view="holidays">Holidays</button>
+      <button class="tab" data-view="prediction">Prediction Markets</button>
+    </nav>
+    <div class="top-actions">
+      <input id="globalSearch" class="search" placeholder="搜索 TSM / NVDA / 营收 / 盘后" />
+      <button class="primary-btn" id="btnSync">同步数据</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section id="dashboard" class="view active-view">
+      <div class="hero-grid">
+        <article class="hero-card glass">
+          <div class="section-kicker">This Week</div>
+          <h1 id="briefHeadline">等待数据同步</h1>
+          <p id="briefParagraph">同步美股日历后，这里会展示事件主线、财报集中度和盘前/盘后风险窗口。</p>
+          <ul id="briefBullets" class="brief-list"></ul>
+          <div id="briefChips" class="chip-row"></div>
+        </article>
+
+        <aside class="metric-panel glass">
+          <div class="panel-title">市场监控指标</div>
+          <div class="metric-grid" id="metricGrid"></div>
+        </aside>
+      </div>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Live Intelligence</div>
+            <h2>Latest Updates</h2>
+          </div>
+          <button class="text-btn" data-view-jump="updates">查看全部</button>
+        </div>
+        <div id="latestUpdates" class="update-stream"></div>
+      </section>
+
+      <section class="three-grid">
+        <article class="glass mini-board">
+          <div class="section-kicker">Today</div>
+          <h3>今日盘前</h3>
+          <div id="todayPre" class="compact-list"></div>
+        </article>
+        <article class="glass mini-board">
+          <div class="section-kicker">Tonight</div>
+          <h3>今日盘后</h3>
+          <div id="todayPost" class="compact-list"></div>
+        </article>
+        <article class="glass mini-board">
+          <div class="section-kicker">Released</div>
+          <h3>Surprise</h3>
+          <div id="topSurprises" class="compact-list"></div>
+        </article>
+      </section>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Concentration</div>
+            <h2>公司组别与事件集中度</h2>
+          </div>
+        </div>
+        <div class="two-grid">
+          <div class="glass chart-card">
+            <h3>主线组别</h3>
+            <div id="groupBars" class="bars"></div>
+          </div>
+          <div class="glass chart-card">
+            <h3>高频公司</h3>
+            <div id="tickerBars" class="bars"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="earnings" class="view">
+      <div class="section-head sticky-head glass">
+        <div>
+          <div class="section-kicker">Earnings</div>
+          <h2>财报日历</h2>
+        </div>
+        <div class="filters">
+          <button class="seg active" data-range="7">7D</button>
+          <button class="seg" data-range="30">30D</button>
+          <button class="seg" data-filter="released">已公布</button>
+          <button class="seg" data-filter="upcoming">待公布</button>
+          <button class="seg" data-filter="star4">Star 4+</button>
+        </div>
+      </div>
+      <div id="earningsList" class="earnings-grid"></div>
+    </section>
+
+    <section id="updates" class="view">
+      <div class="section-head sticky-head glass">
+        <div>
+          <div class="section-kicker">Material Changes</div>
+          <h2>重要变化</h2>
+          <p class="section-note">全部包含所有 Star 等级的有效事件；前台自动隐藏 delete、无内容记录、普通待公布流水，以及已过去满 7 天的项目。</p>
+        </div>
+        <div class="filters">
+          <button class="seg active" data-update-filter="all">全部</button>
+          <button class="seg" data-update-filter="release">数据公布</button>
+          <button class="seg" data-update-filter="forecast">预测/修正</button>
+          <button class="seg" data-update-filter="event">市场事件</button>
+          <button class="seg" data-update-filter="star4">Star 4+</button>
+          <button class="seg" data-update-filter="美国">美国</button>
+          <button class="seg" data-update-filter="欧洲">欧洲</button>
+          <button class="seg" data-update-filter="亚洲">亚洲</button>
+        </div>
+      </div>
+      <div id="updatesList" class="update-list"></div>
+    </section>
+
+    <section id="holidays" class="view">
+      <div class="section-head sticky-head glass">
+        <div>
+          <div class="section-kicker">Market Schedule</div>
+          <h2>假期与交易安排</h2>
+        </div>
+      </div>
+      <div id="holidaysList" class="holiday-grid"></div>
+    </section>
+
+    <section id="prediction" class="view">
+      <div class="section-head sticky-head glass">
+        <div>
+          <div class="section-kicker">Prediction Markets</div>
+          <h2>宏观事件赔率雷达</h2>
+          <p class="section-note">直接从 Polymarket Gamma/CLOB API 拉取事件赔率和 7 日概率变化；不再生成 Excel。主视图只保留利率美元、地缘商品、增长风险三条交易主线。</p>
+        </div>
+        <div class="filters">
+          <button class="seg active" data-pm-bucket="all">全部</button>
+          <button class="seg" data-pm-bucket="rates_usd">利率美元</button>
+          <button class="seg" data-pm-bucket="geo_commodities">地缘商品</button>
+          <button class="seg" data-pm-bucket="growth_risk">增长风险</button>
+          <button class="primary-btn small" id="btnSyncPM">同步 Polymarket</button>
+        </div>
+      </div>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">7D Watch</div>
+            <h2>交易主线监控</h2>
+          </div>
+          <div class="microcopy" id="pmFetchedAt">尚未同步</div>
+        </div>
+        <div id="pmBucketBoard" class="pm-bucket-grid"></div>
+      </section>
+
+      <section class="three-grid">
+        <article class="glass mini-board">
+          <div class="section-kicker">7D Up</div>
+          <h3>概率上升</h3>
+          <div id="pmTopUp" class="compact-list"></div>
+        </article>
+        <article class="glass mini-board">
+          <div class="section-kicker">7D Down</div>
+          <h3>概率下降</h3>
+          <div id="pmTopDown" class="compact-list"></div>
+        </article>
+        <article class="glass mini-board">
+          <div class="section-kicker">Volume</div>
+          <h3>成交额最高</h3>
+          <div id="pmVolumeLeaders" class="compact-list"></div>
+        </article>
+      </section>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">All Markets</div>
+            <h2>宏观相关市场</h2>
+          </div>
+        </div>
+        <div id="pmMarketsTable" class="pm-table-wrap glass"></div>
+      </section>
+    </section>
+
+  </main>
+
+  <aside id="drawer" class="drawer">
+    <div class="drawer-head">
+      <div>
+        <div class="section-kicker">Details</div>
+        <h2 id="drawerTitle">Company</h2>
+      </div>
+      <button id="drawerClose" class="icon-btn">×</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+  </aside>
+  <div id="drawerMask" class="drawer-mask"></div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
