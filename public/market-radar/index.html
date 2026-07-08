@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>US Event Intelligence</title>
+  <link rel="stylesheet" href="/market-radar/styles.css" />
+</head>
+<body>
+  <div class="orb orb-a"></div>
+  <div class="orb orb-b"></div>
+
+  <header class="topbar glass">
+    <div class="brand">
+      <div class="brand-mark">US</div>
+      <div>
+        <div class="brand-title" data-i18n="brandTitle">Market Calendar Intelligence</div>
+        <div class="brand-subtitle" data-i18n="brandSubtitle">US Event-Driven Dashboard</div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-view="dashboard" data-i18n="tabDashboard">Dashboard</button>
+      <button class="tab" data-view="earnings" data-i18n="tabEarnings">Earnings</button>
+      <button class="tab" data-view="updates" data-i18n="tabUpdates">Updates</button>
+      <button class="tab" data-view="holidays" data-i18n="tabHolidays">Holidays</button>
+      <button class="tab" data-view="prediction" data-i18n="tabPrediction">Prediction Markets</button>
+    </nav>
+    <div class="top-actions">
+      <input id="globalSearch" class="search" placeholder="Search TSM / NVDA / revenue / after hours" data-i18n-placeholder="searchPlaceholder" />
+      <button class="primary-btn" id="btnSync" data-i18n="syncData">Sync Data</button>
+    </div>
+  </header>
+
+  <main class="page">
+    <section id="dashboard" class="view active-view">
+      <div class="hero-grid">
+        <article class="hero-card glass">
+          <div class="section-kicker" data-i18n="thisWeek">This Week</div>
+          <h1 id="briefHeadline" data-i18n="waitingHeadline">Waiting for data sync</h1>
+          <p id="briefParagraph" data-i18n="waitingParagraph">After syncing the US market calendar, this area will show event themes, earnings concentration, and pre-market/after-hours risk windows.</p>
+          <ul id="briefBullets" class="brief-list"></ul>
+          <div id="briefChips" class="chip-row"></div>
+        </article>
+
+        <aside class="metric-panel glass">
+          <div class="panel-title" data-i18n="monitorMetrics">Market Monitor</div>
+          <div class="metric-grid" id="metricGrid"></div>
+        </aside>
+      </div>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker" data-i18n="liveIntelligence">Live Intelligence</div>
+            <h2 data-i18n="latestUpdates">Latest Updates</h2>
+          </div>
+          <button class="text-btn" data-view-jump="updates" data-i18n="viewAll">View All</button>
+        </div>
+        <div id="latestUpdates" class="update-stream"></div>
+      </section>
+
+      <section class="three-grid">
+        <article class="glass mini-board">
+          <div class="section-kicker" data-i18n="today">Today</div>
+          <h3 data-i18n="todayPreMarket">Today Pre-Market</h3>
+          <div id="todayPre" class="compact-list"></div>
+        </article>
+        <article class="glass mini-board">
+          <div class="section-kicker" data-i18n="tonight">Tonight</div>
+          <h3 data-i18n="todayAfterHours">Today After-Hours</h3>
+          <div id="todayPost" class="compact-list"></div>
+        </article>
+        <article class="glass mini-board">
+          <div class="section-kicker" data-i18n="released">Released</div>
+          <h3>Surprise</h3>
+          <div id="topSurprises" class="compact-list"></div>
+        </article>
+      </section>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker" data-i18n="concentration">Concentration</div>
+            <h2 data-i18n="companyGroupsTitle">Company Groups & Event Concentration</h2>
+          </div>
+        </div>
+        <div class="two-grid">
+          <div class="glass chart-card">
+            <h3 data-i18n="themeGroups">Theme Groups</h3>
+            <div id="groupBars" class="bars"></div>
+          </div>
+          <div class="glass chart-card">
+            <h3 data-i18n="frequentCompanies">Frequent Companies</h3>
+            <div id="tickerBars" class="bars"></div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="earnings" class="view">
+      <div class="section-head sticky-head glass">
+        <div>
+          <div class="section-kicker" data-i18n="earnings">Earnings</div>
+          <h2 data-i18n="earningsCalendar">Earnings Calendar</h2>
+        </div>
+        <div class="filters">
+          <button class="seg active" data-range="7" data-i18n="range7">7D</button>
+          <button class="seg" data-range="30" data-i18n="range30">30D</button>
+          <button class="seg" data-filter="released" data-i18n="releasedFilter">Released</button>
+          <button class="seg" data-filter="upcoming" data-i18n="upcomingFilter">Upcoming</button>
+          <button class="seg" data-filter="star4" data-i18n="star4Plus">Star 4+</button>
+        </div>
+      </div>
+      <div id="earningsList" class="earnings-grid"></div>
+    </section>
+
+    <section id="updates" class="view">
+      <div class="section-head sticky-head glass">
+        <div>
+          <div class="section-kicker" data-i18n="materialChanges">Material Changes</div>
+          <h2 data-i18n="importantChanges">Important Changes</h2>
+          <p class="section-note" data-i18n="updatesNote">Includes valid events across all Star levels; delete records, empty entries, ordinary pending rows, and items older than 7 days are hidden.</p>
+        </div>
+        <div class="filters">
+          <button class="seg active" data-update-filter="all" data-i18n="all">All</button>
+          <button class="seg" data-update-filter="release" data-i18n="dataRelease">Data Release</button>
+          <button class="seg" data-update-filter="forecast" data-i18n="forecastRevision">Forecast / Revision</button>
+          <button class="seg" data-update-filter="event" data-i18n="marketEvent">Market Event</button>
+          <button class="seg" data-update-filter="star4" data-i18n="star4Plus">Star 4+</button>
+          <button class="seg" data-update-filter="美国" data-i18n="regionUS">US</button>
+          <button class="seg" data-update-filter="欧洲" data-i18n="regionEurope">Europe</button>
+          <button class="seg" data-update-filter="亚洲" data-i18n="regionAsia">Asia</button>
+        </div>
+      </div>
+      <div id="updatesList" class="update-list"></div>
+    </section>
+
+    <section id="holidays" class="view">
+      <div class="section-head sticky-head glass">
+        <div>
+          <div class="section-kicker" data-i18n="marketSchedule">Market Schedule</div>
+          <h2 data-i18n="holidaysSchedule">Holidays & Trading Schedule</h2>
+        </div>
+      </div>
+      <div id="holidaysList" class="holiday-grid"></div>
+    </section>
+
+    <section id="prediction" class="view">
+      <div class="section-head sticky-head glass">
+        <div>
+          <div class="section-kicker" data-i18n="predictionMarkets">Prediction Markets</div>
+          <h2 data-i18n="macroOddsRadar">Macro Event Odds Radar</h2>
+          <p class="section-note" data-i18n="predictionNote">Pulls event odds and 7-day probability changes directly from Polymarket Gamma/CLOB APIs. The main view keeps three trading themes: rates/USD, geopolitics/commodities, and growth risk.</p>
+        </div>
+        <div class="filters">
+          <button class="seg active" data-pm-bucket="all" data-i18n="all">All</button>
+          <button class="seg" data-pm-bucket="rates_usd" data-i18n="ratesUsd">Rates / USD</button>
+          <button class="seg" data-pm-bucket="geo_commodities" data-i18n="geoCommodities">Geo / Commodities</button>
+          <button class="seg" data-pm-bucket="growth_risk" data-i18n="growthRisk">Growth Risk</button>
+          <button class="primary-btn small" id="btnSyncPM" data-i18n="syncPolymarket">Sync Polymarket</button>
+        </div>
+      </div>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker" data-i18n="watch7d">7D Watch</div>
+            <h2 data-i18n="themeMonitor">Theme Monitor</h2>
+          </div>
+          <div class="microcopy" id="pmFetchedAt" data-i18n="notSynced">Not synced yet</div>
+        </div>
+        <div id="pmBucketBoard" class="pm-bucket-grid"></div>
+      </section>
+
+      <section class="three-grid">
+        <article class="glass mini-board">
+          <div class="section-kicker" data-i18n="up7d">7D Up</div>
+          <h3 data-i18n="probUp">Probability Up</h3>
+          <div id="pmTopUp" class="compact-list"></div>
+        </article>
+        <article class="glass mini-board">
+          <div class="section-kicker" data-i18n="down7d">7D Down</div>
+          <h3 data-i18n="probDown">Probability Down</h3>
+          <div id="pmTopDown" class="compact-list"></div>
+        </article>
+        <article class="glass mini-board">
+          <div class="section-kicker" data-i18n="volume">Volume</div>
+          <h3 data-i18n="volumeLeaders">Volume Leaders</h3>
+          <div id="pmVolumeLeaders" class="compact-list"></div>
+        </article>
+      </section>
+
+      <section class="section-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker" data-i18n="allMarkets">All Markets</div>
+            <h2 data-i18n="macroMarkets">Macro-Relevant Markets</h2>
+          </div>
+        </div>
+        <div id="pmMarketsTable" class="pm-table-wrap glass"></div>
+      </section>
+    </section>
+
+  </main>
+
+  <aside id="drawer" class="drawer">
+    <div class="drawer-head">
+      <div>
+        <div class="section-kicker" data-i18n="details">Details</div>
+        <h2 id="drawerTitle" data-i18n="company">Company</h2>
+      </div>
+      <button id="drawerClose" class="icon-btn">×</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+  </aside>
+  <div id="drawerMask" class="drawer-mask"></div>
+
+  <div id="toast" class="toast"></div>
+  <script src="/market-radar/app.js"></script>
+</body>
+</html>

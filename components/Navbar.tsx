@@ -49,6 +49,7 @@ const navItems = {
     research: "Research",
     strategy: "Our Strategy",
     predictionMarkets: "Prediction Markets",
+    marketRadar: "Market Radar",
     researchDropdown: {
       theoretical: "Theoretical Research",
       thesis: "Ongoing Thesis",
@@ -60,6 +61,7 @@ const navItems = {
     research: "研究",
     strategy: "我们的策略",
     predictionMarkets: "预测市场",
+    marketRadar: "市场雷达",
     researchDropdown: {
       theoretical: "理论研究",
       thesis: "进行中的研究",
@@ -195,6 +197,16 @@ export default function Navbar() {
               }`}
             >
               {t.predictionMarkets}
+            </Link>
+            <Link
+              href="/market-radar"
+              className={`text-sm font-medium transition-colors ${
+                isActive("/market-radar")
+                  ? "text-blue-300"
+                  : "text-white hover:text-blue-300"
+              }`}
+            >
+              {t.marketRadar}
             </Link>
 
             <LanguageToggle />
