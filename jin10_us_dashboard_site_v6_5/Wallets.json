@@ -1,0 +1,197 @@
+{
+  "_comment": "在下面填入要追踪的whale钱包地址。address用0x开头的Polymarket钱包地址(proxy wallet或EOA均可,Data API会自动解析)。name是你自己起的备注名,方便看报告。",
+  "wallets": [
+    {
+      "name": "kevinlim883",
+      "address": "0x51f20d1ed17ef25a5bf09f22927c66835073cc8b"
+    },
+    {
+      "name": "elmcap2",
+      "address": "0xed107a85a4585a381e48c7f7ca4144909e7dd2e5"
+    },
+    {
+      "name": "TheReturnOfDarthMaul",
+      "address": "0x3a8aa345d5db7ec5138298c8c4f4540259be7699"
+    },
+    {
+      "name": "denizz",
+      "address": "0xbaa2bcb5439e985ce4ccf815b4700027d1b92c73"
+    },
+    {
+      "name": "thoodr",
+      "address": "0x3eae57986be5e0ca435102ffe1f14206ffa2e2ed"
+    },
+    {
+      "name": "hbjhbjhbjhbj",
+      "address": "0x8539056c79fe9850c48018e0bd582e1d76ec2a48"
+    },
+    {
+      "name": "dfs00",
+      "address": "0xe665f54d3b82c79f1a29c4c327a21c7128dd7d42"
+    },
+    {
+      "name": "bahibahibahi",
+      "address": "0xdf17f4a8dd01a4cfa6fc3da323a2baee5f8697d1"
+    },
+    {
+      "name": "MEPP",
+      "address": "0x6d9fc316c3b8377060a44b852ba664adbfd59790"
+    },
+    {
+      "name": "RizzEmWithTheTism",
+      "address": "0x836ffd95ef3cf3c7987612279b2152b11ce6906e"
+    },
+    {
+      "name": "simpleman",
+      "address": "0xbe89905ca9a689f5129621b62fcf715b5a45b88c"
+    },
+    {
+      "name": "vinii",
+      "address": "0x1ee9a5fc09665909c0cce297c581703bfbb9197f"
+    },
+    {
+      "name": "Seutervoinen",
+      "address": "0xfaf680c17a9cca24ff0773ae2d9f7db49c02cc47"
+    },
+    {
+      "name": "sameday1",
+      "address": "0xe36f5735f5bc12c36b361a599e8603d56f7ccd91"
+    },
+    {
+      "name": "emp992",
+      "address": "0x1c147f2ecc502e1283e5d51d0352cbc386656342"
+    },
+    {
+      "name": "herandrei",
+      "address": "0xc5a3b3c986058c3f2ba7f4332bbfcced9b10883a"
+    },
+    {
+      "name": "Parz1vaI",
+      "address": "0xb10047d6a254b2ebb306d7a7d13bf59171ab6461"
+    },
+    {
+      "name": "nonkenny90",
+      "address": "0x5cd5c8d7a17c78d7389d8b87b611aed83322ac33"
+    },
+    {
+      "name": "zthunderfury",
+      "address": "0xc682d7943aad07c246986a7aa2989cfcb17817bb"
+    },
+    {
+      "name": "Vanquish",
+      "address": "0x4baf4239188fb0b708e4d16872986e1fa9af5fdf"
+    },
+    {
+      "name": "QQQQQQQ.",
+      "address": "0x3560136b9d94ca6b01498ac4f7ae7f1152e56db7"
+    },
+    {
+      "name": "elreptil",
+      "address": "0xb8d2bf9500e4731b09f54c7ebec6bf89899ec66b"
+    },
+    {
+      "name": "rewardbots",
+      "address": "0x876bb030ddd424ef505ae02914024cf18c6a1703"
+    },
+    {
+      "name": "Trumpchi",
+      "address": "0xf7b3094865495f74f01bbf7fbcc83c535da5eeb2"
+    },
+    {
+      "name": "Sniveling-Passion",
+      "address": "0x8333521ed10e5c714960cde86e43b0a93e9def3e"
+    },
+    {
+      "name": "Striped-Crazy",
+      "address": "0x2c79f60bbed7c69e85a03fc23a4fb935cd64e0aa"
+    },
+    {
+      "name": "garlictrump",
+      "address": "0x6630c34aa5836d4610fb6303d0ee9d966cd42f4e"
+    },
+    {
+      "name": "justme003",
+      "address": "0xcb894d56b6ed7f458e8534636a086b65e915a2e8"
+    },
+    {
+      "name": "YasH",
+      "address": "0x1d918e28ad468382fe2f997bb9d897c75514a32a"
+    },
+    {
+      "name": "Tenebrus7",
+      "address": "0xa8c63f775ddbbe66b56614191747def3021444e8"
+    },
+    {
+      "name": "conotocaurius",
+      "address": "0x1104d937f3635fc20f42d56c2855e72f0ec5002a"
+    },
+    {
+      "name": "Everestpredictions",
+      "address": "0xcecaeade076dafc88fdb955864da9d9c15693f67"
+    },
+    {
+      "name": "Playful-Collateral",
+      "address": "0xc6628e0ca87e439bba57294dc8fd7a503a7bb919"
+    },
+    {
+      "name": "Sticky-Closing",
+      "address": "0x6bab66c4bb24c96ed14dcca0f0979b38a6830fe5"
+    },
+    {
+      "name": "Llalalala",
+      "address": "0x05e26c775ecfe91b897d47f134c1bf5900ca6e12"
+    },
+    {
+      "name": "mombil",
+      "address": "0x68c24bf4a8ad4d79a6fe4b8eec6f93a02dfd1711"
+    },
+    {
+      "name": "andeko",
+      "address": "0xe7dd85e5a9059a65d84f354203648df9928a96cb"
+    },
+    {
+      "name": "leCommissaire",
+      "address": "0x9238743eeba8bbfe9e85ac7ba2e1e3d77877b73e"
+    },
+    {
+      "name": "D8D5289c35124b5353f5A10A28B8cC29aEC38935",
+      "address": "0xd8d5289c35124b5353f5a10a28b8cc29aec38935"
+    },
+    {
+      "name": "0x014c4e…",
+      "address": "0x014c4e7ae2145992861c2d1b124af633a97f820c"
+    },
+    {
+      "name": "Olcan",
+      "address": "0x355e5ae20cc1a3a2164f818e4bac8d22dd72a038"
+    },
+    {
+      "name": "MisTKy",
+      "address": "0x35bbbad2415fe5e39b12da9a316cdc80b022009b"
+    },
+    {
+      "name": "etar",
+      "address": "0x0c158a0ffd934322d3a247613dd3fac9e987944d"
+    },
+    {
+      "name": "SirHarryOakes",
+      "address": "0x5685bf6758facce7d1221d3cc3ab0fdb836a62e2"
+    },
+    {
+      "name": "Frenonski",
+      "address": "0xf784e9a7a354c644c1af25f1ee9e1b68b91fab48"
+    },
+    {
+      "name": "placerv2",
+      "address": "0x00d1bfdb216e363bdb1a04dc02865a4dd99ec8a4"
+    },
+    {
+      "name": "StarMaster",
+      "address": "0xeca0c0888e34df59589c67fbe53dc7f298b5e8f8"
+    },
+    {
+      "name": "clark.",
+      "address": "0x543f7e55ffbebe257e099cd0d15c78462e862e82"
+    }
+  ]
+}

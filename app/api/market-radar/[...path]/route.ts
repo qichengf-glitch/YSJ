@@ -62,7 +62,7 @@ async function proxyToMarketRadarBackend(
     return NextResponse.json(
       {
         detail:
-          "Market Radar backend is not reachable. Start the FastAPI service in jin10_us_dashboard_site_v4_2, or set MARKET_RADAR_BACKEND_URL.",
+          "Market Radar backend is not reachable. Start the FastAPI service in jin10_us_dashboard_site_v6_5, or set MARKET_RADAR_BACKEND_URL.",
         error: message,
       },
       { status: 502, headers: corsHeaders }

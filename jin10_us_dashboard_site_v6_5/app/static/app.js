@@ -15,7 +15,6 @@ const state = {
 };
 
 const $ = (id) => document.getElementById(id);
-const API_PROXY_PREFIX = '/api/market-radar';
 const fmt = (v) => (v === null || v === undefined || v === '' ? '—' : v);
 const shortTime = (v) => v ? String(v).replace('T',' ').replace('.000Z','').replace('Z','').slice(0,16) : '—';
 const clsSurprise = (v) => (v || 0) >= 0 ? 'pos' : 'neg';
@@ -40,10 +39,7 @@ const fmtSignedPct = (v) => {
 };
 
 async function api(path, options = {}) {
-  const proxiedPath = path.startsWith('/api/')
-    ? `${API_PROXY_PREFIX}${path.slice('/api'.length)}`
-    : path;
-  const res = await fetch(proxiedPath, { headers: { 'Content-Type': 'application/json' }, ...options });
+  const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
   if (!res.ok) {
     let text = await res.text();
     try { text = JSON.parse(text).detail || text; } catch (_) {}
@@ -165,7 +161,8 @@ function renderCompactEvents(items) {
 
 function renderCompactSurprises(items) {
   if (!items.length) return `<div class="empty">暂无可比较 surprise</div>`;
-  return items.slice(0, 6).map(m => `
+  const cap = mode === 'volume' ? 6 : 2;
+  return items.slice(0, cap).map(m => `
     <div class="compact-item">
       <div class="compact-title">${escapeHtml(m.ticker || '')} · ${escapeHtml(m.measure || '')} <span class="${clsSurprise(m.surprise_pct)}">${escapeHtml(m.surprise_pct_display)}</span></div>
       <div class="compact-sub">Actual ${fmt(m.actual)} vs Consensus ${fmt(m.consensus)}</div>
