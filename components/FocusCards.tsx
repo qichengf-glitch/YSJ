@@ -23,7 +23,7 @@ const sharedItems = [
   {
     href: "/daily-summary",
     image:
-      "https://images.unsplash.com/photo-1642790551116-18e150f248e8?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=80",
   },
   {
     href: "/market-radar",
