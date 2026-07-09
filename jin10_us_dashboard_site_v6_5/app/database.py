@@ -269,6 +269,31 @@ def init_db() -> None:
                 UNIQUE(condition_id, address, outcome, side, size, price, trade_ts)
             );
 
+            """
+        )
+        # Lightweight migrations for older persistent SQLite files.
+        for sql in [
+            "ALTER TABLE pm_markets ADD COLUMN volume_24h REAL",
+            "ALTER TABLE pm_markets ADD COLUMN volume_spike_ratio REAL",
+            "ALTER TABLE pm_markets ADD COLUMN volume_10d_avg REAL",
+            "ALTER TABLE pm_markets ADD COLUMN volume_baseline_days INTEGER",
+            "ALTER TABLE pm_markets ADD COLUMN volume_baseline_source TEXT",
+            "ALTER TABLE pm_whale_positions ADD COLUMN asset TEXT",
+            "ALTER TABLE pm_whale_positions ADD COLUMN value REAL",
+            "ALTER TABLE pm_whale_positions ADD COLUMN size REAL",
+            "ALTER TABLE pm_whale_positions ADD COLUMN avg_price REAL",
+            "ALTER TABLE pm_whale_positions ADD COLUMN cash_pnl REAL",
+            "ALTER TABLE pm_whale_positions ADD COLUMN win_rate REAL",
+            "ALTER TABLE pm_whale_positions ADD COLUMN wins INTEGER",
+            "ALTER TABLE pm_whale_positions ADD COLUMN losses INTEGER",
+            "ALTER TABLE pm_whale_positions ADD COLUMN raw_json TEXT",
+        ]:
+            try:
+                conn.execute(sql)
+            except Exception:
+                pass
+        conn.executescript(
+            """
             CREATE INDEX IF NOT EXISTS idx_pm_markets_bucket ON pm_markets(bucket);
             CREATE INDEX IF NOT EXISTS idx_pm_markets_signal ON pm_markets(signal_type, signal_score);
             CREATE INDEX IF NOT EXISTS idx_pm_markets_volume ON pm_markets(volume_7d);
@@ -283,22 +308,6 @@ def init_db() -> None:
             CREATE INDEX IF NOT EXISTS idx_pm_whale_trades_time ON pm_whale_trades(trade_ts);
             """
         )
-        # Lightweight migrations for older local SQLite files.
-        for sql in [
-            "ALTER TABLE pm_markets ADD COLUMN volume_24h REAL",
-            "ALTER TABLE pm_markets ADD COLUMN volume_spike_ratio REAL",
-            "ALTER TABLE pm_markets ADD COLUMN volume_10d_avg REAL",
-            "ALTER TABLE pm_markets ADD COLUMN volume_baseline_days INTEGER",
-            "ALTER TABLE pm_markets ADD COLUMN volume_baseline_source TEXT",
-            "ALTER TABLE pm_whale_positions ADD COLUMN size REAL",
-            "ALTER TABLE pm_whale_positions ADD COLUMN avg_price REAL",
-            "ALTER TABLE pm_whale_positions ADD COLUMN cash_pnl REAL",
-            "ALTER TABLE pm_whale_positions ADD COLUMN raw_json TEXT",
-        ]:
-            try:
-                conn.execute(sql)
-            except Exception:
-                pass
 
 
 def get_state(key: str) -> Optional[str]:
