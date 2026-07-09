@@ -16,9 +16,14 @@ const sharedItems = [
       "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=80",
   },
   {
-    href: "/prediction-markets",
+    href: "/research/ongoing-thesis",
     image:
-      "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    href: "/daily-summary",
+    image:
+      "https://images.unsplash.com/photo-1642790551116-18e150f248e8?auto=format&fit=crop&w=1200&q=80",
   },
   {
     href: "/market-radar",
@@ -26,9 +31,9 @@ const sharedItems = [
       "https://images.unsplash.com/photo-1642790106117-e829e14a795f?auto=format&fit=crop&w=1200&q=80",
   },
   {
-    href: "/research/ongoing-thesis",
+    href: "/prediction-markets",
     image:
-      "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80",
   },
 ];
 
@@ -47,10 +52,16 @@ const localizedItems = {
       alt: "Hand with stylus on candlestick charts display",
     },
     {
-      title: "Prediction Markets",
+      title: "Ongoing Thesis",
       description:
-        "Data-driven positioning in event-driven markets with disciplined risk control.",
-      alt: "Person holding tablet with financial dashboard",
+        "Current research projects and investment theses under development with community-driven frameworks.",
+      alt: "Analyst reviewing ongoing thesis notes and market data",
+    },
+    {
+      title: "Daily Summary",
+      description:
+        "A compact cross-market brief covering A-shares, US equities, FX, and commodities.",
+      alt: "Daily market dashboard on a laptop screen",
     },
     {
       title: "Market Radar",
@@ -59,10 +70,10 @@ const localizedItems = {
       alt: "Market intelligence dashboard with charts and data panels",
     },
     {
-      title: "Ongoing Thesis",
+      title: "Prediction Markets",
       description:
-        "Current research projects and investment theses under development with community-driven frameworks.",
-      alt: "Analyst reviewing ongoing thesis notes and market data",
+        "Data-driven positioning in event-driven markets with disciplined risk control.",
+      alt: "Person holding tablet with financial dashboard",
     },
   ],
   zh: [
@@ -77,9 +88,14 @@ const localizedItems = {
       alt: "交易图表屏幕上的技术分析走势",
     },
     {
-      title: "预测市场",
-      description: "以数据驱动事件市场判断，并结合纪律化风险控制。",
-      alt: "展示金融仪表盘的平板电脑",
+      title: "进行中的研究",
+      description: "正在推进的研究项目、投资主题与协作式研究框架。",
+      alt: "分析师查看研究笔记和市场数据",
+    },
+    {
+      title: "每日市场日报",
+      description: "集中查看 A 股、美股、外汇与商品的每日市场摘要。",
+      alt: "电脑屏幕上的每日市场看板",
     },
     {
       title: "市场雷达",
@@ -87,9 +103,9 @@ const localizedItems = {
       alt: "包含图表和数据面板的市场情报仪表盘",
     },
     {
-      title: "进行中的研究",
-      description: "正在推进的研究项目、投资主题与协作式研究框架。",
-      alt: "分析师查看研究笔记和市场数据",
+      title: "预测市场",
+      description: "以数据驱动事件市场判断，并结合纪律化风险控制。",
+      alt: "展示金融仪表盘的平板电脑",
     },
   ],
 };
@@ -108,7 +124,7 @@ export default function FocusCards() {
   const action = actionText[language];
 
   return (
-    <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 lg:gap-7">
+    <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-7">
       {items.map((item) => (
         <Link
           key={item.href}

@@ -48,8 +48,10 @@ const navItems = {
     home: "Home",
     research: "Research",
     strategy: "Our Strategy",
+    dashboards: "Dashboards",
     predictionMarkets: "Prediction Markets",
     marketRadar: "Market Radar",
+    dailySummary: "Daily Summary",
     researchDropdown: {
       theoretical: "Theoretical Research",
       thesis: "Ongoing Thesis",
@@ -60,8 +62,10 @@ const navItems = {
     home: "首页",
     research: "研究",
     strategy: "我们的策略",
+    dashboards: "看板",
     predictionMarkets: "预测市场",
     marketRadar: "市场雷达",
+    dailySummary: "每日市场日报",
     researchDropdown: {
       theoretical: "理论研究",
       thesis: "进行中的研究",
@@ -76,6 +80,34 @@ export default function Navbar() {
   const t = navItems[language];
   const [isResearchOpen, setIsResearchOpen] = useState(false);
   const [isStrategyOpen, setIsStrategyOpen] = useState(false);
+  const [isDashboardsOpen, setIsDashboardsOpen] = useState(false);
+
+  const dashboardItems = [
+    {
+      label: t.dailySummary,
+      description:
+        language === "zh"
+          ? "A股、美股、外汇与商品的每日摘要"
+          : "Daily A-shares, US equities, FX, and commodities brief",
+      href: "/daily-summary",
+    },
+    {
+      label: t.marketRadar,
+      description:
+        language === "zh"
+          ? "美股财报、事件更新与市场日历"
+          : "US earnings, event updates, and market calendar",
+      href: "/market-radar",
+    },
+    {
+      label: t.predictionMarkets,
+      description:
+        language === "zh"
+          ? "事件赔率与宏观主题概率跟踪"
+          : "Event odds and macro probability tracking",
+      href: "/prediction-markets",
+    },
+  ];
 
   const isActive = (path: string) => {
     if (path === "/") {
@@ -188,26 +220,46 @@ export default function Navbar() {
                 </div>
               </div>
             </div>
-            <Link
-              href="/prediction-markets"
-              className={`text-sm font-medium transition-colors ${
-                isActive("/prediction-markets")
-                  ? "text-blue-300"
-                  : "text-white hover:text-blue-300"
-              }`}
+            <div
+              className="relative"
+              onMouseEnter={() => setIsDashboardsOpen(true)}
+              onMouseLeave={() => setIsDashboardsOpen(false)}
             >
-              {t.predictionMarkets}
-            </Link>
-            <Link
-              href="/market-radar"
-              className={`text-sm font-medium transition-colors ${
-                isActive("/market-radar")
-                  ? "text-blue-300"
-                  : "text-white hover:text-blue-300"
-              }`}
-            >
-              {t.marketRadar}
-            </Link>
+              <button
+                type="button"
+                className={`text-sm font-medium transition-colors ${
+                  isActive("/daily-summary") ||
+                  isActive("/market-radar") ||
+                  isActive("/prediction-markets")
+                    ? "text-blue-300"
+                    : "text-white hover:text-blue-300"
+                }`}
+              >
+                {t.dashboards}
+              </button>
+              <div
+                className={`absolute left-0 top-full w-80 rounded-b-lg border border-primary-dark border-t-0 bg-primary shadow-lg transition-opacity duration-150 ${
+                  isDashboardsOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                }`}
+              >
+                <div className="py-3">
+                  {dashboardItems.map((item) => (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className="block px-4 py-3 hover:bg-primary-dark group"
+                    >
+                      <div className="text-sm font-medium text-white group-hover:text-blue-300">
+                        {item.label}
+                      </div>
+                      <div className="text-xs text-blue-200/90 mt-0.5 leading-snug">
+                        {item.description}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             <LanguageToggle />
           </div>
