@@ -21,8 +21,15 @@ def ensure_parent_dir(path: str) -> None:
 @contextmanager
 def get_conn():
     ensure_parent_dir(settings.database_path)
-    conn = sqlite3.connect(settings.database_path)
+    conn = sqlite3.connect(settings.database_path, timeout=30)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA busy_timeout = 30000")
+    conn.execute("PRAGMA foreign_keys = ON")
+    try:
+        conn.execute("PRAGMA journal_mode = WAL")
+        conn.execute("PRAGMA synchronous = NORMAL")
+    except sqlite3.OperationalError:
+        pass
     try:
         yield conn
         conn.commit()

@@ -81,7 +81,7 @@ def startup_event():
             replace_existing=True,
             max_instances=1,
             coalesce=True,
-            next_run_time=datetime.now(),
+            next_run_time=datetime.now() + timedelta(seconds=45),
         )
         scheduler.start()
 
