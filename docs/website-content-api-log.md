@@ -686,8 +686,26 @@ NEXT_PUBLIC_VIX_DASHBOARD_URL
 Run command:
 
 ```bash
-cd /Users/qichengfu/Desktop/cn_option_vix
-bash scripts/run_live_dashboard.sh
+cd /Users/qichengfu/Desktop/YSJ
+bash cn_option_vix/scripts/run_live_dashboard.sh
+```
+
+Render deployment:
+
+```text
+Service type: Web Service
+Runtime: Python 3
+Root Directory: leave blank
+Build Command: pip install -r cn_option_vix/requirements.txt
+Start Command: bash cn_option_vix/scripts/run_render_dashboard.sh
+Disk Mount Path: /var/data
+```
+
+Render environment:
+
+```text
+RQDATA_URI=<RiceQuant URI>
+CN_VIX_DB=/var/data/live_vix.sqlite
 ```
 
 ### Market Radar Backend

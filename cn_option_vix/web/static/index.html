@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>China Option Volatility Monitor</title>
+  <meta name="description" content="Live multi-index option volatility monitoring terminal" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script src="https://unpkg.com/lightweight-charts@5.2.0/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">CN FINANCIAL OPTIONS</div>
+        <h1>Volatility Monitor</h1>
+      </div>
+      <div class="status-cluster">
+        <div id="marketBadge" class="market-badge neutral"><span class="status-dot"></span><span>CONNECTING</span></div>
+        <div class="feed-status">
+          <div><span>5-Min feed</span><strong id="last5m">—</strong><small id="next5m">Next —</small></div>
+          <div><span>Half-day feed</span><strong id="lastHalfday">—</strong><small id="nextHalfday">Next —</small></div>
+        </div>
+        <button id="qualityButton" class="quality-button" type="button">Data Quality <strong id="qualityText">—</strong></button>
+      </div>
+    </header>
+
+    <main>
+      <section id="metricCards" class="metric-grid" aria-label="Latest VIX values"></section>
+
+      <section class="average-card" aria-labelledby="averageHeading">
+        <div class="average-header">
+          <div>
+            <div class="section-kicker">REGIME SNAPSHOT</div>
+            <h2 id="averageHeading">30D / 60D Trading-Day Averages</h2>
+            <p>One latest half-day observation per trading date · current value remains the live 5-minute reading</p>
+          </div>
+          <div class="average-meta"><span id="averageAsOf">As of —</span><strong id="averageCoverage">— trading days</strong></div>
+        </div>
+        <div class="average-table-wrap">
+          <table class="average-table">
+            <thead><tr><th>VIX chain</th><th>Latest</th><th>30D average</th><th>vs 30D</th><th>60D average</th><th>vs 60D</th><th>Regime</th></tr></thead>
+            <tbody id="averageRows"><tr><td colspan="7" class="table-loading">Loading moving averages…</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="chart-card" data-resolution="5m">
+        <div class="card-header">
+          <div>
+            <div class="section-kicker">INTRADAY</div>
+            <h2>Latest 5 Trading Days</h2>
+            <p>Native 5-minute observations · equally spaced trading intervals</p>
+          </div>
+          <div class="module-meta module-meta-stacked">
+            <div class="view-toggle" id="viewToggle5m" aria-label="Five-minute chart display mode">
+              <button type="button" data-mode="level">VIX level</button>
+              <button type="button" data-mode="indexed" class="active">Indexed 100</button>
+            </div>
+            <div class="module-stat"><span class="live-chip"><span></span>5-MIN LIVE</span><strong id="fiveMinutePointCount">— points</strong></div>
+          </div>
+        </div>
+        <div id="legend5m" class="series-toolbar"></div>
+        <div class="display-note" id="displayNote5m">Indexed view rebases every chain to 100 at the first visible observation. Exact VIX levels remain in cards and tooltip.</div>
+        <div class="tooltip-panel" id="tooltip5m"><span>Move across the chart to inspect all VIX values and spreads.</span></div>
+        <div class="chart-shell">
+          <div id="chart5m" class="chart-container"></div>
+          <div id="paneLabels5m" class="pane-label-layer"></div>
+          <div id="empty5m" class="empty-state hidden">No five-minute data yet. Run the dashboard bootstrap first.</div>
+        </div>
+      </section>
+
+      <section class="chart-card" data-resolution="halfday">
+        <div class="card-header">
+          <div>
+            <div class="section-kicker">MEDIUM-TERM CONTEXT</div>
+            <h2>2026 Year to Date</h2>
+            <p>From the first available 2026 trading session · AM 11:30 and PM 15:00 observations</p>
+          </div>
+          <div class="module-meta module-meta-stacked">
+            <div class="view-toggle" id="viewToggleHalfday" aria-label="Year-to-date chart display mode">
+              <button type="button" data-mode="level">VIX level</button>
+              <button type="button" data-mode="indexed" class="active">Indexed 100</button>
+            </div>
+            <div class="module-stat"><span class="halfday-chip">2026 YTD · HALF-DAY</span><strong id="halfdayPointCount">— points</strong></div>
+          </div>
+        </div>
+        <div id="legendHalfday" class="series-toolbar"></div>
+        <div class="display-note" id="displayNoteHalfday">Indexed view rebases every chain to 100 at the first 2026 observation. Exact VIX levels remain in cards and tooltip.</div>
+        <div class="tooltip-panel" id="tooltipHalfday"><span>Move across the chart to inspect all VIX values and spreads.</span></div>
+        <div class="chart-shell">
+          <div id="chartHalfday" class="chart-container"></div>
+          <div id="paneLabelsHalfday" class="pane-label-layer"></div>
+          <div id="emptyHalfday" class="empty-state hidden">No half-day history yet. Import the existing 30-minute history.</div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Source: RQData</span>
+      <span>30-day model-free VIX · OI-weighted variance aggregation</span>
+      <span>Charts by <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView</a></span>
+      <span id="footerRefresh">Browser refresh: —</span>
+    </footer>
+  </div>
+
+  <aside id="qualityDrawer" class="drawer" aria-hidden="true">
+    <div class="drawer-backdrop" data-close-drawer></div>
+    <div class="drawer-panel">
+      <div class="drawer-header"><div><div class="section-kicker">SYSTEM</div><h3>Data Quality</h3></div><button type="button" data-close-drawer>×</button></div>
+      <div id="qualityDetails" class="quality-details"></div>
+    </div>
+  </aside>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
