@@ -1,12 +1,20 @@
 import React from "react";
 import type { Metadata } from "next";
+import { Syne } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import Navbar from "@/components/Navbar";
 
+const brandFont = Syne({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-brand",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.ysjlab.com"),
-  title: "YSJ Lab - Financial Research & Strategy",
+  title: "YSJLab - Financial Research & Strategy",
   description: "Independent financial research and strategy studio",
   openGraph: {
     url: "https://www.ysjlab.com",
@@ -19,15 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className="font-sans"
-        style={
-          {
-            "--font-playfair": "'Playfair Display', Georgia, serif",
-          } as React.CSSProperties
-        }
-      >
+    <html lang="en" className={brandFont.variable}>
+      <body className="font-sans">
         <LanguageProvider>
           <Navbar />
           {children}

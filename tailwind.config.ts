@@ -16,6 +16,7 @@ const config: Config = {
       },
       fontFamily: {
         playfair: ["var(--font-playfair)", "serif"],
+        brand: ["var(--font-brand)", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },

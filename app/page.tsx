@@ -1,313 +1,255 @@
 "use client";
 
-import Section from "@/components/Section";
-import { useLanguage } from "@/contexts/LanguageContext";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  BarChart3,
+  Database,
+  Globe2,
+  LockKeyhole,
+  Search,
+  ShieldCheck,
+} from "lucide-react";
 import FocusCards from "@/components/FocusCards";
+import BrandMark from "@/components/BrandMark";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const content = {
   en: {
     hero: {
-      label: "YSJ Lab",
-      title: "Invest with Assurance",
+      title: "Smarter Research. Better Decisions.",
+      primaryCta: "Explore All Sections",
+      secondaryCta: "Our Approach",
+      privateCta: "Private Access",
+    },
+    values: [
+      {
+        title: "Independent",
+        text: "Research without conflicts of interest.",
+      },
+      {
+        title: "Data-Driven",
+        text: "Rigor, discipline, and transparent methods.",
+      },
+      {
+        title: "Global",
+        text: "Markets, sectors, and opportunities worldwide.",
+      },
+    ],
+    sections: {
+      eyebrow: "Sections",
+      title: "Explore the public research platform",
       subtitle:
-        "A disciplined, research-driven partner for investors navigating public and private markets.",
+        "Daily Summary, Market Radar, and live monitoring tools now live behind Private Access. The public homepage stays focused on open research, strategy, and thesis discovery.",
     },
-    whatWeDo: {
-      title: "What We Do",
+    private: {
+      title: "Need internal dashboards?",
+      text:
+        "Authorized users can sign in for live monitors, market radar, daily briefs, and private research operations.",
+      action: "Enter Private Access",
     },
-    philosophy: {
-      title: "Our Mission",
-      text: "We believe in rigorous analysis, disciplined execution, and continuous research. Through quantitative methods and qualitative insights, we aim to be the best companion for investors, no matter what market you're in.",
-    },
-    contact: {
-      title: "Contact Us",
-      intro:
-        "Thank you for reaching out to us. Share a few details and we will follow up as quickly as possible.",
-      firstName: "First Name",
-      lastName: "Last Name",
-      companyName: "Company Name",
-      email: "Email",
-      phoneNumber: "Phone Number",
-      systems: "Automated Systems of Interest (if applicable)",
-      storage: "Storage Solutions of Interest (if applicable)",
-      services: "Services of Interest (if applicable)",
-      project: "Tell Us About Your Project",
-      submit: "Submit Inquiry",
-    },
-    footer: {
-      copyright: "© 2026 YSJ Holdings LLC, all rights reserved",
-    },
+    metrics: [
+      ["10K+", "Community Members"],
+      ["1,200+", "Research Reports"],
+      ["80+", "Markets Covered"],
+      ["Independent", "No Conflicts"],
+    ],
+    footer:
+      "Independent financial research and strategy systems for global market participants.",
+    contact: "Contact",
+    contactHint: "Email us",
+    copyright: "© 2026 YSJLab. All rights reserved.",
   },
   zh: {
     hero: {
-      label: "YSJ Lab",
-      title: "Invest with Assurance",
-      subtitle: "以研究为驱动的严谨伙伴，助您穿越公开与私募市场。",
+      title: "更聪明的研究，更高质量的决策。",
+      primaryCta: "浏览全部板块",
+      secondaryCta: "了解方法论",
+      privateCta: "Private Access",
     },
-    whatWeDo: {
-      title: "我们的工作",
-      cards: [
-        {
-          title: "研究",
-          description:
-            "深入分析市场动态、经济指标和投资机会。",
-          href: "/research",
-        },
-        {
-          title: "策略",
-          description:
-            "系统化的投资组合管理和风险调整回报方法。",
-          href: "/strategy",
-        },
-        {
-          title: "预测市场",
-          description:
-            "数据驱动的预测和概率建模，为决策提供信息支持。",
-          href: "/prediction-markets",
-        },
-      ],
+    values: [
+      {
+        title: "独立",
+        text: "不受利益冲突影响的研究判断。",
+      },
+      {
+        title: "数据驱动",
+        text: "严谨、纪律化且透明的方法。",
+      },
+      {
+        title: "全球",
+        text: "覆盖市场、行业与跨区域机会。",
+      },
+    ],
+    sections: {
+      eyebrow: "公开板块",
+      title: "浏览公开研究平台",
+      subtitle:
+        "Daily Summary、Market Radar 与实时监控工具已收进 Private Access。公开首页聚焦研究、策略与投资主题发现。",
     },
-    philosophy: {
-      title: "我们的使命",
-      text: "我们相信严谨的分析、纪律性的执行和持续的研究。通过定量方法与定性洞察，我们致力于成为投资者的最佳伙伴，无论您身处何种市场。",
+    private: {
+      title: "需要内部看板？",
+      text:
+        "授权用户可登录访问实时监控、市场雷达、每日简报和私密研究运营工具。",
+      action: "进入 Private Access",
     },
-    contact: {
-      title: "联系我们",
-      intro:
-        "感谢您的联系。请填写以下信息，我们会尽快与您沟通。",
-      firstName: "名字",
-      lastName: "姓氏",
-      companyName: "公司名称",
-      email: "邮箱",
-      phoneNumber: "电话号码",
-      systems: "感兴趣的自动化系统（可选）",
-      storage: "感兴趣的存储方案（可选）",
-      services: "感兴趣的服务（可选）",
-      project: "请介绍您的项目",
-      submit: "提交咨询",
-    },
-    footer: {
-      copyright: "© 2026 YSJ Holdings LLC，保留所有权利。",
-    },
+    metrics: [
+      ["10K+", "社区成员"],
+      ["1,200+", "研究报告"],
+      ["80+", "覆盖市场"],
+      ["独立", "无利益冲突"],
+    ],
+    footer: "为全球市场参与者提供独立金融研究与策略系统。",
+    contact: "联系我们",
+    contactHint: "发送邮件",
+    copyright: "© 2026 YSJLab. 保留所有权利。",
   },
 };
+
+const valueIcons = [ShieldCheck, Database, Globe2];
+const metricIcons = [BarChart3, Search, Globe2, ShieldCheck];
 
 export default function Home() {
   const { language } = useLanguage();
   const t = content[language];
 
   return (
-    <main className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative isolate min-h-[75vh] overflow-hidden">
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          src="/ysj-hero.mp4"
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-hidden="true"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/40 to-black/70" />
+    <main className="min-h-screen bg-white text-[#18233A]">
+      <section className="overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)]">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-6 py-16 sm:px-8 lg:grid-cols-[0.95fr_1.05fr] lg:px-12 lg:py-20">
+          <div>
+            <h1 className="max-w-3xl text-5xl font-black leading-[0.98] tracking-tight text-[#18233A] sm:text-6xl lg:text-7xl">
+              {t.hero.title}
+            </h1>
 
-        <div className="absolute bottom-0 left-0 z-10 px-6 sm:px-8 lg:px-12 pb-12 sm:pb-16 lg:pb-20">
-          <h1 className="font-playfair text-4xl sm:text-5xl lg:text-6xl font-normal text-white drop-shadow-md tracking-tight">
-            {t.hero.title}
-          </h1>
+            <div className="mt-14 flex flex-col gap-3 sm:flex-row sm:mt-16">
+              <Link
+                href="#sections"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-[#4F63F6] px-6 text-sm font-bold text-white shadow-[0_14px_28px_rgba(79,99,246,0.24)] transition hover:bg-[#273B9A]"
+              >
+                {t.hero.primaryCta}
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+              <Link
+                href="#approach"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-[#E7ECF5] bg-white px-6 text-sm font-bold text-[#273B9A] transition hover:border-[#A8B2FF] hover:bg-[#F8FAFC]"
+              >
+                {t.hero.secondaryCta}
+              </Link>
+              <Link
+                href="/access"
+                className="inline-flex h-12 items-center justify-center rounded-full border border-[#FFD76A] bg-[#FFF8E3] px-6 text-sm font-bold text-[#18233A] transition hover:bg-[#FFEFAF]"
+              >
+                <LockKeyhole className="mr-2 h-4 w-4" />
+                {t.hero.privateCta}
+              </Link>
+            </div>
+
+            <div id="approach" className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {t.values.map((item, index) => {
+                const Icon = valueIcons[index];
+                return (
+                  <div key={item.title} className="rounded-2xl border border-[#E7ECF5] bg-white p-5 shadow-[0_12px_30px_rgba(39,59,154,0.06)]">
+                    <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-[#EEF2FF] text-[#4F63F6]">
+                      <Icon className="h-4 w-4" />
+                    </div>
+                    <h3 className="text-sm font-bold text-[#18233A]">{item.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-[#5B6780]">{item.text}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="relative isolate">
+            <div className="pointer-events-none absolute -inset-6 rounded-[40%] bg-[radial-gradient(circle_at_55%_45%,rgba(79,99,246,0.16),rgba(191,229,139,0.08)_42%,transparent_70%)] blur-2xl" />
+            <div className="pointer-events-none absolute inset-x-10 bottom-4 h-24 rounded-full bg-[#A8B2FF]/25 blur-3xl" />
+            <Image
+              src="/assets/hero-ysjlab-team.png"
+              alt="YSJLab team reviewing finance research dashboards"
+              width={1400}
+              height={1000}
+              priority
+              className="relative z-10 w-full [mask-image:radial-gradient(ellipse_92%_88%_at_50%_48%,#000_62%,transparent_100%)] [-webkit-mask-image:radial-gradient(ellipse_92%_88%_at_50%_48%,#000_62%,transparent_100%)]"
+            />
+          </div>
         </div>
       </section>
 
-      {/* What We Do */}
-      <Section fullWidth>
-        <h2 className="font-playfair text-4xl sm:text-5xl font-normal text-gray-900 mb-12 tracking-tight text-center">
-          {t.whatWeDo.title}
-        </h2>
-        <div className="w-full">
+      <section id="sections" className="bg-white px-6 py-16 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-10 max-w-3xl">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-[#4F63F6]">
+              {t.sections.eyebrow}
+            </p>
+            <h2 className="mt-3 text-4xl font-black tracking-tight text-[#18233A] sm:text-5xl">
+              {t.sections.title}
+            </h2>
+            <p className="mt-4 text-lg leading-8 text-[#5B6780]">
+              {t.sections.subtitle}
+            </p>
+          </div>
           <FocusCards />
         </div>
-      </Section>
+      </section>
 
-      {/* Philosophy */}
-      <Section fullWidth>
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="font-playfair text-5xl sm:text-6xl lg:text-7xl font-normal text-gray-900 mb-10 tracking-tight">
-            {t.philosophy.title}
-          </h2>
-          <p className="text-2xl sm:text-3xl text-gray-700 leading-relaxed">
-            {t.philosophy.text}
-          </p>
+      <section className="bg-[#F8FAFC] px-6 py-14 sm:px-8 lg:px-12">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {t.metrics.map(([value, label], index) => {
+              const Icon = metricIcons[index];
+              return (
+                <div key={label} className="rounded-2xl border border-[#E7ECF5] bg-white p-6 shadow-[0_12px_28px_rgba(39,59,154,0.05)]">
+                  <Icon className="mb-4 h-5 w-5 text-[#4F63F6]" />
+                  <div className="text-2xl font-black text-[#18233A]">{value}</div>
+                  <div className="mt-1 text-sm text-[#5B6780]">{label}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          <Link
+            href="/access"
+            className="group flex min-h-[220px] flex-col justify-between rounded-2xl border border-[#A8B2FF] bg-[#273B9A] p-7 text-white shadow-[0_18px_44px_rgba(39,59,154,0.18)] transition hover:-translate-y-1"
+          >
+            <div>
+              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/12">
+                <LockKeyhole className="h-5 w-5" />
+              </div>
+              <h3 className="text-2xl font-black">{t.private.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-white/78">{t.private.text}</p>
+            </div>
+            <span className="mt-6 inline-flex items-center text-sm font-bold">
+              {t.private.action}
+              <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" />
+            </span>
+          </Link>
         </div>
-      </Section>
+      </section>
 
-      {/* Contact */}
-      <Section fullWidth className="pt-8 sm:pt-10">
-        <div className="max-w-7xl mx-auto rounded-3xl border border-[#2a7d93]/20 bg-white/55 backdrop-blur-[1px] px-6 sm:px-8 lg:px-10 py-8 sm:py-10 shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
-          <h2 className="font-playfair text-4xl sm:text-5xl text-center text-gray-900 mb-4">
-            {t.contact.title}
-          </h2>
-          <p className="text-lg text-[#184154] text-center max-w-4xl mx-auto mb-8 sm:mb-10">
-            {t.contact.intro}
-          </p>
-
-          <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div>
-                <label htmlFor="firstName" className="block text-xl font-medium text-slate-700 mb-2">
-                  {t.contact.firstName}
-                  <span className="text-red-500"> *</span>
-                </label>
-                <input
-                  id="firstName"
-                  name="firstName"
-                  required
-                  className="w-full h-14 rounded-md border border-[#2a7d93] bg-white/70 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-                />
-              </div>
-              <div>
-                <label htmlFor="lastName" className="block text-xl font-medium text-slate-700 mb-2">
-                  {t.contact.lastName}
-                  <span className="text-red-500"> *</span>
-                </label>
-                <input
-                  id="lastName"
-                  name="lastName"
-                  required
-                  className="w-full h-14 rounded-md border border-[#2a7d93] bg-white/70 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-              <div>
-                <label htmlFor="companyName" className="block text-xl font-medium text-slate-700 mb-2">
-                  {t.contact.companyName}
-                  <span className="text-red-500"> *</span>
-                </label>
-                <input
-                  id="companyName"
-                  name="companyName"
-                  required
-                  className="w-full h-14 rounded-md border border-[#2a7d93] bg-white/70 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-                />
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-xl font-medium text-slate-700 mb-2">
-                  {t.contact.email}
-                  <span className="text-red-500"> *</span>
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  className="w-full h-14 rounded-md border border-[#2a7d93] bg-white/70 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-                />
-              </div>
-              <div>
-                <label htmlFor="phoneNumber" className="block text-xl font-medium text-slate-700 mb-2">
-                  {t.contact.phoneNumber}
-                  <span className="text-red-500"> *</span>
-                </label>
-                <input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  type="tel"
-                  required
-                  placeholder="+1"
-                  className="w-full h-14 rounded-md border border-[#2a7d93] bg-white/70 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="systems" className="block text-xl font-medium text-slate-700 mb-2">
-                {t.contact.systems}
-              </label>
-              <select
-                id="systems"
-                name="systems"
-                className="w-full h-14 rounded-md border border-[#2a7d93] bg-white/70 px-4 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Select an option
-                </option>
-                <option value="portfolio-automation">Portfolio Automation</option>
-                <option value="signal-monitoring">Signal Monitoring</option>
-                <option value="risk-dashboard">Risk Dashboard</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="storage" className="block text-xl font-medium text-slate-700 mb-2">
-                {t.contact.storage}
-              </label>
-              <select
-                id="storage"
-                name="storage"
-                className="w-full h-14 rounded-md border border-[#2a7d93] bg-white/70 px-4 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Select an option
-                </option>
-                <option value="cloud">Cloud</option>
-                <option value="hybrid">Hybrid</option>
-                <option value="on-premise">On-Premise</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="services" className="block text-xl font-medium text-slate-700 mb-2">
-                {t.contact.services}
-              </label>
-              <select
-                id="services"
-                name="services"
-                className="w-full h-14 rounded-md border border-[#2a7d93] bg-white/70 px-4 text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Select an option
-                </option>
-                <option value="research-advisory">Research Advisory</option>
-                <option value="strategy-consulting">Strategy Consulting</option>
-                <option value="market-intelligence">Market Intelligence</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="project" className="block text-xl font-medium text-slate-700 mb-2">
-                {t.contact.project}
-              </label>
-              <textarea
-                id="project"
-                name="project"
-                rows={5}
-                placeholder="Share your goals, timeline, and constraints..."
-                className="w-full rounded-md border border-[#2a7d93] bg-white/70 px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#2a7d93]/35"
-              />
-            </div>
-
-            <div className="flex justify-center pt-2">
-              <button
-                type="submit"
-                className="h-12 px-8 rounded-md bg-primary text-white font-semibold tracking-wide hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary/35"
-              >
-                {t.contact.submit}
-              </button>
-            </div>
-          </form>
-        </div>
-      </Section>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-8">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <p className="text-sm text-gray-500 text-center">
-            {t.footer.copyright}
-          </p>
+      <footer className="border-t border-[#E7ECF5] bg-white px-6 py-8 sm:px-8 lg:px-12">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <BrandMark size="footer" />
+            <p className="mt-2 max-w-xl text-sm text-[#5B6780]">{t.footer}</p>
+          </div>
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <Link
+              href="/contact"
+              className="inline-flex items-center rounded-full border border-[#E7ECF5] bg-[#F8FAFC] px-4 py-2 text-sm font-bold text-[#273B9A] transition hover:border-[#A8B2FF] hover:bg-white"
+            >
+              {t.contact}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+            <a
+              href="mailto:contact@ysjlab.com"
+              className="text-sm font-semibold text-[#4F63F6] hover:underline"
+            >
+              {t.contactHint}: contact@ysjlab.com
+            </a>
+            <p className="text-sm text-[#5B6780]">{t.copyright}</p>
+          </div>
         </div>
       </footer>
     </main>
