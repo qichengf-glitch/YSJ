@@ -49,3 +49,16 @@ npm run dev
 - Responsive design
 - Modern fintech aesthetic
 - Clean, minimal UI with deep blue accent color
+
+
+## Integrated private services
+
+- Jin10 / prediction-market backend: `jin10_us_dashboard_site` on loopback port 8000.
+- CN option VIX backend: `cn_option_vix` on loopback port 8765.
+- CN VIX automatic update and repair instructions: `docs/CN_VIX_AUTO_UPDATE.md`.
+
+To repair the VIX database through a specific trading date on the credentialed server:
+
+```bash
+./scripts/sync_cn_vix_through.sh 2026-07-23
+```

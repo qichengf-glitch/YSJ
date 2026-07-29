@@ -21,7 +21,12 @@ from cn_option_vix.data.intraday_chains import (
     quota_snapshot,
 )
 from cn_option_vix.pipeline.one_day import assemble_vix_row
-from cn_option_vix.web.storage import DEFAULT_DB_PATH, query_series, upsert_points
+from cn_option_vix.web.storage import (
+    DEFAULT_DB_PATH,
+    is_publishable_point,
+    query_series,
+    upsert_points,
+)
 
 _OUT = Path(__file__).resolve().parent.parent / "outputs"
 
@@ -29,6 +34,15 @@ _OUT = Path(__file__).resolve().parent.parent / "outputs"
 def _quota_used(q: dict) -> int | None:
     value = q.get("bytes_used")
     return int(value) if value is not None else None
+
+
+def _safe_quota_snapshot(label: str) -> dict:
+    """Quota metadata is diagnostic and must not block a data backfill."""
+    try:
+        return quota_snapshot()
+    except Exception as exc:
+        print(f"quota diagnostic warning ({label}): {type(exc).__name__}: {exc}", flush=True)
+        return {}
 
 
 def _compute_date_5m(
@@ -92,6 +106,13 @@ def _compute_date_5m(
             for a in slot_audits
         )
         row["calculated_at"] = datetime.now()
+        if not is_publishable_point(row):
+            print(
+                f"  {timestamp.time()} SKIP partial point "
+                f"valid={row['n_instruments']}/{len(ROSTER)}; not written to dashboard",
+                flush=True,
+            )
+            continue
         rows.append(row)
         print(
             f"  {timestamp.time()} valid={row['n_instruments']}/{len(ROSTER)} "
@@ -120,13 +141,13 @@ def build_recent_5m(
 ) -> pd.DataFrame:
     dates = latest_trading_dates(n=n_days, asof=asof)
     latest_date = dates[-1]
-    quota_before = quota_snapshot()
+    quota_before = _safe_quota_snapshot("before run")
     _OUT.mkdir(parents=True, exist_ok=True)
 
     all_audits = []
     reserve_bytes = int(reserve_mib * 1024**2)
     for idx, date in enumerate(dates, start=1):
-        q_day_before = quota_snapshot()
+        q_day_before = _safe_quota_snapshot(f"before {date.date()}")
         limit = q_day_before.get("bytes_limit")
         used = q_day_before.get("bytes_used")
         left_before = int(limit - used) if limit and used is not None else None
@@ -143,12 +164,26 @@ def build_recent_5m(
             source="historical_5m_close",
             db_path=db_path,
         )
+        halfday_records = []
+        for record in records:
+            hhmm = pd.Timestamp(record["timestamp"]).strftime("%H:%M")
+            if hhmm in LIVE_DASHBOARD_PARAMS["halfday_times"]:
+                halfday = dict(record)
+                halfday["session"] = "AM" if hhmm == "11:30" else "PM"
+                halfday_records.append(halfday)
+        if halfday_records:
+            upsert_points(
+                halfday_records,
+                resolution="halfday",
+                source="historical_5m_close_backfill",
+                db_path=db_path,
+            )
         all_audits.append(day_audit)
         print(f"  checkpointed {len(day_df)} points", flush=True)
 
         # Measure the first real day before committing the remaining history.
         # Cached days commonly use ~0 traffic, in which case no extrapolation is needed.
-        q_day_after = quota_snapshot()
+        q_day_after = _safe_quota_snapshot(f"after {date.date()}")
         after_used = q_day_after.get("bytes_used")
         day_delta = (
             int(after_used) - int(used)
@@ -196,7 +231,7 @@ def build_recent_5m(
     df.to_parquet(parquet_path)
     audit_df.to_csv(audit_path, index=False)
 
-    quota_after = quota_snapshot()
+    quota_after = _safe_quota_snapshot("after run")
     before = _quota_used(quota_before)
     after = _quota_used(quota_after)
     delta = after - before if before is not None and after is not None else None

@@ -19,6 +19,12 @@ DEFAULT_DB_PATH = PACKAGE_ROOT / "data" / "live_vix.sqlite"
 
 VIX_COLUMNS = ["overall", *GROUPS.keys()]
 SPREAD_COLUMNS = [f"spread_{gid}_overall" for gid in GROUPS]
+PUBLISHED_POINT_SQL = "(" + " AND ".join(
+    [f"{name} IS NOT NULL" for name in VIX_COLUMNS]
+    + ["(expected_instruments IS NULL OR n_instruments >= expected_instruments)"]
+) + ")"
+
+
 DIAGNOSTIC_COLUMNS = [
     "n_instruments",
     "dq_flags",
@@ -249,9 +255,10 @@ def query_series(
     with connect(db_path) as conn:
         if resolution == "5m":
             dates = conn.execute(
-                """
+                f"""
                 SELECT DISTINCT substr(timestamp, 1, 10) AS day
                 FROM vix_points WHERE resolution='5m'
+                  AND {PUBLISHED_POINT_SQL}
                 ORDER BY day DESC LIMIT ?
                 """,
                 (int(trading_days),),
@@ -260,16 +267,17 @@ def query_series(
                 return []
             start_day = min(row["day"] for row in dates)
             rows = conn.execute(
-                """
+                f"""
                 SELECT * FROM vix_points
                 WHERE resolution='5m' AND timestamp >= ?
+                  AND {PUBLISHED_POINT_SQL}
                 ORDER BY timestamp
                 """,
                 (f"{start_day} 00:00:00",),
             ).fetchall()
         elif resolution == "halfday":
             latest = conn.execute(
-                "SELECT max(timestamp) AS ts FROM vix_points WHERE resolution='halfday'"
+                f"SELECT max(timestamp) AS ts FROM vix_points WHERE resolution='halfday' AND {PUBLISHED_POINT_SQL}"
             ).fetchone()["ts"]
             if latest is None:
                 return []
@@ -284,9 +292,10 @@ def query_series(
                     "%Y-%m-%d 00:00:00"
                 )
             rows = conn.execute(
-                """
+                f"""
                 SELECT * FROM vix_points
                 WHERE resolution='halfday' AND timestamp >= ?
+                  AND {PUBLISHED_POINT_SQL}
                 ORDER BY timestamp
                 """,
                 (start,),
@@ -299,13 +308,17 @@ def query_series(
 def moving_average_snapshot(
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
-    windows: tuple[int, ...] = (30, 60),
+    windows: tuple[int, ...] = (20, 60),
 ) -> dict:
-    """Compute trading-day averages for all six published VIX chains.
+    """Compute VIX-level and relative-spread statistics for the dashboard.
 
-    One observation per trading date is used: the latest available half-day
-    point for that date (normally 15:00, or 11:30 while the current session is
-    still open). This avoids weighting every completed date twice.
+    The option-VIX calculation itself is untouched. This function only performs
+    post-processing on already-published VIX outputs:
+
+    * one observation per trading date: the latest available half-day point;
+    * relative spread for group ``g``: ``VIX_g - VIX_overall`` at the same point;
+    * sample standard deviation and variance use ``ddof=1``;
+    * the current values use the latest complete five-minute observation.
     """
     initialise(db_path)
     with connect(db_path) as conn:
@@ -313,18 +326,26 @@ def moving_average_snapshot(
             f"""
             SELECT timestamp, {','.join(VIX_COLUMNS)}
             FROM vix_points
-            WHERE resolution='halfday'
+            WHERE resolution='halfday' AND {PUBLISHED_POINT_SQL}
             ORDER BY timestamp
             """
         ).fetchall()
+
+    empty_payload = {
+        "asof": None,
+        "basis": "latest half-day observation per trading date",
+        "latest_basis": "latest complete five-minute observation",
+        "variance_method": "sample variance (ddof=1)",
+        "variance_unit": "VIX points squared",
+        "spread_definition": "sector VIX minus Overall VIX at the same timestamp",
+        "spread_standard_deviation_unit": "VIX points",
+        "spread_variance_unit": "VIX points squared",
+        "available_trading_days": 0,
+        "windows": list(windows),
+        "rows": [],
+    }
     if not rows:
-        return {
-            "asof": None,
-            "basis": "latest half-day observation per trading date",
-            "available_trading_days": 0,
-            "windows": list(windows),
-            "rows": [],
-        }
+        return empty_payload
 
     frame = pd.DataFrame([dict(row) for row in rows])
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], errors="raise")
@@ -336,55 +357,112 @@ def moving_average_snapshot(
         .sort_values("timestamp")
         .reset_index(drop=True)
     )
-    latest_live = latest_by_resolution("5m", db_path)
+
+    latest_live = latest_by_resolution("5m", db_path, published_only=True)
     latest_halfday = daily.iloc[-1].to_dict()
     latest_source = latest_live or latest_halfday
 
+    overall_daily = pd.to_numeric(daily["overall"], errors="coerce")
     output_rows = []
     for name in VIX_COLUMNS:
-        series = pd.to_numeric(daily[name], errors="coerce").dropna()
+        level_series = pd.to_numeric(daily[name], errors="coerce")
         latest_value = _clean_number(latest_source.get(name))
         if latest_value is None:
             latest_value = _clean_number(latest_halfday.get(name))
+
+        latest_spread = None
+        spread_series = None
+        if name != "overall":
+            spread_key = f"spread_{name}_overall"
+            latest_spread = _clean_number(latest_source.get(spread_key))
+            if latest_spread is None:
+                latest_overall = _clean_number(latest_source.get("overall"))
+                if latest_value is not None and latest_overall is not None:
+                    latest_spread = latest_value - latest_overall
+            spread_series = level_series - overall_daily
+
         item = {
             "key": name,
             "latest": latest_value,
+            "latest_spread": latest_spread,
         }
+
         for window in windows:
-            sample = series.tail(int(window))
-            avg = float(sample.mean()) if not sample.empty else None
+            window = int(window)
+            daily_window = daily.tail(window)
+
+            level_sample = pd.to_numeric(
+                daily_window[name], errors="coerce"
+            ).dropna()
+            avg = float(level_sample.mean()) if not level_sample.empty else None
+            variance = (
+                float(level_sample.var(ddof=1)) if level_sample.size >= 2 else None
+            )
             item[f"avg_{window}"] = avg
-            item[f"count_{window}"] = int(sample.size)
-            latest_value = item["latest"]
+            item[f"variance_{window}"] = variance
+            item[f"count_{window}"] = int(level_sample.size)
             item[f"vs_avg_{window}"] = (
                 latest_value - avg
                 if latest_value is not None and avg is not None
                 else None
             )
+
+            if name == "overall":
+                item[f"spread_mean_{window}"] = None
+                item[f"spread_std_{window}"] = None
+                item[f"spread_variance_{window}"] = None
+                item[f"spread_count_{window}"] = 0
+            else:
+                spread_sample = (
+                    pd.to_numeric(daily_window[name], errors="coerce")
+                    - pd.to_numeric(daily_window["overall"], errors="coerce")
+                ).dropna()
+                item[f"spread_mean_{window}"] = (
+                    float(spread_sample.mean()) if not spread_sample.empty else None
+                )
+                item[f"spread_std_{window}"] = (
+                    float(spread_sample.std(ddof=1))
+                    if spread_sample.size >= 2
+                    else None
+                )
+                item[f"spread_variance_{window}"] = (
+                    float(spread_sample.var(ddof=1))
+                    if spread_sample.size >= 2
+                    else None
+                )
+                item[f"spread_count_{window}"] = int(spread_sample.size)
+
         output_rows.append(item)
 
-    return {
-        "asof": (
-            _timestamp_text(latest_source.get("timestamp"))
-            if latest_source.get("timestamp") is not None
-            else None
-        ),
-        "basis": "latest available half-day observation per trading date",
-        "available_trading_days": int(len(daily)),
-        "windows": list(windows),
-        "rows": output_rows,
-    }
-
+    payload = dict(empty_payload)
+    payload.update(
+        {
+            "asof": (
+                _timestamp_text(latest_source.get("timestamp"))
+                if latest_source.get("timestamp") is not None
+                else None
+            ),
+            "available_trading_days": int(len(daily)),
+            "rows": output_rows,
+        }
+    )
+    return payload
 
 def latest_by_resolution(
-    resolution: str, db_path: str | Path = DEFAULT_DB_PATH
+    resolution: str,
+    db_path: str | Path = DEFAULT_DB_PATH,
+    *,
+    published_only: bool = True,
 ) -> dict | None:
+    """Return the latest point; dashboard callers default to publishable rows only."""
     initialise(db_path)
+    quality_clause = f" AND {PUBLISHED_POINT_SQL}" if published_only else ""
     with connect(db_path) as conn:
         row = conn.execute(
-            """
+            f"""
             SELECT * FROM vix_points
-            WHERE resolution=? ORDER BY timestamp DESC LIMIT 1
+            WHERE resolution=?{quality_clause}
+            ORDER BY timestamp DESC LIMIT 1
             """,
             (resolution,),
         ).fetchone()
@@ -392,18 +470,42 @@ def latest_by_resolution(
 
 
 def previous_by_resolution(
-    resolution: str, db_path: str | Path = DEFAULT_DB_PATH
+    resolution: str,
+    db_path: str | Path = DEFAULT_DB_PATH,
+    *,
+    published_only: bool = True,
 ) -> dict | None:
     initialise(db_path)
+    quality_clause = f" AND {PUBLISHED_POINT_SQL}" if published_only else ""
     with connect(db_path) as conn:
         row = conn.execute(
-            """
+            f"""
             SELECT * FROM vix_points
-            WHERE resolution=? ORDER BY timestamp DESC LIMIT 1 OFFSET 1
+            WHERE resolution=?{quality_clause}
+            ORDER BY timestamp DESC LIMIT 1 OFFSET 1
             """,
             (resolution,),
         ).fetchone()
     return dict(row) if row is not None else None
+
+
+def is_publishable_point(row: Mapping) -> bool:
+    """A public dashboard point must contain all six VIX chains and full roster coverage."""
+    expected = row.get("expected_instruments")
+    observed = row.get("n_instruments")
+    if expected is not None and (observed is None or int(observed) < int(expected)):
+        return False
+    return all(_clean_number(row.get(name)) is not None for name in VIX_COLUMNS)
+
+
+def delete_unpublishable_points(
+    *, db_path: str | Path = DEFAULT_DB_PATH
+) -> int:
+    """Delete partial dashboard points after the caller has created a DB backup."""
+    initialise(db_path)
+    with connect(db_path) as conn:
+        cursor = conn.execute(f"DELETE FROM vix_points WHERE NOT {PUBLISHED_POINT_SQL}")
+        return int(cursor.rowcount or 0)
 
 
 def log_event(
@@ -419,6 +521,20 @@ def log_event(
             "INSERT INTO collector_events(event_time, level, event, details) VALUES (?,?,?,?)",
             (_timestamp_text(datetime.now()), level, event, details),
         )
+
+
+def latest_collector_event(db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    """Return the most recent collector event for dashboard diagnostics."""
+    initialise(db_path)
+    with connect(db_path) as conn:
+        row = conn.execute(
+            """
+            SELECT event_time, level, event, details
+            FROM collector_events
+            ORDER BY id DESC LIMIT 1
+            """
+        ).fetchone()
+    return dict(row) if row is not None else None
 
 
 def database_summary(db_path: str | Path = DEFAULT_DB_PATH) -> dict:

@@ -1,0 +1,14 @@
+{
+  "audited_on": "2026-07-17",
+  "source_version": "v6.5",
+  "pm_markets": {"count": 41, "latest": "2026-07-09T08:23:34Z"},
+  "pm_price_history": {"count": 6878, "latest": "2026-07-09T08:00:00Z", "oldest": "2026-07-02T09:00:00Z"},
+  "pm_volume_history": {"count": 41, "latest": "2026-07-09", "oldest": "2026-07-09"},
+  "pm_whale_positions": {"count": 480, "latest": "2026-07-09T13:07:43Z"},
+  "pm_whale_trades": {"count": 3711, "latest": "2026-07-09T12:53:16Z"},
+  "us_data_current": {"count": 6, "latest": "2026-07-09T13:07:29Z"},
+  "last_data_log_poll_at": "2026-07-09T13:07:38Z",
+  "last_event_log_poll_at": "2026-07-09T13:07:40Z",
+  "last_holiday_log_poll_at": "2026-07-09T13:07:40Z",
+  "pm_whales_last_sync": "2026-07-09T13:07:43Z"
+}

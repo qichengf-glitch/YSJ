@@ -1,0 +1,74 @@
+{
+  "package": "new-YSJ-main-vix-auto",
+  "generated_at_utc": "2026-07-23T09:46:52Z",
+  "source_archives": {
+    "YSJ-main.zip": "c9c8633b24699949203e7ffdf4709a9e376e19da78062b5288a29d5460b03463",
+    "jin10_us_dashboard_site_v6_6_fixed(2).zip": "62352daa38e2f4174fe1f69d9c79989c456fe0eb0ab536184c368b9a2b2672c3",
+    "cn_option_vix_live_final.zip": "21e138ee44772007d7dca966cc5f28fdbbc4a8a5c34eadf2ab2b8134b84d8b51"
+  },
+  "integrated_versions": {
+    "website": "Next.js 14 / React 18",
+    "jin10": "6.6.1",
+    "cn_option_vix": "20260723-auto-catchup-v5"
+  },
+  "runtime_topology": {
+    "public": "Next.js :3000",
+    "jin10_internal": "127.0.0.1:8000",
+    "cn_vix_internal": "127.0.0.1:8765",
+    "jin10_proxy": "/api/market-radar/*",
+    "cn_vix_proxy": "/api/cn-option-vix-dashboard/*"
+  },
+  "data": {
+    "jin10_database": {
+      "path": "jin10_us_dashboard_site/data/us_dashboard.db",
+      "bytes": 420810752,
+      "integrity_check": "ok",
+      "latest_prediction_timestamp": "2026-07-21T03:00:00Z",
+      "latest_whale_trade_timestamp": "2026-07-21T03:53:48Z"
+    },
+    "cn_vix_database": {
+      "path": "cn_option_vix/data/live_vix.sqlite",
+      "bytes": 389120,
+      "integrity_check": "ok",
+      "vix_points": 1271,
+      "latest_timestamp": "2026-07-17 11:15:00",
+      "five_minute_points": 305,
+      "halfday_points": 966,
+      "latest_5m_timestamp": "2026-07-17 11:15:00",
+      "latest_halfday_timestamp": "2026-07-16 15:00:00",
+      "backfill_through_2026_07_23": "requires execution on server with RQDATA_URI; no values fabricated in package"
+    }
+  },
+  "intentional_integration_changes": [
+    "Removed legacy Jin10 v4.2/v6.5 directories and installed v6.6.1 under jin10_us_dashboard_site.",
+    "Replaced the legacy cn_option_vix directory with the uploaded final VIX package.",
+    "Added authenticated same-origin Next.js reverse proxies for both Python dashboards.",
+    "Changed the VIX iframe from browser-local 127.0.0.1 to a same-origin authenticated route.",
+    "Patched dashboard frontend API bases so browser requests traverse the authenticated proxies.",
+    "Added setup/start/stop/status/validation/sync/backfill/backup scripts.",
+    "Added Nginx and systemd production templates.",
+    "Added fail-closed production access configuration and aggregate service health checks.",
+    "Preserved uploaded SQLite history while excluding uploaded secrets, virtual environments, and runtime caches.",
+    "Added startup catch-up that detects incomplete published five-minute slots and rebuilds only missing trading dates from native RQData bars.",
+    "Added scheduled reconciliation at 08:50 and 15:20 Asia/Shanghai and a manual sync-through-date command.",
+    "Added independent process supervision for the VIX web server, live collector, and repair scheduler.",
+    "Added a cross-process RQData lock and stale-slot rejection so catch-up and live snapshots cannot overlap or mislabel observations.",
+    "Changed the VIX systemd service to Restart=always and enhanced status output with last 5-minute and half-day timestamps."
+  ],
+  "validation": {
+    "python_compile": "passed",
+    "javascript_syntax": "passed",
+    "typescript_tsx_files_checked": 47,
+    "typescript_syntax_errors": 0,
+    "shell_syntax": "passed",
+    "jin10_unit_tests": "15 passed",
+    "cn_vix_partial_tests": "29 passed, 1 skipped; dependency/live-data tests deferred to target setup",
+    "jin10_api_smoke": "5 endpoints returned 200",
+    "cn_vix_api_smoke": "10 endpoints returned 200",
+    "next_production_build": "deferred to target server because sandbox dependency installation was unavailable",
+    "cn_vix_auto_update_tests": "33 selected connection-free tests passed, including catch-up slot logic, repair scheduling, dashboard API and storage",
+    "cn_vix_supervisor_smoke": "web/collector supervisor started; /healthz returned 200 against packaged SQLite",
+    "new_shell_syntax": "passed for live supervisor, sync-through-date, status and VIX launcher scripts",
+    "july_23_data_pull": "not run in sandbox: RQDATA_URI/rqdatac/pyarrow unavailable; execute scripts/sync_cn_vix_through.sh 2026-07-23 on credentialed server"
+  }
+}

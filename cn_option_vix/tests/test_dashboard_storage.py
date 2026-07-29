@@ -79,8 +79,63 @@ def test_halfday_explicit_start_and_moving_averages(tmp_path: Path):
     summary = moving_average_snapshot(db_path=db)
     assert summary["available_trading_days"] == 65
     overall = next(row for row in summary["rows"] if row["key"] == "overall")
-    assert overall["count_30"] == 30
+    assert overall["count_20"] == 20
     assert overall["count_60"] == 60
     # One daily observation is used: the 15:00 point, not both half-days.
-    assert overall["avg_30"] == pd.Series([21.0 + i for i in range(35, 65)]).mean()
+    assert overall["avg_20"] == pd.Series([21.0 + i for i in range(45, 65)]).mean()
+    assert overall["variance_20"] == pd.Series([21.0 + i for i in range(45, 65)]).var(ddof=1)
     assert overall["avg_60"] == pd.Series([21.0 + i for i in range(5, 65)]).mean()
+    assert overall["variance_60"] == pd.Series([21.0 + i for i in range(5, 65)]).var(ddof=1)
+
+
+def test_partial_point_is_never_published(tmp_path: Path):
+    db = tmp_path / "live.sqlite"
+    full = _row("2026-07-16 13:15")
+    partial = _row("2026-07-16 13:20")
+    partial["n_instruments"] = 3
+    partial["index_vix"] = None
+    partial["blue_chip"] = None
+    partial["sz_growth"] = None
+    upsert_points([full, partial], resolution="5m", source="test", db_path=db)
+
+    assert latest_by_resolution("5m", db, published_only=False)["timestamp"].endswith("13:20:00")
+    assert latest_by_resolution("5m", db)["timestamp"].endswith("13:15:00")
+    points = query_series("5m", db_path=db, trading_days=1)
+    assert [point["timestamp"] for point in points] == ["2026-07-16 13:15:00"]
+
+
+def test_moving_average_snapshot_computes_relative_spread_after_subtraction(tmp_path: Path):
+    from cn_option_vix.web.storage import moving_average_snapshot
+
+    db = tmp_path / "live.sqlite"
+    rows = []
+    overall_values = [20.0, 21.0, 22.0, 23.0]
+    hard_values = [21.0, 23.0, 25.0, 27.0]  # spreads: 1, 2, 3, 4
+    for day, overall, hard in zip(
+        pd.bdate_range("2026-07-01", periods=4),
+        overall_values,
+        hard_values,
+    ):
+        rows.append(_row(f"{day.date()} 15:00", overall=overall, hard=hard))
+    upsert_points(rows, resolution="halfday", source="test", db_path=db)
+
+    # The latest panel values must come from one complete, matched 5-minute row.
+    live = _row("2026-07-08 13:20", overall=30.0, hard=35.5)
+    upsert_points([live], resolution="5m", source="test", db_path=db)
+
+    summary = moving_average_snapshot(db_path=db, windows=(4,))
+    hard = next(row for row in summary["rows"] if row["key"] == "hard_tech")
+    expected = pd.Series([1.0, 2.0, 3.0, 4.0])
+
+    assert hard["latest"] == 35.5
+    assert hard["latest_spread"] == 5.5
+    assert hard["spread_mean_4"] == expected.mean()
+    assert hard["spread_std_4"] == expected.std(ddof=1)
+    assert hard["spread_variance_4"] == expected.var(ddof=1)
+    assert hard["spread_count_4"] == 4
+
+    overall = next(row for row in summary["rows"] if row["key"] == "overall")
+    assert overall["latest_spread"] is None
+    assert overall["spread_std_4"] is None
+    assert overall["spread_variance_4"] is None
+    assert overall["spread_count_4"] == 0

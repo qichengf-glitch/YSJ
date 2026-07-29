@@ -5,22 +5,44 @@ export const ACCESS_COOKIE = "ysj_access";
 const DEFAULT_SECRET = "ysj-local-access-secret";
 const DEFAULT_PASSCODE = "0000";
 
+function configuredPasscode() {
+  return process.env.YSJ_ACCESS_PASSCODE?.trim() || "";
+}
+
+function configuredSecret() {
+  return (
+    process.env.YSJ_ACCESS_SECRET?.trim() ||
+    process.env.YSJ_ACCESS_PASSCODE?.trim() ||
+    ""
+  );
+}
+
+export function isAccessConfigured() {
+  if (process.env.NODE_ENV !== "production") {
+    return true;
+  }
+  return Boolean(configuredPasscode() && configuredSecret());
+}
+
 function accessSecret() {
-  return process.env.YSJ_ACCESS_SECRET || process.env.YSJ_ACCESS_PASSCODE || DEFAULT_SECRET;
+  return configuredSecret() || DEFAULT_SECRET;
 }
 
 export function accessPasscode() {
-  return process.env.YSJ_ACCESS_PASSCODE || DEFAULT_PASSCODE;
+  return configuredPasscode() || DEFAULT_PASSCODE;
 }
 
 export function createAccessToken() {
+  if (!isAccessConfigured()) {
+    throw new Error("Production access control is not configured.");
+  }
   const issuedAt = Date.now().toString();
   const signature = createHmac("sha256", accessSecret()).update(issuedAt).digest("hex");
   return `${issuedAt}.${signature}`;
 }
 
 export function verifyAccessToken(token?: string) {
-  if (!token) {
+  if (!isAccessConfigured() || !token) {
     return false;
   }
 
@@ -35,7 +57,7 @@ export function verifyAccessToken(token?: string) {
   }
 
   const maxAgeMs = 1000 * 60 * 60 * 12;
-  if (Date.now() - issuedAtNumber > maxAgeMs) {
+  if (Date.now() - issuedAtNumber > maxAgeMs || issuedAtNumber > Date.now() + 60_000) {
     return false;
   }
 

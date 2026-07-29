@@ -28,8 +28,10 @@ from cn_option_vix.data.intraday_chains import (
     quota_snapshot,
 )
 from cn_option_vix.pipeline.one_day import assemble_vix_row
+from cn_option_vix.data.rq_process_lock import rqdata_locked
 from cn_option_vix.web.storage import (
     DEFAULT_DB_PATH,
+    is_publishable_point,
     log_event,
     query_series,
     upsert_points,
@@ -38,6 +40,22 @@ from cn_option_vix.web.storage import (
 TZ = ZoneInfo("Asia/Shanghai")
 _OUT = Path(__file__).resolve().parent.parent / "outputs"
 _AUDIT_PATH = _OUT / "vix_5m_live_audit.csv"
+
+
+def _safe_quota_snapshot(db_path: str | Path) -> dict:
+    """Read quota diagnostics without blocking a market-data observation.
+
+    RQData quota inspection is operational metadata, not an input to the VIX
+    calculation. A transient account/session error must therefore not discard
+    an otherwise collectable five-minute point.
+    """
+    try:
+        return quota_snapshot()
+    except Exception as exc:
+        message = f"{type(exc).__name__}: {exc}"
+        print(f"quota diagnostic warning: {message}", flush=True)
+        log_event("WARNING", "quota_snapshot_error", message, db_path=db_path)
+        return {}
 
 
 def _tick_frame(ids: list[str]) -> pd.DataFrame:
@@ -172,14 +190,24 @@ def _as_shanghai_datetime(value=None) -> datetime:
     return dt.replace(tzinfo=TZ) if dt.tzinfo is None else dt.astimezone(TZ)
 
 
+@rqdata_locked(timeout_seconds=45)
 def run_once(
     timestamp=None,
     *,
     refresh_plans: bool = True,
     db_path: str | Path = DEFAULT_DB_PATH,
 ) -> dict:
+    requested_now = _as_shanghai_datetime(timestamp)
+    actual_now = datetime.now(TZ)
+    if timestamp is not None:
+        delay_seconds = (actual_now - requested_now).total_seconds()
+        if requested_now.date() == actual_now.date() and delay_seconds > 90:
+            raise RuntimeError(
+                f"refusing stale live slot {requested_now.isoformat()} after "
+                f"{delay_seconds:.0f}s lock/start delay; historical catch-up will repair it"
+            )
     ensure_rq()
-    now = _as_shanghai_datetime(timestamp)
+    now = requested_now
     date = pd.Timestamp(now.date())
     sample_ts = pd.Timestamp(now.replace(second=0, microsecond=0, tzinfo=None))
     hhmm = sample_ts.strftime("%H:%M")
@@ -190,7 +218,7 @@ def run_once(
     if latest != date:
         raise RuntimeError(f"{date.date()} is not a Chinese trading date")
 
-    quota_before = quota_snapshot()
+    quota_before = _safe_quota_snapshot(db_path)
     plans: dict[str, pd.DataFrame] = {}
     for item in ROSTER:
         symbol = item["symbol"]
@@ -251,12 +279,32 @@ def run_once(
     row["provider_timestamp"] = provider_ts
     row["calculated_at"] = datetime.now(TZ).replace(tzinfo=None)
 
-    quota_after = quota_snapshot()
+    quota_after = _safe_quota_snapshot(db_path)
     before = quota_before.get("bytes_used")
     after = quota_after.get("bytes_used")
     row["quota_bytes_used"] = (
         int(after - before) if before is not None and after is not None else None
     )
+
+    if not is_publishable_point(row):
+        _save_audits(audits)
+        message = json.dumps(
+            {
+                "timestamp": str(sample_ts),
+                "valid_instruments": row["n_instruments"],
+                "expected_instruments": len(ROSTER),
+                "action": "skipped_not_published",
+            },
+            ensure_ascii=False,
+        )
+        log_event(
+            "WARNING",
+            "collector_partial_point_skipped",
+            message,
+            db_path=db_path,
+        )
+        print(f"partial point skipped; dashboard unchanged: {message}", flush=True)
+        return row
 
     upsert_points(
         [row],
@@ -317,6 +365,16 @@ def monitor_forever(*, db_path: str | Path = DEFAULT_DB_PATH) -> None:
         now = datetime.now(TZ)
         target = _next_slot(now, skip_date=skipped_date)
         time.sleep(max(0.0, (target - now).total_seconds()))
+        woke_at = datetime.now(TZ)
+        delay_seconds = (woke_at - target).total_seconds()
+        if delay_seconds > 90:
+            message = (
+                f"skipped stale slot {target.isoformat()} after "
+                f"{delay_seconds:.0f}s suspension; historical backfill required"
+            )
+            print(message, flush=True)
+            log_event("WARNING", "collector_missed_slot", message, db_path=db_path)
+            continue
         try:
             refresh = last_plan_date != target.date()
             run_once(target, refresh_plans=refresh, db_path=db_path)

@@ -1,10 +1,21 @@
 import { NextResponse } from "next/server";
-import { ACCESS_COOKIE, accessPasscode, createAccessToken } from "@/lib/access";
+import {
+  ACCESS_COOKIE,
+  accessPasscode,
+  createAccessToken,
+  isAccessConfigured,
+} from "@/lib/access";
 
 export async function POST(request: Request) {
+  if (!isAccessConfigured()) {
+    return NextResponse.json(
+      { ok: false, message: "Access control is not configured on the server." },
+      { status: 503 }
+    );
+  }
+
   const body = await request.json().catch(() => ({}));
   const passcode = typeof body.passcode === "string" ? body.passcode : "";
-
   if (passcode !== accessPasscode()) {
     return NextResponse.json({ ok: false, message: "Invalid access code." }, { status: 401 });
   }
@@ -19,6 +30,5 @@ export async function POST(request: Request) {
     maxAge: 60 * 60 * 12,
     path: "/",
   });
-
   return response;
 }

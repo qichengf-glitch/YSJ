@@ -1,0 +1,16 @@
+[Unit]
+Description=YSJ Jin10 v6.6 backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__YSJ_USER__
+WorkingDirectory=__YSJ_ROOT__/jin10_us_dashboard_site
+EnvironmentFile=__YSJ_ROOT__/.env
+ExecStart=__YSJ_ROOT__/jin10_us_dashboard_site/.venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
