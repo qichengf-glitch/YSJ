@@ -1,5 +1,3 @@
-> **Current integration notice (2026-07-23):** active backends are `jin10_us_dashboard_site` v6.6.1 and `cn_option_vix` final v4. The VIX browser URL now defaults to `/api/cn-option-vix-dashboard/`; older paths below are historical log entries.
-
 # YSJLab Website Content, Feature, and API Log
 
 Last updated: 2026-07-15
@@ -347,7 +345,7 @@ Explained source scripts:
 Related external project:
 
 ```text
-cn_option_vix
+/Users/qichengfu/Desktop/cn_option_vix
 ```
 
 The `cn_option_vix` web app exposes its own API:
@@ -688,7 +686,7 @@ NEXT_PUBLIC_VIX_DASHBOARD_URL
 Run command:
 
 ```bash
-cd /path/to/YSJ
+cd /Users/qichengfu/Desktop/YSJ
 bash cn_option_vix/scripts/run_live_dashboard.sh
 ```
 

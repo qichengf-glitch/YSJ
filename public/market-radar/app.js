@@ -12,18 +12,12 @@ const state = {
   updateFilter: 'all',
   pmBucket: 'all',
   activeEventKey: null,
-  loading: false,
 };
 
 const $ = (id) => document.getElementById(id);
 const API_PROXY_PREFIX = '/api/market-radar';
 const fmt = (v) => (v === null || v === undefined || v === '' ? '—' : v);
-const shortTime = (v) => {
-  if (!v) return '—';
-  const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return String(v).slice(0, 16);
-  return d.toLocaleString('zh-CN', { hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
-};
+const shortTime = (v) => v ? String(v).replace('T',' ').replace('.000Z','').replace('Z','').slice(0,16) : '—';
 const clsSurprise = (v) => (v || 0) >= 0 ? 'pos' : 'neg';
 const fmtNum = (v, digits=2) => (v === null || v === undefined || Number.isNaN(Number(v))) ? '—' : Number(v).toFixed(digits);
 const fmtMoney = (v) => {
@@ -46,18 +40,10 @@ const fmtSignedPct = (v) => {
 };
 
 async function api(path, options = {}) {
-  const method = String(options.method || 'GET').toUpperCase();
   const proxiedPath = path.startsWith('/api/')
     ? `${API_PROXY_PREFIX}${path.slice('/api'.length)}`
     : path;
-  const requestPath = method === 'GET'
-    ? `${proxiedPath}${proxiedPath.includes('?') ? '&' : '?'}_=${Date.now()}`
-    : proxiedPath;
-  const res = await fetch(requestPath, {
-    cache: 'no-store',
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-    ...options,
-  });
+  const res = await fetch(proxiedPath, { headers: { 'Content-Type': 'application/json' }, ...options });
   if (!res.ok) {
     let text = await res.text();
     try { text = JSON.parse(text).detail || text; } catch (_) {}
@@ -90,35 +76,27 @@ function escapeHtml(s) {
 }
 
 async function loadAll() {
-  if (state.loading) return;
-  state.loading = true;
-  const requests = [
-    ['dashboard', api('/api/dashboard?days=7')],
-    ['earnings', api('/api/earnings')],
-    ['updates', api('/api/updates?limit=120')],
-    ['holidays', api('/api/holidays?limit=200')],
-    ['predictionOverview', api('/api/prediction-markets/overview')],
-    ['predictionMarkets', api('/api/prediction-markets/markets?limit=1000')],
-    ['whaleDaily', api(`/api/prediction-markets/whales/daily?bucket=${encodeURIComponent(state.pmBucket)}`)],
-  ];
   try {
-    const settled = await Promise.allSettled(requests.map(x => x[1]));
-    settled.forEach((result, idx) => {
-      const key = requests[idx][0];
-      if (result.status !== 'fulfilled') {
-        console.warn(`refresh ${key} failed`, result.reason);
-        return;
-      }
-      const value = result.value;
-      if (key === 'earnings' || key === 'updates' || key === 'holidays' || key === 'predictionMarkets') {
-        state[key] = value.data || [];
-      } else {
-        state[key] = value;
-      }
-    });
+    const [dashboard, earnings, updates, holidays, pmOverview, pmMarkets, whaleDaily] = await Promise.all([
+      api('/api/dashboard?days=7'),
+      api('/api/earnings'),
+      api('/api/updates?limit=120'),
+      api('/api/holidays?limit=200'),
+      api('/api/prediction-markets/overview').catch(() => null),
+      api('/api/prediction-markets/markets?limit=1000').catch(() => ({data: []})),
+      api('/api/prediction-markets/whales/daily').catch(() => ({events_traded_24h: [], top_traders_24h: []})),
+    ]);
+    state.dashboard = dashboard;
+    state.earnings = earnings.data || [];
+    state.updates = updates.data || [];
+    state.holidays = holidays.data || [];
+    state.predictionOverview = pmOverview;
+    state.predictionMarkets = pmMarkets.data || [];
+    state.whaleDaily = whaleDaily;
     renderAll();
-  } finally {
-    state.loading = false;
+  } catch (err) {
+    console.error(err);
+    toast('加载失败：' + err.message.slice(0, 160));
   }
 }
 
@@ -187,8 +165,7 @@ function renderCompactEvents(items) {
 
 function renderCompactSurprises(items) {
   if (!items.length) return `<div class="empty">暂无可比较 surprise</div>`;
-  const cap = 6;
-  return items.slice(0, cap).map(m => `
+  return items.slice(0, 6).map(m => `
     <div class="compact-item">
       <div class="compact-title">${escapeHtml(m.ticker || '')} · ${escapeHtml(m.measure || '')} <span class="${clsSurprise(m.surprise_pct)}">${escapeHtml(m.surprise_pct_display)}</span></div>
       <div class="compact-sub">Actual ${fmt(m.actual)} vs Consensus ${fmt(m.consensus)}</div>
@@ -374,17 +351,18 @@ function renderDailyEvents(items) {
     </div>`).join('');
 }
 function renderDailyTraders(items) {
-  if (!items || !items.length) return `<div class="empty">暂无 tracked wallets 近24小时真实成交记录。</div>`;
+  if (!items || !items.length) return `<div class="empty">暂无 tracked wallets 近24小时变化。先同步 Whales，或需要至少两次快照。</div>`;
   return items.slice(0, 3).map((t, idx) => {
-    const net = Number(t.net_flow_24h || 0);
-    const cls = net >= 0 ? 'pos' : 'neg';
+    const delta = t.delta_24h;
+    const deltaText = delta === null || delta === undefined ? `当前 ${fmtMoney(t.value || 0)}` : `24h ${fmtDelta(delta)}`;
+    const cls = (delta || 0) >= 0 ? 'pos' : 'neg';
     return `<div class="daily-row" onclick='openPmDrawer(${JSON.stringify(t.condition_id)})'>
       <span class="rank">${idx + 1}</span>
       <div class="daily-main">
         <div class="compact-title">${escapeHtml(t.name || '')} · ${escapeHtml(t.outcome || '—')}</div>
-        <div class="compact-sub">${escapeHtml((t.question || '').slice(0, 82))} · ${t.trade_count_24h || 0} 笔</div>
+        <div class="compact-sub">${escapeHtml((t.question || '').slice(0, 92))}</div>
       </div>
-      <b class="${cls}">成交 ${fmtMoney(t.trade_volume_24h || 0)}<br/>净流 ${fmtDelta(net)}</b>
+      <b class="${cls}">${deltaText}</b>
     </div>`;
   }).join('');
 }
@@ -429,9 +407,7 @@ function renderWhaleSparkline(points) {
 function renderPrediction() {
   if (!$('pmBucketBoard')) return;
   const ov = state.predictionOverview || {bucket_summary: [], market_count: 0};
-  const pmStatus = $('pmFetchedAt');
-  pmStatus.textContent = ov.fetched_at ? `${ov.is_stale ? '⚠ 数据滞后' : '已更新'}：${shortTime(ov.fetched_at)} · ${filteredPredictionMarkets().length}/${ov.market_count || 0} markets${ov.sync_status?.status === 'failed' ? ` · 同步失败：${ov.sync_status.error || ''}` : ''}` : '尚未同步 Polymarket';
-  pmStatus.classList.toggle('stale-text', Boolean(ov.is_stale));
+  $('pmFetchedAt').textContent = ov.fetched_at ? `Last sync: ${shortTime(ov.fetched_at)} · ${filteredPredictionMarkets().length}/${ov.market_count || 0} markets` : '尚未同步 Polymarket';
   const buckets = ov.bucket_summary || [];
   $('pmBucketBoard').innerHTML = buckets.length ? buckets.map(b => {
     const move = b.weighted_change_pp ?? b.avg_change_pp ?? 0;
@@ -483,7 +459,7 @@ function renderVolumeRadar(items) {
     const hot = volPct !== null && volPct >= 40;
     const quiet = volPct !== null && volPct < 40;
     const pctText = volPct === null ? '—' : `${volPct >= 0 ? '+' : ''}${volPct.toFixed(0)}%`;
-    const src = m.volume_baseline_source === 'local_10d_snapshots' ? `local ${m.volume_baseline_days || 0}D avg` : 'Polymarket 7D / 7';
+    const src = m.volume_baseline_source === 'local_10d_snapshots' ? 'local 10D avg' : 'rolling avg';
     return `<div class="volume-radar-item" onclick='openPmDrawer(${JSON.stringify(m.condition_id)})'>
       <div class="volume-radar-rank">${idx + 1}</div>
       <div class="volume-radar-main">
@@ -673,25 +649,9 @@ function bindEvents() {
   });
   $('drawerClose').addEventListener('click', closeDrawer); $('drawerMask').addEventListener('click', closeDrawer);
   $('globalSearch').addEventListener('input', (e) => { state.query = e.target.value; renderEarnings(); renderUpdates(); renderHolidays(); renderPrediction(); });
-  const runSync = async (btn, startText, doneText, fn) => {
-    if (!btn || btn.disabled) return;
-    btn.disabled = true;
-    try { toast(startText); await fn(); toast(doneText); await loadAll(); }
-    catch (err) { toast('同步失败：' + err.message.slice(0, 180)); }
-    finally { btn.disabled = false; }
-  };
-  $('btnSync').addEventListener('click', () => runSync($('btnSync'), '开始同步默认窗口...', '同步完成', async () => {
-    await api('/api/sync/default', { method: 'POST' });
-    await api('/api/sync/logs', { method: 'POST' });
-  }));
-  const btnSyncPM = $('btnSyncPM'); if (btnSyncPM) btnSyncPM.addEventListener('click', () => runSync(btnSyncPM, '正在刷新 Polymarket 当前行情...', 'Polymarket 当前行情已更新', async () => {
-    await api('/api/prediction-markets/sync?min_prob=0.10&min_volume=10000&max_pages=15&fetch_history=false', { method: 'POST' });
-    switchView('prediction');
-  }));
-  const btnSyncWhales = $('btnSyncWhales'); if (btnSyncWhales) btnSyncWhales.addEventListener('click', () => runSync(btnSyncWhales, '正在同步 tracked wallets...', 'Whales 同步完成', async () => {
-    await api('/api/prediction-markets/sync-whales', { method: 'POST' });
-    switchView('prediction');
-  }));
+  $('btnSync').addEventListener('click', async () => { try { toast('开始同步默认窗口...'); await api('/api/sync/default', { method: 'POST' }); await api('/api/sync/logs', { method: 'POST' }).catch(() => null); toast('同步完成'); await loadAll(); } catch (err) { toast('同步失败：' + err.message.slice(0, 160)); } });
+  const btnSyncPM = $('btnSyncPM'); if (btnSyncPM) btnSyncPM.addEventListener('click', async () => { try { toast('开始同步 Polymarket，可能需要几十秒...'); await api('/api/prediction-markets/sync?min_prob=0.10&min_volume=10000&max_pages=15&fetch_history=true', { method: 'POST' }); toast('Polymarket 同步完成'); await loadAll(); switchView('prediction'); } catch (err) { toast('Polymarket 同步失败：' + err.message.slice(0, 180)); } });
+  const btnSyncWhales = $('btnSyncWhales'); if (btnSyncWhales) btnSyncWhales.addEventListener('click', async () => { try { toast('开始同步 tracked wallets，可能需要几分钟...'); await api('/api/prediction-markets/sync-whales', { method: 'POST' }); toast('Whales 同步完成'); await loadAll(); switchView('prediction'); } catch (err) { toast('Whales 同步失败：' + err.message.slice(0, 180)); } });
   document.querySelectorAll('[data-filter]').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active')); document.querySelectorAll('[data-range]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.earningsFilter = btn.dataset.filter; renderEarnings(); }));
   document.querySelectorAll('[data-range]').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active')); document.querySelectorAll('[data-range]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.earningsFilter = null; renderEarnings(); }));
   document.querySelectorAll('[data-update-filter]').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('[data-update-filter]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); state.updateFilter = btn.dataset.updateFilter || 'all'; renderUpdates(); }));
@@ -700,5 +660,4 @@ function bindEvents() {
 
 bindEvents();
 loadAll();
-setInterval(loadAll, 30_000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) loadAll(); });
+setInterval(loadAll, 60_000);

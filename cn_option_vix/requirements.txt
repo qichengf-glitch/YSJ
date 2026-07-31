@@ -3,7 +3,7 @@ pandas
 numpy
 pyarrow
 pytest
-httpx2>=2.0,<3
 matplotlib
 fastapi>=0.115
 uvicorn[standard]>=0.30
+httpx

@@ -11,14 +11,9 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const finiteValue = (v) => {
-    if (v == null || v === '') return null;
-    const number = Number(v);
-    return Number.isFinite(number) ? number : null;
-  };
-  const fmt = (v, digits = 2) => { const number = finiteValue(v); return number == null ? '—' : number.toFixed(digits); };
-  const signed = (v) => { const number = finiteValue(v); return number == null ? '—' : `${number >= 0 ? '+' : ''}${number.toFixed(2)}`; };
-  const signClass = (v) => { const number = finiteValue(v); return number == null ? '' : number >= 0 ? 'positive' : 'negative'; };
+  const fmt = (v, digits = 2) => v == null || Number.isNaN(Number(v)) ? '—' : Number(v).toFixed(digits);
+  const signed = (v) => v == null || Number.isNaN(Number(v)) ? '—' : `${v >= 0 ? '+' : ''}${Number(v).toFixed(2)}`;
+  const signClass = (v) => v == null ? '' : Number(v) >= 0 ? 'positive' : 'negative';
   const parseLocal = (text) => text ? new Date(text.replace(' ', 'T') + '+08:00') : null;
   const dateLabel = (text) => {
     if (!text) return '—';
@@ -39,15 +34,8 @@
     return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
   };
 
-  const CN_VIX_API_PROXY_PREFIX = window.location.pathname.startsWith('/api/cn-option-vix-dashboard')
-  ? '/api/cn-option-vix-dashboard'
-  : '';
-
-async function api(path) {
-    const proxiedPath = path.startsWith('/api/')
-      ? `${CN_VIX_API_PROXY_PREFIX}${path}`
-      : path;
-    const res = await fetch(proxiedPath, { cache: 'no-store' });
+  async function api(path) {
+    const res = await fetch(path, { cache: 'no-store' });
     if (!res.ok) throw new Error(`${path}: ${res.status}`);
     return res.json();
   }
@@ -77,93 +65,25 @@ async function api(path) {
   function renderAverages(payload) {
     $('averageAsOf').textContent = `As of ${fullDateTime(payload.asof)}`;
     $('averageCoverage').textContent = `${payload.available_trading_days ?? 0} trading days`;
-    const relativeBody = $('relativeRows');
-    const levelGrid = $('levelGrid');
+    const body = $('averageRows');
     if (!payload.rows || !payload.rows.length) {
-      relativeBody.innerHTML = '<tr><td colspan="4" class="table-loading">No half-day history available.</td></tr>';
-      levelGrid.innerHTML = '<div class="level-loading">No VIX level history available.</div>';
+      body.innerHTML = '<tr><td colspan="7" class="table-loading">No half-day history available.</td></tr>';
       return;
     }
-
-    const regimeFor = (row) => {
-      const avg20 = finiteValue(row.avg_20);
-      const avg60 = finiteValue(row.avg_60);
-      const delta = avg20 == null || avg60 == null ? null : avg20 - avg60;
-      if (delta == null || Math.abs(delta) < 0.10) return { className: 'neutral', text: 'NEUTRAL' };
-      return delta > 0
-        ? { className: 'rising', text: 'RISING' }
-        : { className: 'cooling', text: 'COOLING' };
-    };
-
-    const relativeWindow = (row, window) => {
-      if (row.key === 'overall') {
-        return `
-          <div class="relative-benchmark">
-            <strong>Benchmark</strong>
-            <span>Sector − Overall is not applicable</span>
-          </div>`;
-      }
-      const count = row[`spread_count_${window}`] ?? 0;
-      const mean = row[`spread_mean_${window}`];
-      return `
-        <div class="relative-window">
-          <div class="relative-metric relative-mean">
-            <span>Mean</span>
-            <strong class="${signClass(mean)}">${signed(mean)}</strong>
-          </div>
-          <div class="relative-metric">
-            <span>σ</span>
-            <strong>${fmt(row[`spread_std_${window}`])}</strong>
-          </div>
-          <div class="relative-metric">
-            <span>Var</span>
-            <strong>${fmt(row[`spread_variance_${window}`])}</strong>
-          </div>
-          <small>n=${count}</small>
-        </div>`;
-    };
-
-    relativeBody.innerHTML = payload.rows.map(row => {
-      const regime = regimeFor(row);
-      const currentRelative = row.key === 'overall'
-        ? '<div class="current-relative benchmark-label">Benchmark</div>'
-        : `<div class="current-relative"><span>vs Overall</span><strong class="${signClass(row.latest_spread)}">${signed(row.latest_spread)}</strong></div>`;
+    body.innerHTML = payload.rows.map(row => {
+      const regimeDelta = row.avg_30 == null || row.avg_60 == null ? null : Number(row.avg_30) - Number(row.avg_60);
+      const regimeClass = regimeDelta == null || Math.abs(regimeDelta) < 0.10 ? 'neutral' : regimeDelta > 0 ? 'rising' : 'cooling';
+      const regimeText = regimeClass === 'rising' ? 'RISING' : regimeClass === 'cooling' ? 'COOLING' : 'NEUTRAL';
       return `<tr>
-        <td>
-          <div class="chain-cell">
-            <span class="average-series" style="--series-color:${row.color}"><span class="average-series-dot"></span>${row.label}</span>
-            <span class="regime-chip ${regime.className}">${regime.text}</span>
-          </div>
-        </td>
-        <td>
-          <div class="current-cell">
-            <strong class="current-vix">${fmt(row.latest)}</strong>
-            ${currentRelative}
-          </div>
-        </td>
-        <td>${relativeWindow(row, 20)}</td>
-        <td>${relativeWindow(row, 60)}</td>
+        <td><span class="average-series" style="--series-color:${row.color}"><span class="average-series-dot"></span>${row.label}</span></td>
+        <td><span class="average-number">${fmt(row.latest)}</span></td>
+        <td>${fmt(row.avg_30)}</td>
+        <td><span class="average-delta ${signClass(row.vs_avg_30)}">${signed(row.vs_avg_30)}</span></td>
+        <td>${fmt(row.avg_60)}</td>
+        <td><span class="average-delta ${signClass(row.vs_avg_60)}">${signed(row.vs_avg_60)}</span></td>
+        <td><span class="regime-chip ${regimeClass}">${regimeText}</span></td>
       </tr>`;
     }).join('');
-
-    const levelWindow = (row, window) => `
-      <div class="level-window">
-        <div class="level-window-title">${window}D</div>
-        <div class="level-stat"><span>Average</span><strong>${fmt(row[`avg_${window}`])}</strong></div>
-        <div class="level-stat"><span>Δ vs Avg</span><strong class="${signClass(row[`vs_avg_${window}`])}">${signed(row[`vs_avg_${window}`])}</strong></div>
-        <div class="level-stat"><span>Variance</span><strong>${fmt(row[`variance_${window}`])}</strong></div>
-      </div>`;
-
-    levelGrid.innerHTML = payload.rows.map(row => `
-      <article class="level-mini-card" style="--series-color:${row.color}">
-        <div class="level-mini-head">
-          <span class="average-series"><span class="average-series-dot"></span>${row.label}</span>
-        </div>
-        <div class="level-window-grid">
-          ${levelWindow(row, 20)}
-          ${levelWindow(row, 60)}
-        </div>
-      </article>`).join('');
   }
 
   function createToolbar(element, terminal) {
@@ -187,7 +107,7 @@ async function api(path) {
     terminal.toolbar = element;
   }
 
-  function makeTerminal({ resolution, chartId, legendId, tooltipId, labelsId, emptyId }) {
+  function makeTerminal({ resolution, chartId, legendId, tooltipId, labelsId, emptyId, toggleId, noteId }) {
     const container = $(chartId);
     const actualByTime = new Map();
     const chart = LightweightCharts.createChart(container, {
@@ -232,7 +152,7 @@ async function api(path) {
     const terminal = {
       resolution, chart, lineSeries: {}, spreadSeries: {}, actualByTime,
       points: [], mapped: [], toolbar: null, tooltip: $(tooltipId), empty: $(emptyId), labelLayer: $(labelsId),
-      hasInitialFit: false,
+      viewToggle: $(toggleId), displayNote: $(noteId), viewMode: 'indexed', hasInitialFit: false,
     };
 
     state.config.series.forEach(meta => {
@@ -272,6 +192,13 @@ async function api(path) {
     createToolbar($(legendId), terminal);
     requestAnimationFrame(() => sizePanes(terminal));
     new ResizeObserver(() => requestAnimationFrame(() => sizePanes(terminal))).observe(container);
+    if (terminal.viewToggle) {
+      terminal.viewToggle.querySelectorAll('[data-mode]').forEach(button => {
+        button.addEventListener('click', () => setViewMode(terminal, button.dataset.mode));
+      });
+    }
+    container.closest('.chart-card')?.setAttribute('data-view-mode', terminal.viewMode);
+
     chart.subscribeCrosshairMove(param => {
       if (param.time == null || !terminal.actualByTime.has(Number(param.time))) {
         renderTooltip(terminal, null);
@@ -335,15 +262,28 @@ async function api(path) {
     });
   }
 
+  function mainSeriesValue(terminal, meta, point, baseValue) {
+    const raw = Number(point[meta.key]);
+    if (!Number.isFinite(raw)) return null;
+    if (terminal.viewMode === 'indexed') {
+      return Number.isFinite(baseValue) && baseValue !== 0 ? 100 * raw / baseValue : null;
+    }
+    return raw;
+  }
+
   function renderMainSeries(terminal) {
     state.config.series.forEach(meta => {
+      const baseItem = terminal.mapped.find(item => Number.isFinite(Number(item.point[meta.key])));
+      const baseValue = baseItem ? Number(baseItem.point[meta.key]) : null;
       const data = terminal.mapped.map(item => ({
         time: item.chartTime,
-        value: finiteValue(item.point[meta.key]),
-      })).filter(item => item.value != null);
+        value: mainSeriesValue(terminal, meta, item.point, baseValue),
+      })).filter(item => item.value != null && Number.isFinite(item.value));
       terminal.lineSeries[meta.key].setData(data);
       terminal.lineSeries[meta.key].applyOptions({
-        priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+        priceFormat: terminal.viewMode === 'indexed'
+          ? { type: 'price', precision: 1, minMove: 0.1 }
+          : { type: 'price', precision: 2, minMove: 0.01 },
       });
     });
     try {
@@ -352,6 +292,23 @@ async function api(path) {
     } catch (err) {
       console.debug('main scale fallback', err);
     }
+  }
+
+  function setViewMode(terminal, mode) {
+    if (!['level', 'indexed'].includes(mode) || terminal.viewMode === mode) return;
+    terminal.viewMode = mode;
+    terminal.viewToggle?.querySelectorAll('[data-mode]').forEach(button => {
+      button.classList.toggle('active', button.dataset.mode === mode);
+    });
+    terminal.viewToggle?.closest('.chart-card')?.setAttribute('data-view-mode', mode);
+    if (terminal.displayNote) {
+      terminal.displayNote.textContent = mode === 'indexed'
+        ? `Indexed view rebases every chain to 100 at the first ${terminal.resolution === '5m' ? 'loaded five-minute' : '2026 half-day'} observation. Exact VIX levels remain in cards and tooltip.`
+        : 'Level view shows the exact model-free VIX values. Select a chain to isolate it with Overall and tighten the comparison scale.';
+    }
+    renderMainSeries(terminal);
+    applyTerminalFocus(terminal);
+    renderTooltip(terminal, terminal.points.length ? terminal.points[terminal.points.length - 1] : null);
   }
 
   function setTerminalData(terminal, points) {
@@ -363,8 +320,8 @@ async function api(path) {
     renderMainSeries(terminal);
     state.config.spreads.forEach(meta => {
       terminal.spreadSeries[meta.group].setData(mapped
-        .map(item => ({ time: item.chartTime, value: finiteValue(item.point[meta.key]) }))
-        .filter(item => item.value != null));
+        .filter(item => item.point[meta.key] != null)
+        .map(item => ({ time: item.chartTime, value: Number(item.point[meta.key]) })));
     });
     terminal.empty.classList.toggle('hidden', points.length > 0);
 
@@ -372,8 +329,8 @@ async function api(path) {
     // are visually comparable rather than independently auto-scaled.
     const spreadValues = [];
     points.forEach(point => state.config.spreads.forEach(meta => {
-      const value = finiteValue(point[meta.key]);
-      if (value != null) spreadValues.push(Math.abs(value));
+      const value = Number(point[meta.key]);
+      if (Number.isFinite(value)) spreadValues.push(Math.abs(value));
     }));
     const spreadLimit = Math.max(1, ...spreadValues) * 1.12;
     for (let paneIndex = 1; paneIndex <= 5; paneIndex++) {
@@ -402,7 +359,14 @@ async function api(path) {
     const time = `<span class="tooltip-time">${fullDateTime(point.timestamp)}${point.session ? ` · ${point.session}` : ''}</span>`;
     const values = state.config.series.map(meta => {
       const spread = meta.key === 'overall' ? null : point[`spread_${meta.key}_overall`];
-      return `<span class="tooltip-item"><span style="color:${meta.color}">${meta.label}</span><b>${fmt(point[meta.key])}</b>${spread == null ? '' : `<em class="${signClass(spread)}">${signed(spread)}</em>`}</span>`;
+      let indexed = '';
+      if (terminal.viewMode === 'indexed') {
+        const basePoint = terminal.points.find(p => Number.isFinite(Number(p[meta.key])));
+        const base = basePoint ? Number(basePoint[meta.key]) : null;
+        const current = Number(point[meta.key]);
+        if (Number.isFinite(base) && base !== 0 && Number.isFinite(current)) indexed = `<small>idx ${fmt(100 * current / base, 1)}</small>`;
+      }
+      return `<span class="tooltip-item"><span style="color:${meta.color}">${meta.label}</span><b>${fmt(point[meta.key])}</b>${indexed}${spread == null ? '' : `<em class="${signClass(spread)}">${signed(spread)}</em>`}</span>`;
     }).join('');
     terminal.tooltip.innerHTML = time + values;
   }
@@ -495,7 +459,6 @@ async function api(path) {
         ['Missing quotes', q.missing_quotes ?? '—'],
         ['Provider timestamp', fullDateTime(q.provider_timestamp)],
         ['Calculated at', fullDateTime(q.calculated_at)],
-        ['Last collector event', q.last_collector_event ? `${q.last_collector_event.level} · ${q.last_collector_event.event} · ${q.last_collector_event.details || '—'}` : '—'],
         ['5m database points', q.database?.counts?.['5m'] ?? 0],
         ['Half-day database points', q.database?.counts?.halfday ?? 0],
         ['Database', q.database?.path ?? '—'],
@@ -530,13 +493,8 @@ async function api(path) {
   async function init() {
     if (!window.LightweightCharts) throw new Error('Lightweight Charts failed to load');
     state.config = await api('/api/config');
-    if (state.config.display_mode !== 'raw_vix_level_only') {
-      throw new Error(`Unexpected dashboard display mode: ${state.config.display_mode || 'missing'}`);
-    }
-    const build = document.getElementById('buildId');
-    if (build) build.textContent = `Build: ${state.config.build_id}`;
-    state.terminals.five = makeTerminal({ resolution: '5m', chartId: 'chart5m', legendId: 'legend5m', tooltipId: 'tooltip5m', labelsId: 'paneLabels5m', emptyId: 'empty5m' });
-    state.terminals.half = makeTerminal({ resolution: 'halfday', chartId: 'chartHalfday', legendId: 'legendHalfday', tooltipId: 'tooltipHalfday', labelsId: 'paneLabelsHalfday', emptyId: 'emptyHalfday' });
+    state.terminals.five = makeTerminal({ resolution: '5m', chartId: 'chart5m', legendId: 'legend5m', tooltipId: 'tooltip5m', labelsId: 'paneLabels5m', emptyId: 'empty5m', toggleId: 'viewToggle5m', noteId: 'displayNote5m' });
+    state.terminals.half = makeTerminal({ resolution: 'halfday', chartId: 'chartHalfday', legendId: 'legendHalfday', tooltipId: 'tooltipHalfday', labelsId: 'paneLabelsHalfday', emptyId: 'emptyHalfday', toggleId: 'viewToggleHalfday', noteId: 'displayNoteHalfday' });
     await refresh();
     state.pollTimer = setInterval(refresh, state.config.poll_seconds * 1000);
     state.countdownTimer = setInterval(updateCountdowns, 1000);

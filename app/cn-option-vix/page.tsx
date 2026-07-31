@@ -15,9 +15,7 @@ export default function Page() {
   }
 
   const dashboardUrl =
-    process.env.NEXT_PUBLIC_VIX_DASHBOARD_URL ||
-    process.env.VIX_DASHBOARD_PUBLIC_URL ||
-    "/api/cn-option-vix-dashboard/index.html";
+    process.env.NEXT_PUBLIC_VIX_DASHBOARD_URL || "http://127.0.0.1:8765";
 
   return <CnOptionVixPage dashboardUrl={dashboardUrl} />;
 }

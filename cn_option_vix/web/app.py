@@ -18,7 +18,6 @@ from cn_option_vix.web.storage import (
     database_summary,
     latest_by_resolution,
     moving_average_snapshot,
-    latest_collector_event,
     previous_by_resolution,
     query_series,
 )
@@ -44,20 +43,8 @@ LABELS = {
     "hard_tech": "Hard Tech",
 }
 
-BUILD_ID = "20260723-auto-catchup-v5"
-
-app = FastAPI(title="China Option Volatility Monitor", version="1.3.0")
+app = FastAPI(title="China Option Volatility Monitor", version="1.0.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-
-@app.middleware("http")
-async def disable_dashboard_asset_cache(request, call_next):
-    response = await call_next(request)
-    if request.url.path == "/" or request.url.path.startswith("/static/"):
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-        response.headers["Pragma"] = "no-cache"
-        response.headers["Expires"] = "0"
-    return response
 
 
 def _jsonable(row: dict) -> dict:
@@ -96,12 +83,8 @@ def _next_time(now: datetime, sample_times: list[str]) -> datetime:
 
 def _status_payload() -> dict:
     now = datetime.now(TZ)
-    # Published values are strict 12/12 observations with all six VIX chains.
-    # Raw is retained only for diagnostics so a partial point can never replace
-    # the values shown in cards or charts.
-    latest_5m = latest_by_resolution("5m", DB_PATH, published_only=True)
-    latest_raw = latest_by_resolution("5m", DB_PATH, published_only=False)
-    latest_half = latest_by_resolution("halfday", DB_PATH, published_only=True)
+    latest_5m = latest_by_resolution("5m", DB_PATH)
+    latest_half = latest_by_resolution("halfday", DB_PATH)
     last_ts = (
         pd.Timestamp(latest_5m["timestamp"]).to_pydatetime().replace(tzinfo=TZ)
         if latest_5m
@@ -111,64 +94,28 @@ def _status_payload() -> dict:
         max(0.0, (now - last_ts).total_seconds() / 60.0) if last_ts else None
     )
     today_has_data = bool(last_ts and last_ts.date() == now.date())
-    weekday = now.weekday() < 5
-    in_session = _in_session(now) and weekday
-    hm = now.hour * 60 + now.minute
-    stale_for_today = bool(
-        last_ts
-        and last_ts.date() < now.date()
-        and weekday
-        and hm >= 9 * 60 + 35
-    )
-    last_event = latest_collector_event(DB_PATH)
-    raw_is_partial = bool(
-        latest_raw
-        and latest_raw.get("expected_instruments") is not None
-        and latest_raw.get("n_instruments") != latest_raw.get("expected_instruments")
-        and (latest_5m is None or latest_raw["timestamp"] >= latest_5m["timestamp"])
-    )
-    has_recent_error = bool(
-        last_event
-        and last_event.get("level") in {"ERROR", "WARNING"}
-        and (
-            latest_5m is None
-            or str(last_event["event_time"]) >= str(latest_5m["timestamp"])
-        )
-    )
+    in_session = _in_session(now) and now.weekday() < 5
     if in_session and today_has_data and age_minutes is not None:
         state = (
             "LIVE"
             if age_minutes <= float(LIVE_DASHBOARD_PARAMS["stale_after_minutes"])
-            and not raw_is_partial
             else "DELAYED"
         )
-    elif in_session and (has_recent_error or raw_is_partial):
-        state = "DELAYED"
-    elif in_session and last_ts and last_ts.date() < now.date():
-        state = "STALE"
     elif in_session:
         state = "WAITING"
-    elif stale_for_today:
-        state = "STALE"
     else:
         state = "CLOSED"
 
     next_5m = _next_time(now, LIVE_DASHBOARD_PARAMS["sample_times"])
     next_half = _next_time(now, LIVE_DASHBOARD_PARAMS["halfday_times"])
-    diagnostic = latest_raw or latest_5m
-    valid = diagnostic.get("n_instruments") if diagnostic else None
-    expected = diagnostic.get("expected_instruments") if diagnostic else len(ROSTER)
-    if (in_session and not today_has_data) or stale_for_today:
-        quality = "STALE"
-    else:
-        quality = "OK" if valid == expected and valid is not None else "PARTIAL"
+    valid = latest_5m.get("n_instruments") if latest_5m else None
+    expected = latest_5m.get("expected_instruments") if latest_5m else len(ROSTER)
+    quality = "OK" if valid == expected and valid is not None else "PARTIAL"
     return {
-        "build_id": BUILD_ID,
         "now": now.isoformat(),
         "state": state,
         "market_session": "OPEN" if in_session else "CLOSED",
         "last_5m": latest_5m["timestamp"] if latest_5m else None,
-        "last_raw_5m": latest_raw["timestamp"] if latest_raw else None,
         "last_halfday": latest_half["timestamp"] if latest_half else None,
         "next_5m": next_5m.isoformat(),
         "next_halfday": next_half.isoformat(),
@@ -176,29 +123,16 @@ def _status_payload() -> dict:
         "quality": quality,
         "valid_instruments": valid,
         "expected_instruments": expected,
-        "valid_contracts": diagnostic.get("valid_contracts") if diagnostic else None,
-        "missing_quotes": diagnostic.get("missing_quotes") if diagnostic else None,
-        "provider_timestamp": diagnostic.get("provider_timestamp") if diagnostic else None,
-        "calculated_at": diagnostic.get("calculated_at") if diagnostic else None,
-        "last_collector_event": last_event,
+        "valid_contracts": latest_5m.get("valid_contracts") if latest_5m else None,
+        "missing_quotes": latest_5m.get("missing_quotes") if latest_5m else None,
+        "provider_timestamp": latest_5m.get("provider_timestamp") if latest_5m else None,
+        "calculated_at": latest_5m.get("calculated_at") if latest_5m else None,
     }
 
 
 @app.get("/")
 def index():
-    return FileResponse(
-        STATIC_DIR / "index.html",
-        headers={
-            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
-            "Pragma": "no-cache",
-            "Expires": "0",
-        },
-    )
-
-
-@app.get("/index.html")
-def index_html():
-    return index()
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/api/config")
@@ -217,8 +151,6 @@ def config():
             }
             for gid in GROUPS
         ],
-        "build_id": BUILD_ID,
-        "display_mode": "raw_vix_level_only",
         "poll_seconds": LIVE_DASHBOARD_PARAMS["browser_poll_seconds"],
         "halfday_history_start": LIVE_DASHBOARD_PARAMS["halfday_history_start"],
     }
@@ -247,7 +179,7 @@ def series(
 
 @app.get("/api/averages")
 def averages():
-    payload = moving_average_snapshot(db_path=DB_PATH, windows=(20, 60))
+    payload = moving_average_snapshot(db_path=DB_PATH, windows=(30, 60))
     for row in payload["rows"]:
         row["label"] = LABELS[row["key"]]
         row["color"] = COLORS[row["key"]]
@@ -293,8 +225,7 @@ def status():
 def quality():
     status = _status_payload()
     return {
-        "timestamp": status["last_raw_5m"],
-        "published_timestamp": status["last_5m"],
+        "timestamp": status["last_5m"],
         "quality": status["quality"],
         "valid_instruments": status["valid_instruments"],
         "expected_instruments": status["expected_instruments"],
@@ -302,7 +233,6 @@ def quality():
         "missing_quotes": status["missing_quotes"],
         "provider_timestamp": status["provider_timestamp"],
         "calculated_at": status["calculated_at"],
-        "last_collector_event": status["last_collector_event"],
         "database": database_summary(DB_PATH),
     }
 

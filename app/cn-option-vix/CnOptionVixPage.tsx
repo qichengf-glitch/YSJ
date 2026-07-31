@@ -30,20 +30,20 @@ const groups = [
 
 const scripts = [
   {
-    name: "monitor_live_5m.py",
-    role: "Collects synchronized five-minute RQData snapshots and writes complete VIX points to SQLite.",
+    name: "history.py",
+    role: "Pulls historical RiceQuant option chains, settlements, and dominant futures series.",
   },
   {
-    name: "build_recent_5m.py",
-    role: "Backfills recent native five-minute observations and repairs missed trading dates.",
+    name: "vix_history.py",
+    role: "Rebuilds historical option chains, computes model-free 30-day VIX, and aggregates groups.",
   },
   {
-    name: "bootstrap_dashboard.py",
-    role: "Imports historical 30-minute outputs into the canonical half-day dashboard series.",
+    name: "5day5min.py",
+    role: "Fetches recent five-trading-day native 5-minute close and volume data.",
   },
   {
-    name: "web/app.py",
-    role: "Serves the live terminal, data-quality status, moving averages, levels, and relative spreads.",
+    name: "vix dashboard.py",
+    role: "Generates the standalone HTML dashboard with YTD, five-day charts, and percentile table.",
   },
 ];
 
@@ -57,13 +57,13 @@ const copy = {
     back: "Back to Private Access",
     frameTitle: "Live dashboard",
     frameNote:
-      "The embedded terminal uses the deployed VIX service URL when configured, otherwise the authenticated same-origin proxy.",
+      "The embedded terminal expects the cn_option_vix FastAPI service to be running. If the frame is blank, start the backend on port 8765 or set NEXT_PUBLIC_VIX_DASHBOARD_URL.",
     modules: "What is inside",
     groups: "Coverage",
     scripts: "Imported scripts",
     workflow: "Local run workflow",
     workflowText:
-      "Set RQDATA_URI once. The service repairs missing dates at startup, collects every completed five-minute slot, and reconciles again after market close.",
+      "Set RQDATA_URI in the terminal, bootstrap the dashboard database, then start the collector and web server.",
     dataModel: "Data model",
     dataModelText:
       "The web process reads SQLite/CSV outputs and does not call RiceQuant directly. The collector is the only process that uses RQData credentials.",
@@ -82,13 +82,13 @@ const copy = {
     back: "返回 Private Access",
     frameTitle: "实时看板",
     frameNote:
-      "下方嵌入页优先使用已部署的 VIX 服务地址；未配置时使用同域鉴权代理。",
+      "下方嵌入页依赖 cn_option_vix 的 FastAPI 服务。如果为空，需要先在本地启动 8765 端口，或配置 NEXT_PUBLIC_VIX_DASHBOARD_URL。",
     modules: "包含内容",
     groups: "覆盖范围",
     scripts: "已接入脚本",
     workflow: "本地运行流程",
     workflowText:
-      "配置一次 RQDATA_URI 后，服务会在启动时自动补漏、每 5 分钟采集，并在收盘后再次核对补齐。",
+      "先在 terminal 设置 RQDATA_URI，再 bootstrap dashboard 数据库，最后启动 collector 和 web server。",
     dataModel: "数据模型",
     dataModelText:
       "网页进程只读取 SQLite/CSV 输出，不直接调用 RiceQuant。真正使用 RQData 授权的是后台采集进程。",
@@ -223,10 +223,10 @@ export default function CnOptionVixPage({ dashboardUrl }: CnOptionVixPageProps) 
           </div>
           <p className="text-sm leading-7 text-[#5B6780]">{t.workflowText}</p>
           <pre className="mt-4 overflow-x-auto rounded-2xl bg-[#18233A] p-4 text-xs leading-6 text-white">
-{`cd new-YSJ-main
-nano .env
-./scripts/sync_cn_vix_through.sh 2026-07-23
-sudo systemctl restart ysj-vix`}
+{`export RQDATA_URI='tcp://...'
+cd /Users/qichengfu/Desktop/cn_option_vix
+bash scripts/bootstrap_dashboard.sh outputs/vix_30m_2y.csv
+bash scripts/run_live_dashboard.sh`}
           </pre>
         </div>
       </section>

@@ -41,14 +41,14 @@ next-env.d.ts
 # python
 __pycache__/
 *.py[cod]
-.venv
 .venv/
-*/.venv
 */.venv/
 
 # local backend data
-jin10_us_dashboard_site/data/*.db
-jin10_us_dashboard_site/data/*.db-*
+jin10_us_dashboard_site_v4_2/data/*.db
+jin10_us_dashboard_site_v4_2/data/*.db-*
+jin10_us_dashboard_site_v6_5/data/*.db
+jin10_us_dashboard_site_v6_5/data/*.db-*
 
 # CN Option VIX generated runtime data
 cn_option_vix/data/cache*/
@@ -58,12 +58,3 @@ cn_option_vix/outputs/*
 !cn_option_vix/outputs/vix_30m_2y.csv
 cn_option_vix/notebooks/
 cn_option_vix/web/static/*.before_*
-
-# unified runtime files
-/logs/*
-!/logs/.gitkeep
-/run/*
-!/run/.gitkeep
-
-# local backups (may contain .env secrets)
-/backups/
