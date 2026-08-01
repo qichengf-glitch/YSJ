@@ -84,3 +84,19 @@ def test_halfday_explicit_start_and_moving_averages(tmp_path: Path):
     # One daily observation is used: the 15:00 point, not both half-days.
     assert overall["avg_30"] == pd.Series([21.0 + i for i in range(35, 65)]).mean()
     assert overall["avg_60"] == pd.Series([21.0 + i for i in range(5, 65)]).mean()
+
+
+def test_partial_point_is_never_published(tmp_path: Path):
+    db = tmp_path / "live.sqlite"
+    full = _row("2026-07-14 10:00")
+    partial = _row("2026-07-14 10:05")
+    partial["n_instruments"] = 3
+    upsert_points([full, partial], resolution="5m", source="test", db_path=db)
+
+    assert latest_by_resolution("5m", db, published_only=False)["timestamp"].startswith(
+        "2026-07-14 10:05"
+    )
+    assert latest_by_resolution("5m", db)["timestamp"].startswith("2026-07-14 10:00")
+    assert [row["timestamp"] for row in query_series("5m", db_path=db)] == [
+        "2026-07-14 10:00:00"
+    ]

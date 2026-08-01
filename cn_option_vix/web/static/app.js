@@ -458,6 +458,7 @@
   async function renderQuality() {
     try {
       const q = await api('/api/quality');
+      const event = q.last_collector_event;
       const rows = [
         ['Latest point', fullDateTime(q.timestamp)],
         ['Quality', q.quality || '—'],
@@ -466,6 +467,9 @@
         ['Missing quotes', q.missing_quotes ?? '—'],
         ['Provider timestamp', fullDateTime(q.provider_timestamp)],
         ['Calculated at', fullDateTime(q.calculated_at)],
+        ['Collector event', event ? `${event.level} · ${event.event}` : '—'],
+        ['Collector event time', event ? fullDateTime(event.event_time) : '—'],
+        ['Collector details', event?.details || '—'],
         ['5m database points', q.database?.counts?.['5m'] ?? 0],
         ['Half-day database points', q.database?.counts?.halfday ?? 0],
         ['Database', q.database?.path ?? '—'],

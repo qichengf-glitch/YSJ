@@ -18,6 +18,7 @@ fi
 export DATABASE_PATH="${DATABASE_PATH:-$DATA_DIR/us_dashboard.db}"
 export CN_VIX_DB="${CN_VIX_DB:-$DATA_DIR/live_vix.sqlite}"
 export CN_VIX_RQ_LOCK="${CN_VIX_RQ_LOCK:-$DATA_DIR/cn_vix_rqdata.lock}"
+export CN_VIX_LOG_DIR="${CN_VIX_LOG_DIR:-$DATA_DIR/dashboard_logs}"
 export MARKET_RADAR_BACKEND_URL="${MARKET_RADAR_BACKEND_URL:-http://127.0.0.1:8000}"
 export CN_VIX_BACKEND_URL="${CN_VIX_BACKEND_URL:-http://127.0.0.1:8765}"
 export VIX_DASHBOARD_PUBLIC_URL="${VIX_DASHBOARD_PUBLIC_URL:-/api/cn-option-vix-dashboard/index.html}"
@@ -34,10 +35,42 @@ seed_sqlite() {
   fi
 }
 
+seed_vix_sqlite_if_empty() {
+  local source="$1"
+  local target="$2"
+  local python_bin="${PYTHON_BIN:-$ROOT/cn_option_vix/.venv/bin/python}"
+  if [[ ! -x "$python_bin" ]] && command -v python3 >/dev/null 2>&1; then
+    python_bin="$(command -v python3)"
+  fi
+
+  seed_sqlite "$source" "$target"
+  if [[ ! -f "$source" || ! -f "$target" || ! -x "$python_bin" ]]; then
+    return
+  fi
+
+  if "$python_bin" - "$target" <<'PY'
+import sqlite3
+import sys
+
+path = sys.argv[1]
+try:
+    with sqlite3.connect(path) as conn:
+        count = conn.execute("SELECT count(*) FROM vix_points").fetchone()[0]
+except (sqlite3.DatabaseError, sqlite3.OperationalError):
+    raise SystemExit(1)
+raise SystemExit(0 if count == 0 else 1)
+PY
+  then
+    cp "$target" "$target.empty-backup"
+    cp "$source" "$target"
+    echo "Seeded empty $(basename "$target") from package snapshot."
+  fi
+}
+
 if [[ -n "$JIN10_DIR" ]]; then
   seed_sqlite "$JIN10_DIR/data/us_dashboard.db" "$DATABASE_PATH"
 fi
-seed_sqlite "$ROOT/cn_option_vix/data/live_vix.sqlite" "$CN_VIX_DB"
+seed_vix_sqlite_if_empty "$ROOT/cn_option_vix/data/live_vix.sqlite" "$CN_VIX_DB"
 
 PIDS=()
 cleanup() {

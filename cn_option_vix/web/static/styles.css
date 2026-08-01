@@ -39,6 +39,7 @@ h1 { margin: 6px 0 0; font-size: 27px; line-height: 1; letter-spacing: -.035em; 
 .status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 4px rgba(104, 115, 134, .12); }
 .market-badge.live { background: #eaf7f1; color: #147a54; }
 .market-badge.delayed { background: #fff4e1; color: #a96a0c; }
+.market-badge.stale { background: #fff4e1; color: #a96a0c; }
 .market-badge.waiting { background: #edf2fb; color: #466898; }
 .market-badge.closed { background: #edf0f4; color: #758095; }
 .feed-status { display: flex; gap: 20px; padding-left: 18px; border-left: 1px solid var(--border); }

@@ -1,4 +1,6 @@
 from fastapi.testclient import TestClient
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from cn_option_vix.web import app as web_app
 from cn_option_vix.web.storage import upsert_points
@@ -66,3 +68,31 @@ def test_dashboard_api_exposes_averages_and_ytd(tmp_path, monkeypatch):
     halfday = client.get("/api/series", params={"resolution": "halfday"})
     assert halfday.status_code == 200
     assert halfday.json()["points"][0]["timestamp"].startswith("2026-")
+
+
+def test_status_marks_old_weekday_data_stale_after_market_close(tmp_path, monkeypatch):
+    db = tmp_path / "live.sqlite"
+    monkeypatch.setattr(web_app, "DB_PATH", db)
+    row = {
+        "timestamp": "2026-07-22 15:00",
+        "overall": 20.0,
+        "index_vix": 21.0,
+        "blue_chip": 19.0,
+        "sz_growth": 23.0,
+        "mid_small": 24.0,
+        "hard_tech": 26.0,
+        "n_instruments": 12,
+        "expected_instruments": 12,
+    }
+    upsert_points([row], resolution="5m", source="test", db_path=db)
+
+    class FixedDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            value = cls(2026, 7, 23, 17, 30, tzinfo=ZoneInfo("Asia/Shanghai"))
+            return value if tz is None else value.astimezone(tz)
+
+    monkeypatch.setattr(web_app, "datetime", FixedDateTime)
+    payload = TestClient(web_app.app).get("/api/status").json()
+    assert payload["state"] == "STALE"
+    assert payload["quality"] == "STALE"

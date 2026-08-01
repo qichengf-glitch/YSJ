@@ -19,6 +19,10 @@ DEFAULT_DB_PATH = PACKAGE_ROOT / "data" / "live_vix.sqlite"
 
 VIX_COLUMNS = ["overall", *GROUPS.keys()]
 SPREAD_COLUMNS = [f"spread_{gid}_overall" for gid in GROUPS]
+PUBLISHED_POINT_SQL = "(" + " AND ".join(
+    [f"{name} IS NOT NULL" for name in VIX_COLUMNS]
+    + ["(expected_instruments IS NULL OR n_instruments >= expected_instruments)"]
+) + ")"
 DIAGNOSTIC_COLUMNS = [
     "n_instruments",
     "dq_flags",
@@ -257,9 +261,10 @@ def query_series(
     with connect(db_path) as conn:
         if resolution == "5m":
             dates = conn.execute(
-                """
+                f"""
                 SELECT DISTINCT substr(timestamp, 1, 10) AS day
                 FROM vix_points WHERE resolution='5m'
+                  AND {PUBLISHED_POINT_SQL}
                 ORDER BY day DESC LIMIT ?
                 """,
                 (int(trading_days),),
@@ -268,16 +273,17 @@ def query_series(
                 return []
             start_day = min(row["day"] for row in dates)
             rows = conn.execute(
-                """
+                f"""
                 SELECT * FROM vix_points
                 WHERE resolution='5m' AND timestamp >= ?
+                  AND {PUBLISHED_POINT_SQL}
                 ORDER BY timestamp
                 """,
                 (f"{start_day} 00:00:00",),
             ).fetchall()
         elif resolution == "halfday":
             latest = conn.execute(
-                "SELECT max(timestamp) AS ts FROM vix_points WHERE resolution='halfday'"
+                f"SELECT max(timestamp) AS ts FROM vix_points WHERE resolution='halfday' AND {PUBLISHED_POINT_SQL}"
             ).fetchone()["ts"]
             if latest is None:
                 return []
@@ -292,9 +298,10 @@ def query_series(
                     "%Y-%m-%d 00:00:00"
                 )
             rows = conn.execute(
-                """
+                f"""
                 SELECT * FROM vix_points
                 WHERE resolution='halfday' AND timestamp >= ?
+                  AND {PUBLISHED_POINT_SQL}
                 ORDER BY timestamp
                 """,
                 (start,),
@@ -321,7 +328,7 @@ def moving_average_snapshot(
             f"""
             SELECT timestamp, {','.join(VIX_COLUMNS)}
             FROM vix_points
-            WHERE resolution='halfday'
+            WHERE resolution='halfday' AND {PUBLISHED_POINT_SQL}
             ORDER BY timestamp
             """
         ).fetchall()
@@ -385,14 +392,19 @@ def moving_average_snapshot(
 
 
 def latest_by_resolution(
-    resolution: str, db_path: str | Path = DEFAULT_DB_PATH
+    resolution: str,
+    db_path: str | Path = DEFAULT_DB_PATH,
+    *,
+    published_only: bool = True,
 ) -> dict | None:
     initialise(db_path)
+    quality_clause = f" AND {PUBLISHED_POINT_SQL}" if published_only else ""
     with connect(db_path) as conn:
         row = conn.execute(
-            """
+            f"""
             SELECT * FROM vix_points
-            WHERE resolution=? ORDER BY timestamp DESC LIMIT 1
+            WHERE resolution=?{quality_clause}
+            ORDER BY timestamp DESC LIMIT 1
             """,
             (resolution,),
         ).fetchone()
@@ -400,18 +412,42 @@ def latest_by_resolution(
 
 
 def previous_by_resolution(
-    resolution: str, db_path: str | Path = DEFAULT_DB_PATH
+    resolution: str,
+    db_path: str | Path = DEFAULT_DB_PATH,
+    *,
+    published_only: bool = True,
 ) -> dict | None:
     initialise(db_path)
+    quality_clause = f" AND {PUBLISHED_POINT_SQL}" if published_only else ""
     with connect(db_path) as conn:
         row = conn.execute(
-            """
+            f"""
             SELECT * FROM vix_points
-            WHERE resolution=? ORDER BY timestamp DESC LIMIT 1 OFFSET 1
+            WHERE resolution=?{quality_clause}
+            ORDER BY timestamp DESC LIMIT 1 OFFSET 1
             """,
             (resolution,),
         ).fetchone()
     return dict(row) if row is not None else None
+
+
+def is_publishable_point(row: Mapping) -> bool:
+    """Require all six VIX chains and complete instrument coverage."""
+    expected = row.get("expected_instruments")
+    observed = row.get("n_instruments")
+    if expected is not None and (observed is None or int(observed) < int(expected)):
+        return False
+    return all(_clean_number(row.get(name)) is not None for name in VIX_COLUMNS)
+
+
+def delete_unpublishable_points(
+    *, db_path: str | Path = DEFAULT_DB_PATH
+) -> int:
+    """Delete partial points after the caller has backed up the database."""
+    initialise(db_path)
+    with connect(db_path) as conn:
+        cursor = conn.execute(f"DELETE FROM vix_points WHERE NOT {PUBLISHED_POINT_SQL}")
+        return int(cursor.rowcount or 0)
 
 
 def log_event(
@@ -427,6 +463,20 @@ def log_event(
             "INSERT INTO collector_events(event_time, level, event, details) VALUES (?,?,?,?)",
             (_timestamp_text(datetime.now()), level, event, details),
         )
+
+
+def latest_collector_event(db_path: str | Path = DEFAULT_DB_PATH) -> dict | None:
+    """Return the latest collector event for operational diagnostics."""
+    initialise(db_path)
+    with connect(db_path) as conn:
+        row = conn.execute(
+            """
+            SELECT event_time, level, event, details
+            FROM collector_events
+            ORDER BY id DESC LIMIT 1
+            """
+        ).fetchone()
+    return dict(row) if row is not None else None
 
 
 def database_summary(db_path: str | Path = DEFAULT_DB_PATH) -> dict:

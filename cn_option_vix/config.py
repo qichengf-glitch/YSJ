@@ -9,11 +9,16 @@ RQDATAC_URI = os.environ.get("RQDATA_URI") or os.environ.get("RQDATAC_URI")
 
 def require_rqdata_uri():
     """Return the configured RQData URI or raise a clear configuration error."""
-    uri = os.environ.get("RQDATA_URI") or os.environ.get("RQDATAC_URI") or RQDATAC_URI
-    if not uri:
+    raw_uri = os.environ.get("RQDATA_URI") or os.environ.get("RQDATAC_URI") or RQDATAC_URI
+    if not raw_uri:
         raise RuntimeError(
             "RQData URI is not configured. Run: export RQDATA_URI='tcp://...'"
         )
+    uri = raw_uri.strip()
+    if len(uri) >= 2 and uri[0] == uri[-1] and uri[0] in {"'", '"'}:
+        uri = uri[1:-1].strip()
+    if not uri.startswith("tcp://"):
+        raise RuntimeError("RQData URI must start with tcp://")
     return uri
 
 # --- The 12 financial-option instruments (option product code, exchange, underlying, group) ---
