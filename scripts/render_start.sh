@@ -20,7 +20,7 @@ export CN_VIX_DB="${CN_VIX_DB:-$DATA_DIR/live_vix.sqlite}"
 export CN_VIX_RQ_LOCK="${CN_VIX_RQ_LOCK:-$DATA_DIR/cn_vix_rqdata.lock}"
 export MARKET_RADAR_BACKEND_URL="${MARKET_RADAR_BACKEND_URL:-http://127.0.0.1:8000}"
 export CN_VIX_BACKEND_URL="${CN_VIX_BACKEND_URL:-http://127.0.0.1:8765}"
-export VIX_DASHBOARD_PUBLIC_URL="${VIX_DASHBOARD_PUBLIC_URL:-/api/cn-option-vix-dashboard/}"
+export VIX_DASHBOARD_PUBLIC_URL="${VIX_DASHBOARD_PUBLIC_URL:-/api/cn-option-vix-dashboard/index.html}"
 export DASHBOARD_HOST="${DASHBOARD_HOST:-127.0.0.1}"
 export DASHBOARD_PORT="${DASHBOARD_PORT:-8765}"
 
