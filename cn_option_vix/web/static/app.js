@@ -34,8 +34,15 @@
     return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
   };
 
+  const CN_VIX_API_PROXY_PREFIX = window.location.pathname.startsWith('/api/cn-option-vix-dashboard')
+    ? '/api/cn-option-vix-dashboard'
+    : '';
+
   async function api(path) {
-    const res = await fetch(path, { cache: 'no-store' });
+    const proxiedPath = path.startsWith('/api/')
+      ? `${CN_VIX_API_PROXY_PREFIX}${path}`
+      : path;
+    const res = await fetch(proxiedPath, { cache: 'no-store' });
     if (!res.ok) throw new Error(`${path}: ${res.status}`);
     return res.json();
   }
