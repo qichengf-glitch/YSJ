@@ -22,7 +22,8 @@ async function proxyToVixBackend(request: NextRequest, context: RouteContext) {
     );
   }
 
-  const path = context.params.path?.join("/") ?? "";
+  const rawPath = context.params.path?.join("/") ?? "";
+  const path = rawPath === "index.html" ? "" : rawPath;
   const incomingUrl = new URL(request.url);
   const targetUrl = new URL(`/${path}${incomingUrl.search}`, BACKEND_URL);
   const headers = new Headers(request.headers);
