@@ -218,7 +218,28 @@ def latest():
 
 @app.get("/api/status")
 def status():
-    return _status_payload()
+    try:
+        return _status_payload()
+    except Exception as exc:
+        now = datetime.now(TZ)
+        return {
+            "now": now.isoformat(),
+            "state": "ERROR",
+            "market_session": "UNKNOWN",
+            "last_5m": None,
+            "last_halfday": None,
+            "next_5m": None,
+            "next_halfday": None,
+            "age_minutes": None,
+            "quality": "ERROR",
+            "valid_instruments": None,
+            "expected_instruments": len(ROSTER),
+            "valid_contracts": None,
+            "missing_quotes": None,
+            "provider_timestamp": None,
+            "calculated_at": None,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
 
 
 @app.get("/api/quality")

@@ -44,20 +44,21 @@ def connect(db_path: str | Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
 
 
 def initialise(db_path: str | Path = DEFAULT_DB_PATH) -> None:
-    columns = ",\n".join(
-        [f"{name} REAL" for name in [*VIX_COLUMNS, *SPREAD_COLUMNS]]
+    column_specs = (
+        [(name, "REAL") for name in [*VIX_COLUMNS, *SPREAD_COLUMNS]]
         + [
-            "n_instruments INTEGER",
-            "dq_flags INTEGER",
-            "expected_instruments INTEGER",
-            "missing_instruments INTEGER",
-            "valid_contracts INTEGER",
-            "missing_quotes INTEGER",
-            "provider_timestamp TEXT",
-            "calculated_at TEXT NOT NULL",
-            "quota_bytes_used INTEGER",
+            ("n_instruments", "INTEGER"),
+            ("dq_flags", "INTEGER"),
+            ("expected_instruments", "INTEGER"),
+            ("missing_instruments", "INTEGER"),
+            ("valid_contracts", "INTEGER"),
+            ("missing_quotes", "INTEGER"),
+            ("provider_timestamp", "TEXT"),
+            ("calculated_at", "TEXT"),
+            ("quota_bytes_used", "INTEGER"),
         ]
     )
+    columns = ",\n".join(f"{name} {spec}" for name, spec in column_specs)
     with connect(db_path) as conn:
         conn.executescript(
             f"""
@@ -81,6 +82,13 @@ def initialise(db_path: str | Path = DEFAULT_DB_PATH) -> None:
             );
             """
         )
+        existing = {
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(vix_points)").fetchall()
+        }
+        for name, spec in column_specs:
+            if name not in existing:
+                conn.execute(f"ALTER TABLE vix_points ADD COLUMN {name} {spec}")
 
 
 def _clean_number(value):
