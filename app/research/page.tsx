@@ -2,38 +2,48 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import Section from "@/components/Section";
+import { ArrowRight, BookOpen, LineChart, MessageSquareText, ShieldCheck } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { ChevronRight } from "lucide-react";
 
 const content = {
   en: {
+    eyebrow: "Research",
     title: "Research Hub",
-    intro: "Curated research, ongoing theses, and market insights to support informed investment decisions.",
+    intro:
+      "A structured home for published work, developing theses, and market intelligence. Follow the evidence from first principles to active observation.",
+    standards: [
+      ["Independent", "Clear assumptions and conclusions without product-driven incentives."],
+      ["Evidence-led", "Data, methodology, and limitations remain visible throughout the work."],
+      ["Open to revision", "Theses evolve as new evidence changes the balance of probabilities."],
+    ],
+    explore: "Explore section",
     blocks: [
       {
         href: "/research/theoretical-research",
+        kicker: "Published work",
         title: "Theoretical Research",
         intro:
-          "Our theoretical research explores fundamental questions in finance, economics, and market behavior. Academic papers and conceptual frameworks that underpin systematic strategies.",
+          "Papers and conceptual frameworks on finance, economics, portfolio construction, and market behavior.",
         image:
           "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1400&q=80",
         alt: "Analyst notes and documents for financial research",
       },
       {
         href: "/research/ongoing-thesis",
+        kicker: "Work in progress",
         title: "Ongoing Thesis",
         intro:
-          "Current research projects and investment theses under development. Community-driven theses, frameworks, and ongoing debates around markets, macro, and specific trade structures.",
+          "Developing investment theses, research questions, and community discussion around markets and trade structures.",
         image:
           "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1400&q=80",
-        alt: "Research team reviewing thesis drafts and charts",
+        alt: "Researcher reviewing thesis drafts and charts",
       },
       {
         href: "/research/market-data",
-        title: "General Market Data & Our Picks",
+        kicker: "Market intelligence",
+        title: "Market Data & Our Picks",
         intro:
-          "Curated market data, analysis, and selected opportunities we're monitoring. World indices, key signals, and a rotating set of YSJ Lab watchlist ideas.",
+          "Global indices, selected signals, and a focused watchlist of opportunities under active observation.",
         image:
           "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?auto=format&fit=crop&w=1400&q=80",
         alt: "Market dashboard displaying multi-asset data",
@@ -41,32 +51,40 @@ const content = {
     ],
   },
   zh: {
+    eyebrow: "研究",
     title: "研究中心",
-    intro: "精选研究、进行中的主题与市场洞察，为投资决策提供支持。",
+    intro:
+      "汇集已发布成果、进行中的投资主题与市场情报。从第一性原理出发，沿着证据走向持续观察。",
+    standards: [
+      ["保持独立", "清晰呈现假设与结论，不受产品销售目标影响。"],
+      ["证据驱动", "在研究过程中明确展示数据、方法与局限性。"],
+      ["持续修正", "当新证据改变概率判断时，及时调整投资主题。"],
+    ],
+    explore: "进入板块",
     blocks: [
       {
         href: "/research/theoretical-research",
+        kicker: "已发布成果",
         title: "理论研究",
-        intro:
-          "我们的理论研究探索金融、经济学和市场行为中的基本问题。支撑系统化策略的学术论文与概念框架。",
+        intro: "围绕金融、经济学、组合构建与市场行为的论文和概念框架。",
         image:
           "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1400&q=80",
         alt: "金融研究与文档资料",
       },
       {
         href: "/research/ongoing-thesis",
+        kicker: "研究进行中",
         title: "进行中的研究",
-        intro:
-          "当前的研究项目和正在开发的投资主题。社区驱动的主题、框架以及围绕市场、宏观和具体交易结构的持续讨论。",
+        intro: "持续发展的投资主题、研究问题，以及围绕市场和交易结构的社区讨论。",
         image:
           "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1400&q=80",
-        alt: "研究团队讨论进行中的课题",
+        alt: "研究人员查看课题草稿和图表",
       },
       {
         href: "/research/market-data",
+        kicker: "市场情报",
         title: "市场数据与我们的选择",
-        intro:
-          "精选的市场数据、分析和我们正在关注的机会。全球指数、关键信号以及 YSJ Lab 观察清单。",
+        intro: "全球指数、精选信号，以及正在持续观察的重点机会清单。",
         image:
           "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?auto=format&fit=crop&w=1400&q=80",
         alt: "多资产市场数据看板",
@@ -75,53 +93,82 @@ const content = {
   },
 };
 
+const standardIcons = [ShieldCheck, LineChart, MessageSquareText];
+const blockIcons = [BookOpen, MessageSquareText, LineChart];
+
 export default function ResearchPage() {
   const { language } = useLanguage();
   const t = content[language];
 
   return (
-    <main className="min-h-screen">
-      <Section className="pt-4 pb-12 sm:pt-5 sm:pb-14">
-        <div className="mx-auto max-w-7xl">
-          <h1 className="font-playfair text-4xl sm:text-5xl lg:text-6xl font-normal text-gray-900 mb-6 text-center tracking-tight">
-            {t.title}
-          </h1>
-          <p className="text-xl text-gray-600 mb-10 sm:mb-14 max-w-2xl mx-auto text-center leading-relaxed">
-            {t.intro}
-          </p>
+    <main className="min-h-screen bg-white text-[#18233A]">
+      <section className="border-b border-[#E7ECF5] bg-[#F8FAFC] px-6 py-12 sm:px-8 lg:px-12">
+        <div className="mx-auto grid max-w-7xl gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
+          <div>
+            <p className="text-sm font-bold uppercase text-[#4F63F6]">{t.eyebrow}</p>
+            <h1 className="mt-3 text-4xl font-black leading-tight text-[#18233A] sm:text-5xl">
+              {t.title}
+            </h1>
+            <p className="mt-5 max-w-xl text-lg leading-8 text-[#5B6780]">{t.intro}</p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {t.blocks.map((block) => (
+          <div className="grid gap-5 border-t border-[#DCE3EF] pt-7 sm:grid-cols-3 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+            {t.standards.map(([title, text], index) => {
+              const Icon = standardIcons[index];
+              return (
+                <div key={title}>
+                  <Icon className="h-5 w-5 text-[#4F63F6]" />
+                  <h2 className="mt-3 text-sm font-bold text-[#18233A]">{title}</h2>
+                  <p className="mt-1 text-sm leading-6 text-[#5B6780]">{text}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 py-14 sm:px-8 lg:px-12 lg:py-16">
+        <div className="mx-auto grid max-w-7xl gap-6 md:grid-cols-3">
+          {t.blocks.map((block, index) => {
+            const Icon = blockIcons[index];
+            return (
               <Link
                 key={block.href}
                 href={block.href}
-                className="group flex flex-col overflow-hidden rounded-2xl bg-[#f7fbff] border border-slate-200 shadow-[0_10px_28px_rgba(15,23,42,0.06)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(15,23,42,0.11)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+                className="group flex min-h-[470px] flex-col overflow-hidden rounded-lg border border-[#E7ECF5] bg-white shadow-[0_12px_30px_rgba(39,59,154,0.06)] transition hover:-translate-y-1 hover:border-[#A8B2FF] hover:shadow-[0_20px_40px_rgba(39,59,154,0.11)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#4F63F6]"
               >
-                <div className="relative aspect-[16/9] overflow-hidden">
+                <div className="relative aspect-[16/10] overflow-hidden bg-[#F3F5F9]">
                   <Image
                     src={block.image}
                     alt={block.alt}
                     fill
-                    sizes="(min-width: 1024px) 33vw, 100vw"
-                    className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover transition duration-300 group-hover:scale-[1.025]"
                   />
+                  <div className="absolute inset-x-0 bottom-0 h-16 bg-[linear-gradient(180deg,transparent,rgba(24,35,58,0.42))]" />
                 </div>
-                <div className="flex flex-1 items-start justify-between gap-3 p-6">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-2xl font-semibold text-gray-900 group-hover:text-primary transition-colors">
-                      {block.title}
-                    </h2>
-                    <p className="mt-3 text-lg text-gray-600 leading-relaxed">
-                      {block.intro}
-                    </p>
+
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase text-[#4F63F6]">
+                      {block.kicker}
+                    </span>
+                    <Icon className="h-5 w-5 text-[#778195]" />
                   </div>
-                  <ChevronRight className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                  <h2 className="mt-5 text-2xl font-black leading-tight text-[#18233A]">
+                    {block.title}
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-[#5B6780]">{block.intro}</p>
+                  <span className="mt-auto inline-flex items-center border-t border-[#E7ECF5] pt-5 text-sm font-bold text-[#273B9A]">
+                    {t.explore}
+                    <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" />
+                  </span>
                 </div>
               </Link>
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </Section>
+      </section>
     </main>
   );
 }
