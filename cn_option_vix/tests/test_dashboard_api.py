@@ -62,12 +62,32 @@ def test_dashboard_api_exposes_averages_and_ytd(tmp_path, monkeypatch):
     assert averages.status_code == 200
     payload = averages.json()
     assert len(payload["rows"]) == 6
-    assert payload["rows"][0]["count_30"] == 30
+    assert payload["windows"] == [20, 60]
+    assert payload["rows"][0]["count_20"] == 20
+    assert payload["rows"][0]["variance_20"] is not None
     assert payload["rows"][0]["count_60"] == 60
+    hard = next(row for row in payload["rows"] if row["key"] == "hard_tech")
+    assert hard["latest_spread"] == 6.0
+    assert hard["spread_count_20"] == 20
+    assert hard["spread_std_20"] == 0.0
+    assert hard["spread_variance_20"] == 0.0
 
     halfday = client.get("/api/series", params={"resolution": "halfday"})
     assert halfday.status_code == 200
     assert halfday.json()["points"][0]["timestamp"].startswith("2026-")
+
+
+def test_dashboard_page_exposes_relative_statistics_panels(tmp_path, monkeypatch):
+    monkeypatch.setattr(web_app, "DB_PATH", tmp_path / "live.sqlite")
+    page = TestClient(web_app.app).get("/")
+
+    assert page.status_code == 200
+    assert "styles.css?v=20260805-relative-statistics-v1" in page.text
+    assert "app.js?v=20260805-relative-statistics-v1" in page.text
+    assert 'id="relativeRows"' in page.text
+    assert 'id="levelGrid"' in page.text
+    assert "20D relative spread" in page.text
+    assert "20D / 60D VIX Level Context" in page.text
 
 
 def test_status_marks_old_weekday_data_stale_after_market_close(tmp_path, monkeypatch):

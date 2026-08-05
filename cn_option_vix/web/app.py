@@ -44,9 +44,9 @@ LABELS = {
     "hard_tech": "Hard Tech",
 }
 
-BUILD_ID = "20260723-auto-catchup-v5"
+BUILD_ID = "20260805-relative-statistics-v1"
 
-app = FastAPI(title="China Option Volatility Monitor", version="1.3.0")
+app = FastAPI(title="China Option Volatility Monitor", version="1.4.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
@@ -219,7 +219,7 @@ def series(
 
 @app.get("/api/averages")
 def averages():
-    payload = moving_average_snapshot(db_path=DB_PATH, windows=(30, 60))
+    payload = moving_average_snapshot(db_path=DB_PATH, windows=(20, 60))
     for row in payload["rows"]:
         row["label"] = LABELS[row["key"]]
         row["color"] = COLORS[row["key"]]

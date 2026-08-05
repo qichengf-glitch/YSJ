@@ -314,13 +314,14 @@ def query_series(
 def moving_average_snapshot(
     *,
     db_path: str | Path = DEFAULT_DB_PATH,
-    windows: tuple[int, ...] = (30, 60),
+    windows: tuple[int, ...] = (20, 60),
 ) -> dict:
-    """Compute trading-day averages for all six published VIX chains.
+    """Compute VIX-level and relative-spread statistics for the dashboard.
 
-    One observation per trading date is used: the latest available half-day
-    point for that date (normally 15:00, or 11:30 while the current session is
-    still open). This avoids weighting every completed date twice.
+    The VIX calculation itself is untouched. Statistics use one published
+    half-day observation per trading date, while current values come from the
+    latest complete five-minute observation. Standard deviation and variance
+    use the sample definition (``ddof=1``).
     """
     initialise(db_path)
     with connect(db_path) as conn:
@@ -332,14 +333,21 @@ def moving_average_snapshot(
             ORDER BY timestamp
             """
         ).fetchall()
+    empty_payload = {
+        "asof": None,
+        "basis": "latest half-day observation per trading date",
+        "latest_basis": "latest complete five-minute observation",
+        "variance_method": "sample variance (ddof=1)",
+        "variance_unit": "VIX points squared",
+        "spread_definition": "sector VIX minus Overall VIX at the same timestamp",
+        "spread_standard_deviation_unit": "VIX points",
+        "spread_variance_unit": "VIX points squared",
+        "available_trading_days": 0,
+        "windows": list(windows),
+        "rows": [],
+    }
     if not rows:
-        return {
-            "asof": None,
-            "basis": "latest half-day observation per trading date",
-            "available_trading_days": 0,
-            "windows": list(windows),
-            "rows": [],
-        }
+        return empty_payload
 
     frame = pd.DataFrame([dict(row) for row in rows])
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], errors="raise")
@@ -351,44 +359,87 @@ def moving_average_snapshot(
         .sort_values("timestamp")
         .reset_index(drop=True)
     )
-    latest_live = latest_by_resolution("5m", db_path)
+    latest_live = latest_by_resolution("5m", db_path, published_only=True)
     latest_halfday = daily.iloc[-1].to_dict()
     latest_source = latest_live or latest_halfday
 
     output_rows = []
     for name in VIX_COLUMNS:
-        series = pd.to_numeric(daily[name], errors="coerce").dropna()
         latest_value = _clean_number(latest_source.get(name))
         if latest_value is None:
             latest_value = _clean_number(latest_halfday.get(name))
+
+        latest_spread = None
+        if name != "overall":
+            spread_key = f"spread_{name}_overall"
+            latest_spread = _clean_number(latest_source.get(spread_key))
+            if latest_spread is None:
+                latest_overall = _clean_number(latest_source.get("overall"))
+                if latest_value is not None and latest_overall is not None:
+                    latest_spread = latest_value - latest_overall
+
         item = {
             "key": name,
             "latest": latest_value,
+            "latest_spread": latest_spread,
         }
         for window in windows:
-            sample = series.tail(int(window))
-            avg = float(sample.mean()) if not sample.empty else None
+            window = int(window)
+            daily_window = daily.tail(window)
+            level_sample = pd.to_numeric(
+                daily_window[name], errors="coerce"
+            ).dropna()
+            avg = float(level_sample.mean()) if not level_sample.empty else None
             item[f"avg_{window}"] = avg
-            item[f"count_{window}"] = int(sample.size)
-            latest_value = item["latest"]
+            item[f"variance_{window}"] = (
+                float(level_sample.var(ddof=1)) if level_sample.size >= 2 else None
+            )
+            item[f"count_{window}"] = int(level_sample.size)
             item[f"vs_avg_{window}"] = (
                 latest_value - avg
                 if latest_value is not None and avg is not None
                 else None
             )
+
+            if name == "overall":
+                item[f"spread_mean_{window}"] = None
+                item[f"spread_std_{window}"] = None
+                item[f"spread_variance_{window}"] = None
+                item[f"spread_count_{window}"] = 0
+            else:
+                spread_sample = (
+                    pd.to_numeric(daily_window[name], errors="coerce")
+                    - pd.to_numeric(daily_window["overall"], errors="coerce")
+                ).dropna()
+                item[f"spread_mean_{window}"] = (
+                    float(spread_sample.mean()) if not spread_sample.empty else None
+                )
+                item[f"spread_std_{window}"] = (
+                    float(spread_sample.std(ddof=1))
+                    if spread_sample.size >= 2
+                    else None
+                )
+                item[f"spread_variance_{window}"] = (
+                    float(spread_sample.var(ddof=1))
+                    if spread_sample.size >= 2
+                    else None
+                )
+                item[f"spread_count_{window}"] = int(spread_sample.size)
         output_rows.append(item)
 
-    return {
-        "asof": (
-            _timestamp_text(latest_source.get("timestamp"))
-            if latest_source.get("timestamp") is not None
-            else None
-        ),
-        "basis": "latest available half-day observation per trading date",
-        "available_trading_days": int(len(daily)),
-        "windows": list(windows),
-        "rows": output_rows,
-    }
+    payload = dict(empty_payload)
+    payload.update(
+        {
+            "asof": (
+                _timestamp_text(latest_source.get("timestamp"))
+                if latest_source.get("timestamp") is not None
+                else None
+            ),
+            "available_trading_days": int(len(daily)),
+            "rows": output_rows,
+        }
+    )
+    return payload
 
 
 def latest_by_resolution(

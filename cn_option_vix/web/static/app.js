@@ -11,9 +11,14 @@
   };
 
   const $ = (id) => document.getElementById(id);
-  const fmt = (v, digits = 2) => v == null || Number.isNaN(Number(v)) ? '—' : Number(v).toFixed(digits);
-  const signed = (v) => v == null || Number.isNaN(Number(v)) ? '—' : `${v >= 0 ? '+' : ''}${Number(v).toFixed(2)}`;
-  const signClass = (v) => v == null ? '' : Number(v) >= 0 ? 'positive' : 'negative';
+  const finiteValue = (v) => {
+    if (v == null || v === '') return null;
+    const number = Number(v);
+    return Number.isFinite(number) ? number : null;
+  };
+  const fmt = (v, digits = 2) => { const number = finiteValue(v); return number == null ? '—' : number.toFixed(digits); };
+  const signed = (v) => { const number = finiteValue(v); return number == null ? '—' : `${number >= 0 ? '+' : ''}${number.toFixed(2)}`; };
+  const signClass = (v) => { const number = finiteValue(v); return number == null ? '' : number >= 0 ? 'positive' : 'negative'; };
   const parseLocal = (text) => text ? new Date(text.replace(' ', 'T') + '+08:00') : null;
   const dateLabel = (text) => {
     if (!text) return '—';
@@ -72,25 +77,93 @@
   function renderAverages(payload) {
     $('averageAsOf').textContent = `As of ${fullDateTime(payload.asof)}`;
     $('averageCoverage').textContent = `${payload.available_trading_days ?? 0} trading days`;
-    const body = $('averageRows');
+    const relativeBody = $('relativeRows');
+    const levelGrid = $('levelGrid');
     if (!payload.rows || !payload.rows.length) {
-      body.innerHTML = '<tr><td colspan="7" class="table-loading">No half-day history available.</td></tr>';
+      relativeBody.innerHTML = '<tr><td colspan="4" class="table-loading">No half-day history available.</td></tr>';
+      levelGrid.innerHTML = '<div class="level-loading">No VIX level history available.</div>';
       return;
     }
-    body.innerHTML = payload.rows.map(row => {
-      const regimeDelta = row.avg_30 == null || row.avg_60 == null ? null : Number(row.avg_30) - Number(row.avg_60);
-      const regimeClass = regimeDelta == null || Math.abs(regimeDelta) < 0.10 ? 'neutral' : regimeDelta > 0 ? 'rising' : 'cooling';
-      const regimeText = regimeClass === 'rising' ? 'RISING' : regimeClass === 'cooling' ? 'COOLING' : 'NEUTRAL';
+
+    const regimeFor = (row) => {
+      const avg20 = finiteValue(row.avg_20);
+      const avg60 = finiteValue(row.avg_60);
+      const delta = avg20 == null || avg60 == null ? null : avg20 - avg60;
+      if (delta == null || Math.abs(delta) < 0.10) return { className: 'neutral', text: 'NEUTRAL' };
+      return delta > 0
+        ? { className: 'rising', text: 'RISING' }
+        : { className: 'cooling', text: 'COOLING' };
+    };
+
+    const relativeWindow = (row, window) => {
+      if (row.key === 'overall') {
+        return `
+          <div class="relative-benchmark">
+            <strong>Benchmark</strong>
+            <span>Sector - Overall is not applicable</span>
+          </div>`;
+      }
+      const count = row[`spread_count_${window}`] ?? 0;
+      const mean = row[`spread_mean_${window}`];
+      return `
+        <div class="relative-window">
+          <div class="relative-metric relative-mean">
+            <span>Mean</span>
+            <strong class="${signClass(mean)}">${signed(mean)}</strong>
+          </div>
+          <div class="relative-metric">
+            <span>SD</span>
+            <strong>${fmt(row[`spread_std_${window}`])}</strong>
+          </div>
+          <div class="relative-metric">
+            <span>Var</span>
+            <strong>${fmt(row[`spread_variance_${window}`])}</strong>
+          </div>
+          <small>n=${count}</small>
+        </div>`;
+    };
+
+    relativeBody.innerHTML = payload.rows.map(row => {
+      const regime = regimeFor(row);
+      const currentRelative = row.key === 'overall'
+        ? '<div class="current-relative benchmark-label">Benchmark</div>'
+        : `<div class="current-relative"><span>vs Overall</span><strong class="${signClass(row.latest_spread)}">${signed(row.latest_spread)}</strong></div>`;
       return `<tr>
-        <td><span class="average-series" style="--series-color:${row.color}"><span class="average-series-dot"></span>${row.label}</span></td>
-        <td><span class="average-number">${fmt(row.latest)}</span></td>
-        <td>${fmt(row.avg_30)}</td>
-        <td><span class="average-delta ${signClass(row.vs_avg_30)}">${signed(row.vs_avg_30)}</span></td>
-        <td>${fmt(row.avg_60)}</td>
-        <td><span class="average-delta ${signClass(row.vs_avg_60)}">${signed(row.vs_avg_60)}</span></td>
-        <td><span class="regime-chip ${regimeClass}">${regimeText}</span></td>
+        <td>
+          <div class="chain-cell">
+            <span class="average-series" style="--series-color:${row.color}"><span class="average-series-dot"></span>${row.label}</span>
+            <span class="regime-chip ${regime.className}">${regime.text}</span>
+          </div>
+        </td>
+        <td>
+          <div class="current-cell">
+            <strong class="current-vix">${fmt(row.latest)}</strong>
+            ${currentRelative}
+          </div>
+        </td>
+        <td>${relativeWindow(row, 20)}</td>
+        <td>${relativeWindow(row, 60)}</td>
       </tr>`;
     }).join('');
+
+    const levelWindow = (row, window) => `
+      <div class="level-window">
+        <div class="level-window-title">${window}D</div>
+        <div class="level-stat"><span>Average</span><strong>${fmt(row[`avg_${window}`])}</strong></div>
+        <div class="level-stat"><span>Delta vs Avg</span><strong class="${signClass(row[`vs_avg_${window}`])}">${signed(row[`vs_avg_${window}`])}</strong></div>
+        <div class="level-stat"><span>Variance</span><strong>${fmt(row[`variance_${window}`])}</strong></div>
+      </div>`;
+
+    levelGrid.innerHTML = payload.rows.map(row => `
+      <article class="level-mini-card" style="--series-color:${row.color}">
+        <div class="level-mini-head">
+          <span class="average-series"><span class="average-series-dot"></span>${row.label}</span>
+        </div>
+        <div class="level-window-grid">
+          ${levelWindow(row, 20)}
+          ${levelWindow(row, 60)}
+        </div>
+      </article>`).join('');
   }
 
   function createToolbar(element, terminal) {
@@ -504,6 +577,8 @@
   async function init() {
     if (!window.LightweightCharts) throw new Error('Lightweight Charts failed to load');
     state.config = await api('/api/config');
+    const build = $('buildId');
+    if (build) build.textContent = `Build: ${state.config.build_id}`;
     state.terminals.five = makeTerminal({ resolution: '5m', chartId: 'chart5m', legendId: 'legend5m', tooltipId: 'tooltip5m', labelsId: 'paneLabels5m', emptyId: 'empty5m', toggleId: 'viewToggle5m', noteId: 'displayNote5m' });
     state.terminals.half = makeTerminal({ resolution: 'halfday', chartId: 'chartHalfday', legendId: 'legendHalfday', tooltipId: 'tooltipHalfday', labelsId: 'paneLabelsHalfday', emptyId: 'emptyHalfday', toggleId: 'viewToggleHalfday', noteId: 'displayNoteHalfday' });
     await refresh();

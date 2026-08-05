@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>China Option Volatility Monitor</title>
   <meta name="description" content="Live multi-index option volatility monitoring terminal" />
-  <link rel="stylesheet" href="static/styles.css" />
+  <link rel="stylesheet" href="static/styles.css?v=20260805-relative-statistics-v1" />
   <script src="https://unpkg.com/lightweight-charts@5.2.0/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
@@ -28,20 +28,48 @@
     <main>
       <section id="metricCards" class="metric-grid" aria-label="Latest VIX values"></section>
 
-      <section class="average-card" aria-labelledby="averageHeading">
-        <div class="average-header">
+      <section class="relative-card" aria-labelledby="relativeHeading">
+        <div class="statistics-header">
           <div>
-            <div class="section-kicker">REGIME SNAPSHOT</div>
-            <h2 id="averageHeading">30D / 60D Trading-Day Averages</h2>
-            <p>One latest half-day observation per trading date · current value remains the live 5-minute reading</p>
+            <div class="section-kicker">PRIMARY MONITOR</div>
+            <h2 id="relativeHeading">Current &amp; Relative Spread Monitor</h2>
+            <p>Current uses the latest complete 5-minute observation. Relative spread = sector VIX - Overall VIX; 20D / 60D statistics use one matched half-day observation per trading date.</p>
           </div>
-          <div class="average-meta"><span id="averageAsOf">As of —</span><strong id="averageCoverage">— trading days</strong></div>
+          <div class="statistics-meta-stack">
+            <div class="average-meta"><span id="averageAsOf">As of —</span><strong id="averageCoverage">— trading days</strong></div>
+            <div class="sign-convention" aria-label="A-share sign convention">
+              <span class="sign-chip positive">+ Positive</span>
+              <span class="sign-chip negative">- Negative</span>
+            </div>
+          </div>
         </div>
-        <div class="average-table-wrap">
-          <table class="average-table">
-            <thead><tr><th>VIX chain</th><th>Latest</th><th>30D average</th><th>vs 30D</th><th>60D average</th><th>vs 60D</th><th>Regime</th></tr></thead>
-            <tbody id="averageRows"><tr><td colspan="7" class="table-loading">Loading moving averages…</td></tr></tbody>
+        <div class="relative-table-wrap">
+          <table class="relative-table">
+            <thead>
+              <tr>
+                <th>VIX chain<span class="th-sub">Regime</span></th>
+                <th>Current<span class="th-sub">VIX · vs Overall</span></th>
+                <th>20D relative spread<span class="th-sub">Mean · SD · Var</span></th>
+                <th>60D relative spread<span class="th-sub">Mean · SD · Var</span></th>
+              </tr>
+            </thead>
+            <tbody id="relativeRows"><tr><td colspan="4" class="table-loading">Loading current and relative-spread statistics...</td></tr></tbody>
           </table>
+        </div>
+        <div class="statistics-note"><strong>SD</strong> is sample standard deviation in VIX points; <strong>Var</strong> is sample variance in VIX points squared. Positive signed values are red and negative signed values are green under the A-share convention.</div>
+      </section>
+
+      <section class="level-card" aria-labelledby="levelHeading">
+        <div class="level-header">
+          <div>
+            <div class="section-kicker">SECONDARY CONTEXT</div>
+            <h2 id="levelHeading">20D / 60D VIX Level Context</h2>
+            <p>Absolute VIX level statistics are separated from the primary relative-spread monitor for faster reading.</p>
+          </div>
+          <span class="secondary-badge">REFERENCE PANEL</span>
+        </div>
+        <div id="levelGrid" class="level-grid">
+          <div class="level-loading">Loading VIX level statistics...</div>
         </div>
       </section>
 
@@ -100,6 +128,7 @@
       <span>Source: RQData</span>
       <span>30-day model-free VIX · OI-weighted variance aggregation</span>
       <span>Charts by <a href="https://www.tradingview.com/" target="_blank" rel="noreferrer">TradingView</a></span>
+      <span id="buildId">Build: —</span>
       <span id="footerRefresh">Browser refresh: —</span>
     </footer>
   </div>
@@ -112,6 +141,6 @@
     </div>
   </aside>
 
-  <script src="static/app.js"></script>
+  <script src="static/app.js?v=20260805-relative-statistics-v1"></script>
 </body>
 </html>
