@@ -14,8 +14,16 @@ HOST="${DASHBOARD_HOST:-127.0.0.1}"
 PORT="${DASHBOARD_PORT:-8765}"
 RESTART_SECONDS="${CN_VIX_SUPERVISOR_RESTART_SECONDS:-5}"
 RESERVE_MIB="${CN_VIX_BACKFILL_RESERVE_MIB:-64}"
-LOOKBACK_DAYS="${CN_VIX_CATCHUP_LOOKBACK_TRADING_DAYS:-10}"
+CONFIGURED_LOOKBACK_DAYS="${CN_VIX_CATCHUP_LOOKBACK_TRADING_DAYS:-10}"
+MIN_LOOKBACK_DAYS="${CN_VIX_MIN_CATCHUP_LOOKBACK_TRADING_DAYS:-18}"
+if (( CONFIGURED_LOOKBACK_DAYS < MIN_LOOKBACK_DAYS )); then
+  LOOKBACK_DAYS="$MIN_LOOKBACK_DAYS"
+else
+  LOOKBACK_DAYS="$CONFIGURED_LOOKBACK_DAYS"
+fi
 AUTO_BACKFILL="${CN_VIX_AUTO_BACKFILL:-1}"
+SEED_HISTORY="${CN_VIX_SEED_HISTORY_ON_START:-1}"
+HISTORY_PATH="${CN_VIX_HISTORY_30M:-$PACKAGE_DIR/outputs/vix_30m_2y.csv}"
 
 rotate_log() {
   local path="$1"
@@ -30,6 +38,20 @@ REPAIR_LOG="$LOG_DIR/repair.log"
 for log in "$WEB_LOG" "$COLLECTOR_LOG" "$REPAIR_LOG"; do
   rotate_log "$log"
 done
+
+seed_packaged_history_if_needed() {
+  if [[ "$SEED_HISTORY" == "0" || ! -f "$HISTORY_PATH" ]]; then
+    return
+  fi
+
+  if ! "$PY" -m cn_option_vix.pipeline.seed_packaged_history \
+    --history-30m "$HISTORY_PATH" \
+    --db "$CN_VIX_DB"; then
+    echo "warning: packaged half-day history import failed; continuing with live services" >&2
+  fi
+}
+
+seed_packaged_history_if_needed
 
 supervise() {
   local name="$1"
@@ -80,7 +102,7 @@ echo "web log: $WEB_LOG"
 # Failure is non-fatal: the live collector must still start and scheduled repair
 # will try again at the configured reconciliation times.
 if [[ "$AUTO_BACKFILL" != "0" ]]; then
-  echo "startup catch-up: enabled"
+  echo "startup catch-up: enabled (${LOOKBACK_DAYS} trading days)"
   "$PY" -m cn_option_vix.pipeline.sync_missing_5m \
     --db "$CN_VIX_DB" \
     --reserve-mib "$RESERVE_MIB" \
