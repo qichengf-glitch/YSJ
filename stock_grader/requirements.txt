@@ -1,0 +1,16 @@
+# Core -- required
+yfinance>=0.2.40
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+PyYAML>=6.0
+openpyxl>=3.1.0
+
+# Fallback scraping
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+html5lib>=1.1
+
+# Tier 3 LLM extraction -- install ONE of these (or neither, and run --no-llm)
+#anthropic>=0.40.0
+# openai>=1.50.0

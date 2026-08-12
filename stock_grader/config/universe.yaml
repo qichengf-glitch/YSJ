@@ -1,0 +1,318 @@
+# =============================================================================
+# universe.yaml -- generated from the workbook on 2026-08-03
+# =============================================================================
+# Ticker order MATCHES the workbook's block order. Do not reorder them: the
+# diff engine derives cell addresses from position (block n -> row 1+13*(n-1)).
+
+settings:
+  # SEC EDGAR requires a real contact address or it rate-limits/blocks you.
+  sec_user_agent: "Research jcappa@andrew.cmu.edu"
+  base_currency: "USD"
+
+  # Re-grade triggers
+  earnings_window_days: 5
+  fy2_move_trigger: 0.10
+  price_drawdown_trigger: -0.20
+  volume_spike_trigger: 3.0
+  max_snapshot_age_days: 100
+
+  # Tier 3 (LLM) re-extraction cadence
+  tier3_max_age_days: 400
+
+  # Peer discovery
+  max_peers: 8
+  min_peers_to_score: 3
+  peer_cache_days: 90
+
+  # LLM
+  llm_model: "claude-sonnet-4-6"
+  llm_enabled: true
+
+# -----------------------------------------------------------------------------
+# TICKERS -- archetypes pinned from the workbook's column J.
+# Add `peers: [A, B, C]` under any ticker to override automatic discovery.
+# -----------------------------------------------------------------------------
+tickers:
+
+  AAOI:                      # block 1
+    archetype: C       # C: High Growth
+
+  AAPL:                      # block 2
+    archetype: A       # A: Mature Cash Generator
+
+  ABVX:                      # block 3
+    archetype: E       # E: Early Biotech
+
+  AKAM:                      # block 4
+    archetype: A       # A: Mature Cash Generator
+
+  ALL:                      # block 5
+    archetype: F       # F: Financial Institution
+
+  ALLT:                      # block 6
+    archetype: C       # C: High Growth
+
+  ALMU:                      # block 7
+    archetype: C       # C: High Growth
+
+  AMD:                      # block 8
+    archetype: B       # B: Durable Compounder
+
+  AMZN:                      # block 9
+    archetype: B       # B: Durable Compounder
+
+  APLD:                      # block 10
+    archetype: C       # C: High Growth
+
+  APP:                      # block 11
+    archetype: B       # B: Durable Compounder
+
+  ASTS:                      # block 12
+    archetype: C       # C: High Growth
+
+  ATI:                      # block 13
+    archetype: B       # B: Durable Compounder
+
+  AU:                      # block 14
+    archetype: D       # D: Cyclical / Commodity
+
+  AVGO:                      # block 15
+    archetype: B       # B: Durable Compounder
+
+  AXTI:                      # block 16
+    archetype: C       # C: High Growth
+
+  B:                      # block 17
+    archetype: D       # D: Cyclical / Commodity
+
+  BIOA:                      # block 18
+    archetype: E       # E: Early Biotech
+
+  BZAI:                      # block 19
+    archetype: C       # C: High Growth
+
+  CIEN:                      # block 20
+    archetype: B       # B: Durable Compounder
+
+  CLS:                      # block 21
+    archetype: B       # B: Durable Compounder
+
+  COHR:                      # block 22
+    archetype: B       # B: Durable Compounder
+
+  CRDO:                      # block 23
+    archetype: B       # B: Durable Compounder
+
+  CRWV:                      # block 24
+    archetype: C       # C: High Growth
+
+  DRTS:                      # block 25
+    archetype: E       # E: Early Biotech
+
+  DY:                      # block 26
+    archetype: B       # B: Durable Compounder
+
+  ENVA:                      # block 27
+    archetype: F       # F: Financial Institution
+
+  EQX:                      # block 28
+    archetype: D       # D: Cyclical / Commodity
+
+  ET:                      # block 29
+    archetype: B       # B: Durable Compounder
+
+  FSLY:                      # block 30
+    archetype: C       # C: High Growth
+
+  GTX:                      # block 31
+    archetype: B       # B: Durable Compounder
+
+  HIMX:                      # block 32
+    archetype: D       # D: Cyclical / Commodity
+
+  HUT:                      # block 33
+    archetype: C       # C: High Growth
+
+  IBRX:                      # block 34
+    archetype: E       # E: Early Biotech
+
+  ICHR:                      # block 35
+    archetype: C       # C: High Growth
+
+  INCY:                      # block 36
+    archetype: B       # B: Durable Compounder
+
+  IONQ:                      # block 37
+    archetype: C       # C: High Growth
+
+  IREN:                      # block 38
+    archetype: C       # C: High Growth
+
+  KEYS:                      # block 39
+    archetype: B       # B: Durable Compounder
+
+  LASR:                      # block 40
+    archetype: C       # C: High Growth
+
+  LHX:                      # block 41
+    archetype: B       # B: Durable Compounder
+
+  LITE:                      # block 42
+    archetype: B       # B: Durable Compounder
+
+  LTM:                      # block 43
+    archetype: G       # G: Turnaround
+
+  LUMN:                      # block 44
+    archetype: G       # G: Turnaround
+
+  LUNR:                      # block 45
+    archetype: C       # C: High Growth
+
+  MBAI:                      # block 46
+    archetype: E       # E: Early Stage
+
+  META:                      # block 47
+    archetype: B       # B: Durable Compounder
+
+  MP:                      # block 48
+    archetype: D       # D: Cyclical / Commodity
+
+  MSFT:                      # block 49
+    archetype: B       # B: Durable Compounder
+
+  MU:                      # block 50
+    archetype: D       # D: Cyclical / Commodity
+
+  MXL:                      # block 51
+    archetype: C       # C: High Growth
+
+  NBIS:                      # block 52
+    archetype: C       # C: High Growth
+
+  NEM:                      # block 53
+    archetype: D       # D: Cyclical / Commodity
+
+  NKE:                      # block 54
+    archetype: A       # A: Mature Cash Generator
+
+  NOW:                      # block 55
+    archetype: B       # B: Durable Compounder
+
+  NUVB:                      # block 56
+    archetype: E       # E: Early Biotech
+
+  NVDA:                      # block 57
+    archetype: B       # B: Durable Compounder
+
+  NVO:                      # block 58
+    archetype: B       # B: Durable Compounder
+
+  OKE:                      # block 59
+    archetype: B       # B: Durable Compounder
+
+  ONDS:                      # block 60
+    archetype: C       # C: High Growth
+
+  ONTO:                      # block 61
+    archetype: B       # B: Durable Compounder
+
+  OXY:                      # block 62
+    archetype: D       # D: Cyclical / Commodity
+
+  PL:                      # block 63
+    archetype: C       # C: High Growth
+
+  PLTR:                      # block 64
+    archetype: B       # B: Durable Compounder
+
+  POET:                      # block 65
+    archetype: C       # C: High Growth
+
+  QBTS:                      # block 66
+    archetype: C       # C: High Growth
+
+  QCOM:                      # block 67
+    archetype: B       # B: Durable Compounder
+
+  RCAT:                      # block 68
+    archetype: C       # C: High Growth
+
+  RDDT:                      # block 69
+    archetype: B       # B: Durable Compounder
+
+  RGTI:                      # block 70
+    archetype: C       # C: High Growth
+
+  RKLB:                      # block 71
+    archetype: C       # C: High Growth
+
+  RTX:                      # block 72
+    archetype: B       # B: Durable Compounder
+
+  SANM:                      # block 73
+    archetype: B       # B: Durable Compounder
+
+  SLS:                      # block 74
+    archetype: E       # E: Early Biotech
+
+  SNDK:                      # block 75
+    archetype: D       # D: Cyclical / Commodity
+
+  SOFI:                      # block 76
+    archetype: F       # F: Financial Institution
+
+  STX:                      # block 77
+    archetype: D       # D: Cyclical / Commodity
+
+  TAYD:                      # block 78
+    archetype: B       # B: Durable Compounder
+
+  TEVA:                      # block 79
+    archetype: B       # B: Durable Compounder
+
+  TIGO:                      # block 80
+    archetype: A       # A: Mature Cash Generator
+
+  TSLA:                      # block 81
+    archetype: B       # B: Durable Compounder
+
+  TSM:                      # block 82
+    archetype: B       # B: Durable Compounder
+
+  TTMI:                      # block 83
+    archetype: B       # B: Durable Compounder
+
+  UCTT:                      # block 84
+    archetype: D       # D: Cyclical / Commodity
+
+  UNH:                      # block 85
+    archetype: B       # B: Durable Compounder
+
+  VFF:                      # block 86
+    archetype: B       # B: Durable Compounder
+
+  VIAV:                      # block 87
+    archetype: B       # B: Durable Compounder
+
+  VISN:                      # block 88
+    archetype: D       # D: Cyclical / Commodity
+
+  VRDN:                      # block 89
+    archetype: E       # E: Early Biotech
+
+  WLDN:                      # block 90
+    archetype: B       # B: Durable Compounder
+
+# -----------------------------------------------------------------------------
+# MANUAL OVERRIDES -- your judgment beats the machine and is never overwritten.
+# -----------------------------------------------------------------------------
+overrides: {}
+
+#  Example:
+#  overrides:
+#    AAOI:
+#      business_quality:
+#        score: 7
+#        note: "In-house MBE/MOCVD fab. Offset: Microsoft 28% of DC revenue."
+#        asof: "2026-01-15"

@@ -58,3 +58,13 @@ cn_option_vix/outputs/*
 !cn_option_vix/outputs/vix_30m_2y.csv
 cn_option_vix/notebooks/
 cn_option_vix/web/static/*.before_*
+
+# Stock Grader generated runtime data
+stock_grader/data/cache/
+stock_grader/data/snapshots/
+stock_grader/data/peers/
+stock_grader/data/tier3/
+stock_grader/data/grader.log
+stock_grader/data/cron.log
+stock_grader/data/reports/*
+!stock_grader/data/reports/full_scores_20260804.csv
