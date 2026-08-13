@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { ACCESS_COOKIE, verifyAccessToken } from "@/lib/access";
 
 export const dynamic = "force-dynamic";
 
@@ -9,7 +11,7 @@ type RouteContext = {
 };
 
 const BACKEND_URL =
-  process.env.MARKET_RADAR_BACKEND_URL ?? "http://127.0.0.1:8000";
+  process.env.PREDICTION_MARKET_BACKEND_URL ?? "http://127.0.0.1:8000";
 
 const corsHeaders = {
   "access-control-allow-origin": "*",
@@ -17,13 +19,24 @@ const corsHeaders = {
   "access-control-allow-headers": "content-type, authorization",
 };
 
-async function proxyToMarketRadarBackend(
+async function proxyToPredictionMarketBackend(
   request: NextRequest,
   context: RouteContext
 ) {
+  const token = cookies().get(ACCESS_COOKIE)?.value;
+  if (!verifyAccessToken(token)) {
+    return NextResponse.json(
+      { detail: "Authentication required." },
+      { status: 401, headers: corsHeaders }
+    );
+  }
+
   const path = context.params.path?.join("/") ?? "";
   const incomingUrl = new URL(request.url);
-  const targetUrl = new URL(`/api/${path}${incomingUrl.search}`, BACKEND_URL);
+  const targetUrl = new URL(
+    `/api/prediction-markets/${path}${incomingUrl.search}`,
+    BACKEND_URL
+  );
   const headers = new Headers(request.headers);
 
   headers.delete("host");
@@ -49,6 +62,7 @@ async function proxyToMarketRadarBackend(
     Object.entries(corsHeaders).forEach(([key, value]) => {
       responseHeaders.set(key, value);
     });
+    responseHeaders.set("cache-control", "no-store");
 
     return new Response(response.body, {
       status: response.status,
@@ -57,12 +71,12 @@ async function proxyToMarketRadarBackend(
     });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Market Radar backend unavailable";
+      error instanceof Error ? error.message : "Prediction Market backend unavailable";
 
     return NextResponse.json(
       {
         detail:
-          "Market Radar backend is not reachable. Start the FastAPI service in jin10_us_dashboard_site_v6_5, or set MARKET_RADAR_BACKEND_URL.",
+          "Prediction Market backend is not reachable. Start prediction_market_backend, or set PREDICTION_MARKET_BACKEND_URL.",
         error: message,
       },
       { status: 502, headers: corsHeaders }
@@ -70,11 +84,11 @@ async function proxyToMarketRadarBackend(
   }
 }
 
-export const GET = proxyToMarketRadarBackend;
-export const POST = proxyToMarketRadarBackend;
-export const PUT = proxyToMarketRadarBackend;
-export const PATCH = proxyToMarketRadarBackend;
-export const DELETE = proxyToMarketRadarBackend;
+export const GET = proxyToPredictionMarketBackend;
+export const POST = proxyToPredictionMarketBackend;
+export const PUT = proxyToPredictionMarketBackend;
+export const PATCH = proxyToPredictionMarketBackend;
+export const DELETE = proxyToPredictionMarketBackend;
 export function OPTIONS() {
   return new Response(null, { status: 204, headers: corsHeaders });
 }

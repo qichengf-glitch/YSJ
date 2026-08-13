@@ -8,18 +8,14 @@ PORT="${PORT:-3000}"
 DATA_DIR="${RENDER_DATA_DIR:-/var/data}"
 mkdir -p "$DATA_DIR"
 
-JIN10_DIR=""
-if [[ -d "$ROOT/jin10_us_dashboard_site" ]]; then
-  JIN10_DIR="$ROOT/jin10_us_dashboard_site"
-elif [[ -d "$ROOT/jin10_us_dashboard_site_v6_5" ]]; then
-  JIN10_DIR="$ROOT/jin10_us_dashboard_site_v6_5"
-fi
+PREDICTION_MARKET_DIR="$ROOT/prediction_market_backend"
 
-export DATABASE_PATH="${DATABASE_PATH:-$DATA_DIR/us_dashboard.db}"
+export PREDICTION_MARKET_DB="${PREDICTION_MARKET_DB:-${DATABASE_PATH:-$DATA_DIR/us_dashboard.db}}"
+export DATABASE_PATH="$PREDICTION_MARKET_DB"
 export CN_VIX_DB="${CN_VIX_DB:-$DATA_DIR/live_vix.sqlite}"
 export CN_VIX_RQ_LOCK="${CN_VIX_RQ_LOCK:-$DATA_DIR/cn_vix_rqdata.lock}"
 export CN_VIX_LOG_DIR="${CN_VIX_LOG_DIR:-$DATA_DIR/dashboard_logs}"
-export MARKET_RADAR_BACKEND_URL="${MARKET_RADAR_BACKEND_URL:-http://127.0.0.1:8000}"
+export PREDICTION_MARKET_BACKEND_URL="${PREDICTION_MARKET_BACKEND_URL:-http://127.0.0.1:8000}"
 export CN_VIX_BACKEND_URL="${CN_VIX_BACKEND_URL:-http://127.0.0.1:8765}"
 export VIX_DASHBOARD_PUBLIC_URL="${VIX_DASHBOARD_PUBLIC_URL:-/api/cn-option-vix-dashboard/index.html}"
 export DASHBOARD_HOST="${DASHBOARD_HOST:-127.0.0.1}"
@@ -67,9 +63,6 @@ PY
   fi
 }
 
-if [[ -n "$JIN10_DIR" ]]; then
-  seed_sqlite "$JIN10_DIR/data/us_dashboard.db" "$DATABASE_PATH"
-fi
 seed_vix_sqlite_if_empty "$ROOT/cn_option_vix/data/live_vix.sqlite" "$CN_VIX_DB"
 
 PIDS=()
@@ -84,15 +77,15 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-if [[ -n "$JIN10_DIR" ]]; then
+if [[ -d "$PREDICTION_MARKET_DIR" ]]; then
   (
-    cd "$JIN10_DIR"
+    cd "$PREDICTION_MARKET_DIR"
     exec .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
   ) &
   PIDS+=("$!")
-  echo "Jin10 backend started on 127.0.0.1:8000"
+  echo "Prediction Market backend started on 127.0.0.1:8000"
 else
-  echo "WARNING: Jin10 backend directory not found."
+  echo "WARNING: prediction_market_backend directory not found."
 fi
 
 if [[ -d "$ROOT/cn_option_vix" ]]; then

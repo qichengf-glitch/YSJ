@@ -1,4 +1,3 @@
-import json
 import os
 import sqlite3
 from contextlib import contextmanager
@@ -45,131 +44,11 @@ def init_db() -> None:
     with get_conn() as conn:
         conn.executescript(
             """
-            CREATE TABLE IF NOT EXISTS us_data_current (
-                source_id INTEGER PRIMARY KEY,
-                indicator_id INTEGER,
-                company_name TEXT,
-                ticker TEXT,
-                exchange_name TEXT,
-                measure TEXT,
-                time_period TEXT,
-                full_time_period TEXT,
-                pub_time TEXT,
-                actual TEXT,
-                previous TEXT,
-                consensus TEXT,
-                revised TEXT,
-                unit TEXT,
-                star INTEGER,
-                affect INTEGER,
-                affect_status TEXT,
-                time_status TEXT,
-                title TEXT,
-                stock_logo TEXT,
-                ahead_url TEXT,
-                is_deleted INTEGER DEFAULT 0,
-                last_action TEXT,
-                last_modify_time TEXT,
-                first_seen_at TEXT,
-                last_synced_at TEXT,
-                raw_json TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS us_event_current (
-                source_id INTEGER PRIMARY KEY,
-                event_time TEXT,
-                event_content TEXT,
-                country TEXT,
-                determine INTEGER,
-                note TEXT,
-                people TEXT,
-                region TEXT,
-                star INTEGER,
-                emergencies INTEGER,
-                time_status TEXT,
-                is_deleted INTEGER DEFAULT 0,
-                last_action TEXT,
-                last_modify_time TEXT,
-                first_seen_at TEXT,
-                last_synced_at TEXT,
-                raw_json TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS us_holiday_current (
-                source_id INTEGER PRIMARY KEY,
-                date TEXT,
-                event_time TEXT,
-                event_content TEXT,
-                country TEXT,
-                exchange_name TEXT,
-                name TEXT,
-                rest_note TEXT,
-                determine INTEGER,
-                note TEXT,
-                people TEXT,
-                region TEXT,
-                star INTEGER,
-                time_status TEXT,
-                is_deleted INTEGER DEFAULT 0,
-                last_action TEXT,
-                last_modify_time TEXT,
-                first_seen_at TEXT,
-                last_synced_at TEXT,
-                raw_json TEXT NOT NULL
-            );
-
-            CREATE TABLE IF NOT EXISTS raw_jin10_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                log_id INTEGER NOT NULL,
-                category TEXT NOT NULL,
-                source_type TEXT NOT NULL,
-                data_id INTEGER NOT NULL,
-                action TEXT NOT NULL,
-                modify_time TEXT,
-                raw_json TEXT NOT NULL,
-                received_at TEXT NOT NULL,
-                UNIQUE(category, source_type, log_id)
-            );
-
             CREATE TABLE IF NOT EXISTS sync_state (
                 key TEXT PRIMARY KEY,
                 value TEXT,
                 updated_at TEXT NOT NULL
             );
-
-            CREATE INDEX IF NOT EXISTS idx_us_data_pub_time ON us_data_current(pub_time);
-            CREATE INDEX IF NOT EXISTS idx_us_data_ticker ON us_data_current(ticker);
-            CREATE INDEX IF NOT EXISTS idx_us_data_star ON us_data_current(star);
-            CREATE INDEX IF NOT EXISTS idx_us_event_time ON us_event_current(event_time);
-            CREATE INDEX IF NOT EXISTS idx_us_holiday_date ON us_holiday_current(date);
-            CREATE TABLE IF NOT EXISTS price_bars (
-                ticker TEXT NOT NULL,
-                provider TEXT NOT NULL,
-                interval TEXT NOT NULL,
-                ts TEXT NOT NULL,
-                open REAL,
-                high REAL,
-                low REAL,
-                close REAL,
-                volume REAL,
-                raw_json TEXT,
-                fetched_at TEXT NOT NULL,
-                PRIMARY KEY (ticker, provider, interval, ts)
-            );
-
-            CREATE TABLE IF NOT EXISTS price_fetch_cache (
-                ticker TEXT NOT NULL,
-                provider TEXT NOT NULL,
-                interval TEXT NOT NULL,
-                range_key TEXT NOT NULL,
-                last_fetched_at TEXT,
-                status TEXT,
-                error TEXT,
-                PRIMARY KEY (ticker, provider, interval, range_key)
-            );
-
-            CREATE INDEX IF NOT EXISTS idx_raw_logs_modify_time ON raw_jin10_logs(modify_time);
-            CREATE INDEX IF NOT EXISTS idx_price_bars_lookup ON price_bars(ticker, provider, interval, ts);
 
             CREATE TABLE IF NOT EXISTS pm_events (
                 event_id TEXT PRIMARY KEY,
@@ -259,7 +138,6 @@ def init_db() -> None:
                 errors_json TEXT
             );
 
-
             CREATE TABLE IF NOT EXISTS pm_whale_trades (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 condition_id TEXT NOT NULL,
@@ -275,10 +153,8 @@ def init_db() -> None:
                 fetched_at TEXT NOT NULL,
                 UNIQUE(condition_id, address, outcome, side, size, price, trade_ts)
             );
-
             """
         )
-        # Lightweight migrations for older persistent SQLite files.
         for sql in [
             "ALTER TABLE pm_markets ADD COLUMN volume_24h REAL",
             "ALTER TABLE pm_markets ADD COLUMN volume_spike_ratio REAL",
@@ -335,27 +211,3 @@ def set_state(key: str, value: str) -> None:
             """,
             (key, value, utc_now()),
         )
-
-
-def record_log(category: str, source_type: str, log: Dict[str, Any]) -> bool:
-    with get_conn() as conn:
-        try:
-            conn.execute(
-                """
-                INSERT INTO raw_jin10_logs(log_id, category, source_type, data_id, action, modify_time, raw_json, received_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    int(log.get("log_id")),
-                    category,
-                    source_type,
-                    int(log.get("data_id")),
-                    log.get("action") or "unknown",
-                    log.get("modify_time"),
-                    json.dumps(log, ensure_ascii=False),
-                    utc_now(),
-                ),
-            )
-            return True
-        except sqlite3.IntegrityError:
-            return False

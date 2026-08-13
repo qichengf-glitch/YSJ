@@ -22,19 +22,13 @@ PY_VERSION
 
 npm ci
 
-JIN10_DIR=""
-if [[ -d "$ROOT/jin10_us_dashboard_site" ]]; then
-  JIN10_DIR="$ROOT/jin10_us_dashboard_site"
-elif [[ -d "$ROOT/jin10_us_dashboard_site_v6_5" ]]; then
-  JIN10_DIR="$ROOT/jin10_us_dashboard_site_v6_5"
-fi
-
-if [[ -n "$JIN10_DIR" ]]; then
-  "$PYTHON_BIN" -m venv "$JIN10_DIR/.venv"
-  "$JIN10_DIR/.venv/bin/python" -m pip install --upgrade pip
-  "$JIN10_DIR/.venv/bin/python" -m pip install -r "$JIN10_DIR/requirements.txt"
+PREDICTION_MARKET_DIR="$ROOT/prediction_market_backend"
+if [[ -d "$PREDICTION_MARKET_DIR" ]]; then
+  "$PYTHON_BIN" -m venv "$PREDICTION_MARKET_DIR/.venv"
+  "$PREDICTION_MARKET_DIR/.venv/bin/python" -m pip install --upgrade pip
+  "$PREDICTION_MARKET_DIR/.venv/bin/python" -m pip install -r "$PREDICTION_MARKET_DIR/requirements.txt"
 else
-  echo "No Jin10 backend directory found; skipping Jin10 Python install."
+  echo "No prediction_market_backend directory found; skipping Prediction Market Python install."
 fi
 
 if [[ -d "$ROOT/cn_option_vix" ]]; then

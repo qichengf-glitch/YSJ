@@ -38,8 +38,8 @@ const copy = {
     vixTitle: "CN Option VIX Monitor",
     vixDescription:
       "Live five-minute and half-day China financial-option volatility dashboard.",
-    marketTitle: "Market Radar",
-    marketDescription: "US earnings, event updates, and market calendar.",
+    marketTitle: "Prediction Market",
+    marketDescription: "Polymarket macro probability, liquidity, and tracked-wallet activity.",
     dailyTitle: "Daily Summary",
     dailyDescription: "Daily cross-asset brief for equities, FX, rates, and commodities.",
     stockGraderTitle: "Stock Grader",
@@ -68,8 +68,8 @@ const copy = {
     vixTitle: "中国金融期权 VIX 监控",
     vixDescription:
       "五分钟实时与半日频中国金融期权波动率看板。",
-    marketTitle: "市场雷达",
-    marketDescription: "美股财报、事件更新与市场日历。",
+    marketTitle: "预测市场",
+    marketDescription: "Polymarket 宏观概率、流动性与跟踪钱包活动。",
     dailyTitle: "每日市场日报",
     dailyDescription: "股票、外汇、利率与商品的跨资产日报。",
     stockGraderTitle: "股票基本面评分",
@@ -129,7 +129,7 @@ export default function AccessPortal({ isAuthenticated }: AccessPortalProps) {
     {
       title: t.marketTitle,
       description: t.marketDescription,
-      href: "/market-radar",
+      href: "/prediction-markets",
       external: false,
       icon: ShieldCheck,
     },

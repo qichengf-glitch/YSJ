@@ -41,12 +41,12 @@ const content = {
       eyebrow: "Sections",
       title: "Explore the public research platform",
       subtitle:
-        "Daily Summary, Market Radar, and live monitoring tools now live behind Private Access. The public homepage stays focused on open research, strategy, and thesis discovery.",
+        "Daily Summary, Prediction Market, and live monitoring tools now live behind Private Access. The public homepage stays focused on open research, strategy, and thesis discovery.",
     },
     private: {
       title: "Need internal dashboards?",
       text:
-        "Authorized users can sign in for live monitors, market radar, daily briefs, and private research operations.",
+        "Authorized users can sign in for live monitors, prediction market signals, daily briefs, and private research operations.",
       action: "Enter Private Access",
     },
     metrics: [
@@ -86,12 +86,12 @@ const content = {
       eyebrow: "公开板块",
       title: "浏览公开研究平台",
       subtitle:
-        "Daily Summary、Market Radar 与实时监控工具已收进 Private Access。公开首页聚焦研究、策略与投资主题发现。",
+        "Daily Summary、Prediction Market 与实时监控工具已收进 Private Access。公开首页聚焦研究、策略与投资主题发现。",
     },
     private: {
       title: "需要内部看板？",
       text:
-        "授权用户可登录访问实时监控、市场雷达、每日简报和私密研究运营工具。",
+        "授权用户可登录访问实时监控、预测市场信号、每日简报和私密研究运营工具。",
       action: "进入 Private Access",
     },
     metrics: [
