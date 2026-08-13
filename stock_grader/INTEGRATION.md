@@ -49,9 +49,39 @@ python3 run.py --grade-all --force
 ```text
 GET /stock-grader
 GET /api/stock-grader/scores
+GET /stock-grader/admin
 ```
 
-Both require the existing `ysj_access` browser session.
+The public dashboard and scores API require the existing `ysj_access` browser
+session. The admin console requires that session plus a separate
+`STOCK_GRADER_ADMIN_PASSCODE`.
+
+## Admin Override Layer
+
+The admin console only edits the discretionary categories:
+
+```text
+Business Quality
+Income
+Market Sentiment
+Industry/Sector Tailwinds
+```
+
+Each `ticker + category` has exactly one active override record. Saving the same
+pair updates that record. Deleting the card removes the override and the public
+dashboard falls back to the system score and system marker.
+
+Production variables:
+
+```text
+STOCK_GRADER_ADMIN_PASSCODE=<admin passcode>
+STOCK_GRADER_ADMIN_SECRET=<long random secret>
+STOCK_GRADER_OVERRIDE_PATH=/var/data/stock_grader/overrides.json
+STOCK_GRADER_OVERRIDE_AUDIT_PATH=/var/data/stock_grader/override_audit.jsonl
+```
+
+If `STOCK_GRADER_DATA_DIR=/var/data/stock_grader` is set, the default override
+paths already live there.
 
 ## Production Notes
 

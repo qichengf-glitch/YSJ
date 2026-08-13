@@ -66,5 +66,7 @@ stock_grader/data/peers/
 stock_grader/data/tier3/
 stock_grader/data/grader.log
 stock_grader/data/cron.log
+stock_grader/data/overrides.json
+stock_grader/data/override_audit.jsonl
 stock_grader/data/reports/*
 !stock_grader/data/reports/full_scores_20260804.csv

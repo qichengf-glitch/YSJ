@@ -114,6 +114,13 @@ export default function StockGraderDashboard({ payload }: Props) {
               <ArrowLeft className="h-4 w-4" />
               Private Access
             </Link>
+            <Link
+              href="/stock-grader/admin"
+              className="mb-5 ml-4 inline-flex items-center gap-2 text-sm font-bold text-[#5B6780] transition hover:text-[#4F63F6]"
+            >
+              <ShieldCheck className="h-4 w-4" />
+              Admin Review
+            </Link>
             <div className="inline-flex items-center gap-2 rounded-full border border-[#E7ECF5] bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#4F63F6]">
               <BarChart3 className="h-3.5 w-3.5" />
               Stock Grader
@@ -134,8 +141,8 @@ export default function StockGraderDashboard({ payload }: Props) {
               </div>
             </div>
             <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
-              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Rows</div>
-              <div className="mt-1 text-xl font-black">{payload.summary.categoryCount}</div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Manual</div>
+              <div className="mt-1 text-xl font-black">{payload.summary.manualOverrideCount}</div>
             </div>
             <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">As Of</div>
@@ -220,7 +227,18 @@ export default function StockGraderDashboard({ payload }: Props) {
                         selected?.ticker === score.ticker ? "bg-[#EEF2FF]" : ""
                       }`}
                     >
-                      <td className="px-4 py-3 font-black text-[#18233A]">{score.ticker}</td>
+                      <td className="px-4 py-3">
+                        <div className="font-black text-[#18233A]">{score.ticker}</div>
+                        <div
+                          className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.10em] ${
+                            score.hasManualOverride
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-[#F8FAFC] text-[#7B879C]"
+                          }`}
+                        >
+                          {score.hasManualOverride ? "Manual" : "System"}
+                        </div>
+                      </td>
                       <td className="px-3 py-3 text-xs font-semibold text-[#5B6780]">{score.archetype}</td>
                       <td className="px-3 py-3">
                         <span
@@ -242,6 +260,9 @@ export default function StockGraderDashboard({ payload }: Props) {
                             >
                               {value ?? "-"}
                             </span>
+                            {score.categories.find((item) => item.category === category)?.isManual ? (
+                              <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-amber-500 align-middle" />
+                            ) : null}
                           </td>
                         );
                       })}
@@ -262,6 +283,15 @@ export default function StockGraderDashboard({ payload }: Props) {
                     </div>
                     <div className="mt-1 text-3xl font-black">{selected.ticker}</div>
                     <div className="mt-1 text-xs font-semibold text-[#5B6780]">{selected.archetype}</div>
+                    <div
+                      className={`mt-2 inline-flex rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${
+                        selected.hasManualOverride
+                          ? "bg-amber-50 text-amber-700"
+                          : "bg-[#F8FAFC] text-[#7B879C]"
+                      }`}
+                    >
+                      {selected.hasManualOverride ? "Manual override active" : "System scores only"}
+                    </div>
                   </div>
                   <span
                     className={`inline-flex h-12 min-w-14 items-center justify-center rounded-xl border px-3 text-lg font-black ${scoreTone(
@@ -287,7 +317,13 @@ export default function StockGraderDashboard({ payload }: Props) {
                             <span className={`rounded-full px-2 py-1 ${confidenceTone(category.confidence)}`}>
                               {category.confidence}
                             </span>
-                            <span className="rounded-full bg-white px-2 py-1 text-[#5B6780]">{category.source}</span>
+                            <span
+                              className={`rounded-full px-2 py-1 ${
+                                category.isManual ? "bg-amber-50 text-amber-700" : "bg-white text-[#5B6780]"
+                              }`}
+                            >
+                              {category.isManual ? "manual" : "system"}
+                            </span>
                           </div>
                         </div>
                         <span
@@ -298,7 +334,19 @@ export default function StockGraderDashboard({ payload }: Props) {
                           {category.score ?? "-"}
                         </span>
                       </div>
+                      {category.isManual ? (
+                        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800">
+                          System score {category.systemScore ?? "-"} changed to {category.score ?? "-"} by{" "}
+                          {category.override?.author || "Admin"} on {category.override?.updatedAt.slice(0, 10)}.
+                        </div>
+                      ) : null}
                       <p className="mt-3 line-clamp-3 text-xs leading-5 text-[#5B6780]">{category.reasonText}</p>
+                      {category.isManual && category.systemReasonText ? (
+                        <details className="mt-2 text-xs text-[#7B879C]">
+                          <summary className="cursor-pointer font-bold text-[#4F63F6]">System rationale</summary>
+                          <p className="mt-2 leading-5">{category.systemReasonText}</p>
+                        </details>
+                      ) : null}
                     </div>
                   ))}
                 </div>
@@ -333,4 +381,3 @@ export default function StockGraderDashboard({ payload }: Props) {
     </main>
   );
 }
-
