@@ -19,10 +19,10 @@ export default function BrandMark({
 }: BrandMarkProps) {
   const mark = (
     <span
-      className={`inline-flex items-baseline font-brand font-extrabold tracking-[-0.045em] text-[#18233A] ${sizeClass[size]} ${className}`}
+      className={`inline-flex items-baseline font-brand font-extrabold tracking-[-0.045em] text-[#111827] ${sizeClass[size]} ${className}`}
     >
       <span>YSJ</span>
-      <span className="bg-[linear-gradient(120deg,#4F63F6_0%,#273B9A_100%)] bg-clip-text text-transparent">
+      <span className="text-[#D7B46A]">
         Lab
       </span>
     </span>

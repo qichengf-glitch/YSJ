@@ -109,9 +109,9 @@ export default function FocusCards() {
           key={item.href}
           href={item.href}
           aria-label={`${item.title} - ${action}`}
-          className="group flex min-h-[410px] flex-col overflow-hidden rounded-2xl border border-[#E7ECF5] bg-white shadow-[0_14px_34px_rgba(39,59,154,0.07)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#A8B2FF] hover:shadow-[0_22px_50px_rgba(39,59,154,0.14)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#4F63F6]"
+          className="group flex min-h-[410px] flex-col overflow-hidden border border-[#E6DDCD] bg-[#FFFDF8] shadow-[0_14px_34px_rgba(78,56,21,0.07)] transition-all duration-300 ease-out hover:-translate-y-1 hover:border-[#D7B46A] hover:shadow-[0_22px_50px_rgba(78,56,21,0.13)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#D7B46A]"
         >
-          <div className="flex h-56 items-center justify-center bg-gradient-to-b from-white to-[#F8FAFC] p-7">
+          <div className="flex h-56 items-center justify-center bg-gradient-to-b from-[#FFFDF8] to-[#F8F1E3] p-7">
             <Image
               src={item.image}
               alt={item.alt}
@@ -122,11 +122,11 @@ export default function FocusCards() {
           </div>
 
           <div className="flex flex-1 flex-col gap-3 px-7 pb-7 pt-2">
-            <h3 className="text-2xl font-bold tracking-tight text-[#18233A]">{item.title}</h3>
-            <p className="text-base leading-relaxed text-[#5B6780]">
+            <h3 className="text-2xl font-bold tracking-tight text-[#111827]">{item.title}</h3>
+            <p className="text-base leading-relaxed text-[#5B6472]">
               {item.description}
             </p>
-            <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-[#4F63F6]">
+            <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold text-[#8A6A2F]">
               {action} <span aria-hidden="true">→</span>
             </span>
           </div>

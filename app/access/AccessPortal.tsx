@@ -1,14 +1,10 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import {
-  Activity,
   ArrowRight,
   BarChart3,
-  Clock3,
-  Database,
   LockKeyhole,
   LogOut,
   ShieldCheck,
@@ -19,22 +15,20 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const copy = {
   en: {
     eyebrow: "Private Access",
-    title: "Client portal for internal market systems",
+    title: "Private Research Operations",
     subtitle:
-      "Sign in to reach restricted dashboards, monitoring tools, and research operations prepared for approved YSJ users.",
-    statusLabel: "Portal scope",
-    statusItems: ["Market dashboards", "Live volatility monitor", "Research operations"],
-    sessionLabel: "Session",
-    sessionValue: "12h secure browser session",
-    dataLabel: "Data",
-    dataValue: "Live systems connect after sign-in",
+      "Authorized entry for live monitors, probability dashboards, daily briefs, and internal research systems.",
+    operatingLayer: "Operating layer",
+    operatingText:
+      "The public site stays clean. Approved users enter here for restricted dashboards and tools.",
+    sessionText: "Your browser session remains active for 12 hours after sign-in.",
     passcode: "Access Code",
     passcodePlaceholder: "Enter access code",
     submit: "Enter Portal",
     signingIn: "Verifying...",
     invalid: "The access code is not valid.",
     granted: "Access granted",
-    grantedText: "Choose a system below. Your session stays active for 12 hours on this browser.",
+    grantedText: "Select a system below.",
     vixTitle: "CN Option VIX Monitor",
     vixDescription:
       "Live five-minute and half-day China financial-option volatility dashboard.",
@@ -48,23 +42,21 @@ const copy = {
     logout: "Sign out",
   },
   zh: {
-    eyebrow: "私密访问",
-    title: "内部市场系统客户端入口",
+    eyebrow: "Private Access",
+    title: "私密研究运营入口",
     subtitle:
-      "登录后可进入已授权的看板、监控工具和研究运营系统。",
-    statusLabel: "入口范围",
-    statusItems: ["市场看板", "实时波动率监控", "研究运营"],
-    sessionLabel: "会话",
-    sessionValue: "12 小时安全浏览器会话",
-    dataLabel: "数据",
-    dataValue: "登录后连接实时系统",
+      "授权进入实时监控、预测市场、每日简报和内部研究系统。",
+    operatingLayer: "运营层",
+    operatingText:
+      "公开网站保持干净展示；被授权用户从这里进入受限看板和内部工具。",
+    sessionText: "登录后，本浏览器会保持 12 小时会话。",
     passcode: "访问码",
     passcodePlaceholder: "输入访问码",
     submit: "进入入口",
     signingIn: "验证中...",
     invalid: "访问码无效。",
     granted: "已授权访问",
-    grantedText: "请选择下方系统。本浏览器会保持 12 小时登录状态。",
+    grantedText: "请选择下方系统。",
     vixTitle: "中国金融期权 VIX 监控",
     vixDescription:
       "五分钟实时与半日频中国金融期权波动率看板。",
@@ -123,98 +115,72 @@ export default function AccessPortal({ isAuthenticated }: AccessPortalProps) {
       title: t.vixTitle,
       description: t.vixDescription,
       href: "/cn-option-vix",
-      external: false,
       icon: BarChart3,
     },
     {
       title: t.marketTitle,
       description: t.marketDescription,
       href: "/prediction-markets",
-      external: false,
       icon: ShieldCheck,
     },
     {
       title: t.dailyTitle,
       description: t.dailyDescription,
       href: "/daily-summary",
-      external: false,
       icon: ShieldCheck,
     },
     {
       title: t.stockGraderTitle,
       description: t.stockGraderDescription,
       href: "/stock-grader",
-      external: false,
       icon: TrendingUp,
     },
   ];
 
   return (
-    <main className="min-h-[calc(100vh-4rem)] overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] text-[#18233A]">
-      <section className="relative mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-6 pb-16 pt-12 sm:px-8 lg:grid-cols-[minmax(0,1fr)_460px] lg:px-12 lg:pb-20 lg:pt-20">
-        <div className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(circle_at_18%_22%,rgba(168,178,255,0.20),transparent_30%),radial-gradient(circle_at_82%_70%,rgba(191,229,139,0.18),transparent_34%)]" />
-        <div className="relative z-10">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#E7ECF5] bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#4F63F6] shadow-[0_10px_24px_rgba(79,99,246,0.08)]">
-            <LockKeyhole className="h-3.5 w-3.5" />
-            {t.eyebrow}
-          </div>
-          <h1 className="max-w-4xl text-4xl font-black leading-[0.98] tracking-tight text-[#18233A] sm:text-5xl lg:text-6xl">
-            {t.title}
-          </h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-[#5B6780] sm:text-xl">
-            {t.subtitle}
-          </p>
-
-          <div className="mt-10 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-[#E7ECF5] bg-white p-5 shadow-[0_12px_30px_rgba(39,59,154,0.06)]">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#273B9A]">
-                <Activity className="h-4 w-4" />
-                {t.statusLabel}
-              </div>
-              <div className="mt-3 space-y-1.5 text-sm text-[#5B6780]">
-                {t.statusItems.map((item) => (
-                  <div key={item}>{item}</div>
-                ))}
-              </div>
+    <main className="min-h-[calc(100vh-4rem)] bg-[#FBFAF7] text-[#111827]">
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-12 sm:px-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:px-12 lg:py-20">
+        <div className="flex flex-col justify-between">
+          <div>
+            <div className="mb-5 inline-flex items-center gap-2 border border-[#D7B46A] bg-[#F8F1E3] px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#8A6A2F]">
+              <LockKeyhole className="h-3.5 w-3.5" />
+              {t.eyebrow}
             </div>
-            <div className="rounded-2xl border border-[#E7ECF5] bg-white p-5 shadow-[0_12px_30px_rgba(39,59,154,0.06)]">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#273B9A]">
-                <Clock3 className="h-4 w-4" />
-                {t.sessionLabel}
-              </div>
-              <p className="mt-3 text-sm leading-6 text-[#5B6780]">{t.sessionValue}</p>
-            </div>
-            <div className="rounded-2xl border border-[#E7ECF5] bg-white p-5 shadow-[0_12px_30px_rgba(39,59,154,0.06)]">
-              <div className="flex items-center gap-2 text-sm font-bold text-[#273B9A]">
-                <Database className="h-4 w-4" />
-                {t.dataLabel}
-              </div>
-              <p className="mt-3 text-sm leading-6 text-[#5B6780]">{t.dataValue}</p>
-            </div>
+            <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] text-[#111827] sm:text-6xl lg:text-7xl">
+              {t.title}
+            </h1>
+            <p className="mt-7 max-w-3xl text-lg leading-8 text-[#5B6472]">
+              {t.subtitle}
+            </p>
           </div>
 
-          <div className="mt-8 max-w-xl rounded-3xl border border-[#E7ECF5] bg-white/75 p-5 shadow-[0_16px_36px_rgba(39,59,154,0.08)] backdrop-blur">
-            <Image
-              src="/assets/private-dashboard-icon.png"
-              alt="Private dashboard illustration"
-              width={520}
-              height={320}
-              className="mx-auto max-h-44 w-full object-contain"
-            />
+          <div className="mt-12 grid max-w-4xl grid-cols-1 gap-px border border-[#E6DDCD] bg-[#E6DDCD] sm:grid-cols-2">
+            <article className="bg-[#111827] p-7 text-white">
+              <div className="text-xs font-black uppercase tracking-[0.22em] text-[#D7B46A]">
+                {t.operatingLayer}
+              </div>
+              <p className="mt-5 text-lg font-semibold leading-8">{t.operatingText}</p>
+            </article>
+            <article className="bg-[#FFFDF8] p-7">
+              <div className="text-xs font-black uppercase tracking-[0.22em] text-[#8A6A2F]">
+                Secure Session
+              </div>
+              <p className="mt-5 text-lg font-semibold leading-8 text-[#5F4820]">{t.sessionText}</p>
+            </article>
           </div>
         </div>
 
-        <div className="relative z-10 rounded-2xl border border-[#E7ECF5] bg-white p-6 shadow-[0_22px_55px_rgba(39,59,154,0.13)]">
-          <div className="mb-5 flex items-center justify-between border-b border-[#E7ECF5] pb-4">
+        <div className="border border-[#E6DDCD] bg-[#FFFDF8] p-6 shadow-[0_24px_60px_rgba(78,56,21,0.12)]">
+          <div className="mb-5 flex items-center justify-between border-b border-[#E6DDCD] pb-4">
             <div>
-              <div className="text-xs font-bold uppercase tracking-[0.16em] text-[#A8B2FF]">
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#8A6A2F]">
                 YSJLab
               </div>
-              <div className="mt-1 text-lg font-black text-[#18233A]">
+              <div className="mt-1 text-lg font-semibold text-[#111827]">
                 {authenticated ? t.granted : t.eyebrow}
               </div>
             </div>
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#EEF2FF] text-[#4F63F6]">
+            <div className="flex h-10 w-10 items-center justify-center bg-[#111827] text-[#D7B46A]">
               {authenticated ? <ShieldCheck className="h-5 w-5" /> : <LockKeyhole className="h-5 w-5" />}
             </div>
           </div>
@@ -222,13 +188,11 @@ export default function AccessPortal({ isAuthenticated }: AccessPortalProps) {
           {authenticated ? (
             <div>
               <div className="mb-6 flex items-start justify-between gap-4">
-                <div>
-                  <p className="mt-2 text-sm leading-6 text-[#5B6780]">{t.grantedText}</p>
-                </div>
+                <p className="text-sm leading-6 text-[#5B6472]">{t.grantedText}</p>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E7ECF5] text-[#5B6780] transition hover:border-[#A8B2FF] hover:text-[#4F63F6]"
+                  className="inline-flex h-10 w-10 items-center justify-center border border-[#E6DDCD] text-[#5B6472] transition hover:border-[#D7B46A] hover:text-[#111827]"
                   aria-label={t.logout}
                 >
                   <LogOut className="h-4 w-4" />
@@ -238,87 +202,57 @@ export default function AccessPortal({ isAuthenticated }: AccessPortalProps) {
               <div className="space-y-3">
                 {tools.map((tool) => {
                   const Icon = tool.icon;
-                  const className =
-                    "group flex items-center justify-between gap-4 rounded-2xl border border-[#E7ECF5] bg-[#F8FAFC] p-4 transition hover:-translate-y-0.5 hover:border-[#A8B2FF] hover:bg-white hover:shadow-[0_12px_28px_rgba(39,59,154,0.10)]";
-                  const body = (
-                    <>
-                      <div className="flex min-w-0 items-start gap-3">
-                        <span className="mt-0.5 inline-flex h-10 w-10 flex-none items-center justify-center rounded-xl bg-[#EEF2FF] text-[#4F63F6]">
+                  return (
+                    <Link
+                      key={tool.href}
+                      href={tool.href}
+                      className="group flex items-center justify-between gap-4 border border-[#E6DDCD] bg-[#FBFAF7] p-4 transition hover:border-[#D7B46A] hover:bg-white"
+                    >
+                      <span className="flex min-w-0 items-start gap-3">
+                        <span className="mt-0.5 inline-flex h-10 w-10 flex-none items-center justify-center bg-[#F8F1E3] text-[#8A6A2F]">
                           <Icon className="h-5 w-5" />
                         </span>
                         <span>
-                          <span className="block text-sm font-bold text-[#18233A]">{tool.title}</span>
-                          <span className="mt-1 block text-sm leading-5 text-[#5B6780]">
+                          <span className="block text-sm font-black text-[#111827]">{tool.title}</span>
+                          <span className="mt-1 block text-sm leading-5 text-[#5B6472]">
                             {tool.description}
                           </span>
                         </span>
-                      </div>
-                      <span className="inline-flex flex-none items-center gap-1 text-sm font-bold text-[#4F63F6]">
+                      </span>
+                      <span className="inline-flex flex-none items-center gap-1 text-sm font-black text-[#8A6A2F]">
                         {t.open}
                         <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
                       </span>
-                    </>
-                  );
-
-                  return tool.external ? (
-                    <a
-                      key={tool.href}
-                      href={tool.href}
-                      target="_blank"
-                      rel="noreferrer"
-                      className={className}
-                    >
-                      {body}
-                    </a>
-                  ) : (
-                    <Link key={tool.href} href={tool.href} className={className}>
-                      {body}
                     </Link>
                   );
                 })}
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label htmlFor="accessCode" className="mb-2 block text-sm font-bold text-[#18233A]">
-                  {t.passcode}
-                </label>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <label className="block">
+                <span className="text-sm font-black text-[#111827]">{t.passcode}</span>
                 <input
-                  id="accessCode"
-                  type="password"
                   value={passcode}
                   onChange={(event) => setPasscode(event.target.value)}
+                  type="password"
                   placeholder={t.passcodePlaceholder}
-                  className="h-12 w-full rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] px-4 text-[#18233A] outline-none transition placeholder:text-[#9AA5BA] focus:border-[#A8B2FF] focus:ring-2 focus:ring-[#A8B2FF]/25"
-                  autoComplete="current-password"
-                  required
+                  className="mt-2 h-12 w-full border border-[#E6DDCD] bg-[#FBFAF7] px-4 text-base font-semibold text-[#111827] outline-none transition focus:border-[#D7B46A] focus:ring-2 focus:ring-[#D7B46A]/25"
                 />
-                {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
-              </div>
+              </label>
+              {error ? (
+                <div className="border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">
+                  {error}
+                </div>
+              ) : null}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#4F63F6] px-5 text-sm font-bold text-white shadow-[0_14px_28px_rgba(79,99,246,0.24)] transition hover:bg-[#273B9A] disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex h-12 w-full items-center justify-center bg-[#111827] px-5 text-sm font-black text-white transition hover:bg-[#2B3445] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {isSubmitting ? t.signingIn : t.submit}
+                <ArrowRight className="ml-2 h-4 w-4" />
               </button>
-              <div className="rounded-2xl border border-[#E7ECF5] bg-[#F8FAFC] p-4">
-                <div className="mb-3 flex items-center gap-2 text-sm font-bold text-[#18233A]">
-                  <BarChart3 className="h-4 w-4 text-[#4F63F6]" />
-                  {t.vixTitle}
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  {["Overall", "Index", "Hard Tech"].map((label, index) => (
-                    <div key={label} className="rounded-xl bg-white px-2 py-3 shadow-[0_8px_18px_rgba(39,59,154,0.06)]">
-                      <div className="text-[10px] uppercase tracking-[0.14em] text-[#9AA5BA]">{label}</div>
-                      <div className="mt-1 text-sm font-black text-[#18233A]">
-                        {["36.6", "25.7", "49.9"][index]}%
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </form>
           )}
         </div>
