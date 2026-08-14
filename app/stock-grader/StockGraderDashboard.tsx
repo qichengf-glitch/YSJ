@@ -18,18 +18,18 @@ type Props = {
   payload: StockGraderPayload;
 };
 
-const compactCategory: Record<string, string> = {
-  Valuation: "Val",
-  Growth: "Growth",
-  Profitability: "Prof",
-  Financials: "Fin",
-  "Business Quality": "Quality",
-  Management: "Mgmt",
-  Income: "Income",
-  "Market Sentiment": "Sent",
-  "EPS/Revison Trends": "EPS",
-  "Industry/Sector Tailwinds": "Industry",
-};
+const categoryColumns = [
+  { key: "valuation", label: "Val" },
+  { key: "growth", label: "Growth" },
+  { key: "profitability", label: "Prof" },
+  { key: "financials", label: "Fin" },
+  { key: "business_quality", label: "Quality" },
+  { key: "management", label: "Mgmt" },
+  { key: "income", label: "Income" },
+  { key: "market_sentiment", label: "Sent" },
+  { key: "eps_revisions", label: "EPS" },
+  { key: "industry", label: "Industry" },
+];
 
 function scoreTone(score: number | null) {
   if (score == null) {
@@ -60,8 +60,8 @@ function confidenceTone(confidence: string) {
   return "bg-[#F8FAFC] text-[#5B6780]";
 }
 
-function categoryScore(score: StockGraderScore, category: string) {
-  return score.categories.find((item) => item.category === category)?.score ?? null;
+function categoryFor(score: StockGraderScore, categoryKey: string) {
+  return score.categories.find((item) => item.categoryKey === categoryKey);
 }
 
 export default function StockGraderDashboard({ payload }: Props) {
@@ -70,11 +70,6 @@ export default function StockGraderDashboard({ payload }: Props) {
   const [minimumScore, setMinimumScore] = useState(0);
   const [sortMode, setSortMode] = useState<"book" | "high" | "low">("book");
   const [selectedTicker, setSelectedTicker] = useState(payload.scores[0]?.ticker ?? "");
-
-  const categories = useMemo(() => {
-    const first = payload.scores[0];
-    return first?.categories.map((category) => category.category) ?? [];
-  }, [payload.scores]);
 
   const archetypes = useMemo(
     () => ["All", ...Array.from(new Set(payload.scores.map((score) => score.archetype))).sort()],
@@ -151,7 +146,7 @@ export default function StockGraderDashboard({ payload }: Props) {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
           <section className="min-w-0 rounded-2xl border border-[#E7ECF5] bg-white shadow-[0_18px_45px_rgba(39,59,154,0.08)]">
             <div className="grid grid-cols-1 gap-3 border-b border-[#E7ECF5] p-4 md:grid-cols-[minmax(180px,1fr)_220px_160px_160px]">
               <label className="relative block">
@@ -205,15 +200,23 @@ export default function StockGraderDashboard({ payload }: Props) {
             </div>
 
             <div className="overflow-x-auto">
-              <table className="min-w-[980px] w-full border-collapse text-left text-sm">
+              <table className="w-full min-w-[780px] table-fixed border-collapse text-left text-sm">
+                <colgroup>
+                  <col className="w-[74px]" />
+                  <col className="w-[116px]" />
+                  <col className="w-[58px]" />
+                  {categoryColumns.map((category) => (
+                    <col key={category.key} className="w-[50px]" />
+                  ))}
+                </colgroup>
                 <thead>
                   <tr className="border-b border-[#E7ECF5] bg-[#F8FAFC] text-[10px] uppercase tracking-[0.14em] text-[#7B879C]">
-                    <th className="w-28 px-4 py-3">Ticker</th>
-                    <th className="w-48 px-3 py-3">Archetype</th>
-                    <th className="w-24 px-3 py-3">Total</th>
-                    {categories.map((category) => (
-                      <th key={category} className="px-2 py-3 text-center">
-                        {compactCategory[category] ?? category}
+                    <th className="px-3 py-3">Ticker</th>
+                    <th className="px-2 py-3">Type</th>
+                    <th className="px-2 py-3 text-center">Total</th>
+                    {categoryColumns.map((category) => (
+                      <th key={category.key} className="px-1 py-3 text-center">
+                        {category.label}
                       </th>
                     ))}
                   </tr>
@@ -227,7 +230,7 @@ export default function StockGraderDashboard({ payload }: Props) {
                         selected?.ticker === score.ticker ? "bg-[#EEF2FF]" : ""
                       }`}
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-3 py-3">
                         <div className="font-black text-[#18233A]">{score.ticker}</div>
                         <div
                           className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.10em] ${
@@ -239,20 +242,23 @@ export default function StockGraderDashboard({ payload }: Props) {
                           {score.hasManualOverride ? "Manual" : "System"}
                         </div>
                       </td>
-                      <td className="px-3 py-3 text-xs font-semibold text-[#5B6780]">{score.archetype}</td>
-                      <td className="px-3 py-3">
+                      <td className="truncate px-2 py-3 text-[11px] font-semibold text-[#5B6780]" title={score.archetype}>
+                        {score.archetype}
+                      </td>
+                      <td className="px-2 py-3 text-center">
                         <span
-                          className={`inline-flex h-8 min-w-12 items-center justify-center rounded-lg border px-2 font-black ${scoreTone(
+                          className={`inline-flex h-8 min-w-11 items-center justify-center rounded-lg border px-2 font-black ${scoreTone(
                             score.composite0To10
                           )}`}
                         >
                           {score.composite0To10?.toFixed(1) ?? "-"}
                         </span>
                       </td>
-                      {categories.map((category) => {
-                        const value = categoryScore(score, category);
+                      {categoryColumns.map((category) => {
+                        const categoryScore = categoryFor(score, category.key);
+                        const value = categoryScore?.score ?? null;
                         return (
-                          <td key={category} className="px-2 py-3 text-center">
+                          <td key={category.key} className="px-1 py-3 text-center">
                             <span
                               className={`inline-flex h-7 min-w-8 items-center justify-center rounded-md border px-1.5 text-xs font-black ${scoreTone(
                                 value
@@ -260,7 +266,7 @@ export default function StockGraderDashboard({ payload }: Props) {
                             >
                               {value ?? "-"}
                             </span>
-                            {score.categories.find((item) => item.category === category)?.isManual ? (
+                            {categoryScore?.isManual ? (
                               <span className="ml-1 inline-flex h-1.5 w-1.5 rounded-full bg-amber-500 align-middle" />
                             ) : null}
                           </td>
@@ -273,7 +279,7 @@ export default function StockGraderDashboard({ payload }: Props) {
             </div>
           </section>
 
-          <aside className="rounded-2xl border border-[#E7ECF5] bg-white p-4 shadow-[0_18px_45px_rgba(39,59,154,0.08)]">
+          <aside className="rounded-2xl border border-[#E7ECF5] bg-white p-4 shadow-[0_18px_45px_rgba(39,59,154,0.08)] xl:sticky xl:top-6 xl:max-h-[calc(100vh-3rem)] xl:overflow-y-auto">
             {selected ? (
               <>
                 <div className="flex items-start justify-between gap-3 border-b border-[#E7ECF5] pb-4">
