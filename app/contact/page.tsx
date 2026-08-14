@@ -12,7 +12,7 @@ const content = {
     eyebrow: "Contact",
     title: "Get in touch",
     subtitle:
-      "Questions about research, partnerships, or private access? Send us a note and we will get back to you.",
+      "Questions about research, partnerships, or internal monitoring access? Send us a note and we will get back to you.",
     name: "Name",
     email: "Your email",
     subject: "Subject",
@@ -28,7 +28,7 @@ const content = {
   zh: {
     eyebrow: "联系我们",
     title: "保持联系",
-    subtitle: "研究合作、商务洽谈或 Private Access 相关问题，欢迎来信。",
+    subtitle: "研究合作、商务洽谈或内部监控访问相关问题，欢迎来信。",
     name: "姓名",
     email: "你的邮箱",
     subject: "主题",

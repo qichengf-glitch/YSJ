@@ -14,13 +14,13 @@ import { useLanguage } from "@/contexts/LanguageContext";
 
 const copy = {
   en: {
-    eyebrow: "Private Access",
-    title: "Private Research Operations",
+    eyebrow: "Access Controlled",
+    title: "Quant Monitor",
     subtitle:
-      "Authorized entry for live monitors, probability dashboards, daily briefs, and internal research systems.",
-    operatingLayer: "Operating layer",
+      "Enter the internal market-monitoring workspace for live indicators, probability dashboards, daily briefs, and scoring systems.",
+    operatingLayer: "Monitoring layer",
     operatingText:
-      "The public site stays clean. Approved users enter here for restricted dashboards and tools.",
+      "This page is the controlled entry point for the company’s internal quantitative monitoring modules.",
     sessionText: "Your browser session remains active for 12 hours after sign-in.",
     passcode: "Access Code",
     passcodePlaceholder: "Enter access code",
@@ -42,13 +42,13 @@ const copy = {
     logout: "Sign out",
   },
   zh: {
-    eyebrow: "Private Access",
-    title: "私密研究运营入口",
+    eyebrow: "受控访问",
+    title: "量化指标监控",
     subtitle:
-      "授权进入实时监控、预测市场、每日简报和内部研究系统。",
-    operatingLayer: "运营层",
+      "进入内部市场监控工作台，查看实时指标、预测市场、每日简报和评分系统。",
+    operatingLayer: "监控层",
     operatingText:
-      "公开网站保持干净展示；被授权用户从这里进入受限看板和内部工具。",
+      "这里是公司内部量化监控模块的受控入口。",
     sessionText: "登录后，本浏览器会保持 12 小时会话。",
     passcode: "访问码",
     passcodePlaceholder: "输入访问码",

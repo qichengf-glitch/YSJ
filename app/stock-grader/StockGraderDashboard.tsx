@@ -112,7 +112,7 @@ export default function StockGraderDashboard({ payload }: Props) {
               className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-[#4F63F6] transition hover:text-[#273B9A]"
             >
               <ArrowLeft className="h-4 w-4" />
-              Private Access
+              Quant Monitor
             </Link>
             <Link
               href="/stock-grader/admin"

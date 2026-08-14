@@ -33,10 +33,10 @@ const copy = {
     subtitle:
       "Live and historical China option volatility monitoring built from RiceQuant option-chain data, model-free VIX math, and OI-weighted aggregation.",
     openDashboard: "Open live dashboard",
-    back: "Back to Private Access",
+    back: "Back to Quant Monitor",
     frameTitle: "Live dashboard",
     frameNote:
-      "The embedded dashboard connects to the protected VIX service and keeps the monitoring workflow inside the private portal.",
+      "The embedded dashboard connects to the protected VIX service and keeps the monitoring workflow inside the Quant Monitor workspace.",
     groups: "Coverage",
     dataModel: "System discipline",
     dataModelText:
@@ -59,10 +59,10 @@ const copy = {
     subtitle:
       "基于 RiceQuant 期权链、无模型 30 日 VIX 计算和 OI 加权聚合的中国期权波动率监控系统。",
     openDashboard: "打开实时看板",
-    back: "返回 Private Access",
+    back: "返回量化指标监控",
     frameTitle: "实时看板",
     frameNote:
-      "下方实时看板连接受保护的 VIX 服务，监控工作流保持在 Private Access 内部。",
+      "下方实时看板连接受保护的 VIX 服务，监控工作流保持在量化指标监控工作台内部。",
     groups: "覆盖范围",
     dataModel: "系统边界",
     dataModelText:

@@ -14,8 +14,8 @@ const brandFont = Syne({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.ysjlab.com"),
-  title: "YSJLab - Financial Research & Strategy",
-  description: "Independent financial research and strategy studio",
+  title: "YSJLab - Quantitative Market Monitoring",
+  description: "Internal market intelligence workspace for quantitative research and monitoring",
   openGraph: {
     url: "https://www.ysjlab.com",
   },

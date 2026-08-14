@@ -10,20 +10,12 @@ const sharedItems = [
     image: "/assets/research-icon.png",
   },
   {
-    href: "/strategy",
-    image: "/assets/strategy-icon.png",
-  },
-  {
     href: "/research/ongoing-thesis",
     image: "/assets/ongoing-thesis-icon.png",
   },
   {
-    href: "/prediction-markets",
-    image: "/assets/prediction-markets-icon.png",
-  },
-  {
     href: "/access",
-    image: "/assets/private-radar-icon.png",
+    image: "/assets/prediction-markets-icon.png",
   },
 ];
 
@@ -36,28 +28,16 @@ const localizedItems = {
       alt: "Research report illustration with charts and magnifier",
     },
     {
-      title: "Strategy",
-      description:
-        "Systematic strategies across equities, commodities, options, and global markets.",
-      alt: "Strategy chess piece and planning board illustration",
-    },
-    {
       title: "Ongoing Thesis",
       description:
         "Current research projects and investment theses under development with community-driven feedback.",
       alt: "Notebook and idea discussion illustration",
     },
     {
-      title: "Prediction Markets",
+      title: "Quant Monitor",
       description:
-        "Data-driven positioning in event-driven markets with disciplined risk control.",
-      alt: "Probability chart and market outcome illustration",
-    },
-    {
-      title: "Private Access",
-      description:
-        "Authorized entry for internal dashboards, live monitors, daily briefs, and market radar tools.",
-      alt: "Private dashboard and radar illustration",
+        "Access-controlled monitoring for VIX, prediction markets, daily summaries, and stock scoring.",
+      alt: "Probability chart and market monitoring illustration",
     },
   ],
   zh: [
@@ -67,24 +47,14 @@ const localizedItems = {
       alt: "包含图表和放大镜的研究报告插图",
     },
     {
-      title: "策略",
-      description: "覆盖股票、大宗商品、期权与全球市场的系统化策略。",
-      alt: "策略棋子和规划图插图",
-    },
-    {
       title: "进行中的研究",
       description: "正在推进的研究项目、投资主题与协作式反馈。",
       alt: "笔记本和想法讨论插图",
     },
     {
-      title: "预测市场",
-      description: "以数据驱动事件市场判断，并结合纪律化风险控制。",
+      title: "量化指标监控",
+      description: "受控访问 VIX、预测市场、每日简报与股票评分等内部监控模块。",
       alt: "概率图表和市场结果插图",
-    },
-    {
-      title: "Private Access",
-      description: "授权访问内部看板、实时监控、每日简报与市场雷达工具。",
-      alt: "私密看板和雷达插图",
     },
   ],
 };

@@ -5,9 +5,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
-  Database,
   Globe2,
-  LockKeyhole,
   Search,
   ShieldCheck,
 } from "lucide-react";
@@ -18,109 +16,95 @@ import { useLanguage } from "@/contexts/LanguageContext";
 const content = {
   en: {
     hero: {
-      kicker: "YSJLab Research Systems",
-      title: "Independent Research. Disciplined Systems.",
+      kicker: "Quantitative Market Monitoring",
+      title: "Market Intelligence for Quant Research.",
       copy:
-        "A public research layer for market perspective, with private operating systems for live monitors, probability signals, daily briefs, and internal scoring.",
+        "A focused workspace for internal research staff to review market indicators, volatility regimes, event probabilities, daily briefs, and scoring outputs.",
       primaryCta: "Explore Research",
-      secondaryCta: "Private Access",
     },
     values: [
-      ["Global", "Markets observed across public assets"],
-      ["Systematic", "Repeatable workflows and documented assumptions"],
-      ["Diligent", "Risk-aware tools for live monitoring"],
+      ["Monitor", "Live dashboards for market indicators"],
+      ["Compare", "Cross-module context for research work"],
+      ["Review", "Outputs designed for disciplined follow-up"],
     ],
     sections: {
-      eyebrow: "Sections",
-      title: "Public perspective, private operating layer.",
+      eyebrow: "Workspace",
+      title: "Research pages plus monitored market systems.",
       subtitle:
-        "Daily Summary, Prediction Market, CN Option VIX, and Stock Grader stay behind controlled access. Public pages remain focused on research, strategy, and thesis discovery.",
+        "The public pages hold research material and ongoing theses. Quant Monitor is the controlled entry point for CN Option VIX, Prediction Market, Daily Summary, and Stock Grader.",
     },
     pillars: [
       {
         label: "01",
-        title: "Research Foundation",
-        text: "Independent market research, strategy notes, and ongoing theses give the public site a clear editorial spine.",
+        title: "Research Context",
+        text: "Research notes and ongoing theses provide the human-readable context around monitored market signals.",
       },
       {
         label: "02",
-        title: "Systematic Intelligence",
-        text: "Private dashboards turn volatility, probability markets, market calendars, and scorecards into operational signals.",
+        title: "Quant Monitor",
+        text: "Internal modules track volatility, prediction markets, daily market summaries, and equity scoring outputs.",
       },
       {
         label: "03",
-        title: "Controlled Access",
-        text: "Internal tools remain gated, session-based, and separated from public-facing company content.",
+        title: "Operator Workflow",
+        text: "The interface is tuned for researchers and staff who need to scan, compare, and revisit indicators repeatedly.",
       },
     ],
-    private: {
-      title: "Need internal dashboards?",
-      text:
-        "Authorized users can enter the private portal for live monitors, prediction market signals, daily briefs, and scoring systems.",
-      action: "Enter Private Access",
-    },
     metrics: [
-      ["10K+", "Community Members"],
-      ["1,200+", "Research Reports"],
-      ["80+", "Markets Covered"],
-      ["Independent", "No Conflicts"],
+      ["4", "Monitoring Modules"],
+      ["12h", "Browser Session"],
+      ["Live", "Market Feeds"],
+      ["Internal", "Research Workflow"],
     ],
     footer:
-      "Independent financial research and strategy systems for global market participants.",
+      "Internal market intelligence workspace for quantitative research and monitoring.",
     contact: "Contact",
     contactHint: "Email us",
     copyright: "© 2026 YSJLab. All rights reserved.",
   },
   zh: {
     hero: {
-      kicker: "YSJLab 研究系统",
-      title: "独立研究，纪律化系统。",
+      kicker: "量化指标监控",
+      title: "面向量化研究的市场情报工作台。",
       copy:
-        "公开层承载市场观点与研究内容，私密层承载实时监控、预测市场信号、每日简报和内部评分系统。",
+        "供内部科研人员和工作人员查看市场指标、波动率状态、事件概率、每日简报与评分输出。",
       primaryCta: "浏览研究",
-      secondaryCta: "Private Access",
     },
     values: [
-      ["Global", "覆盖公开资产与全球市场"],
-      ["Systematic", "可重复的流程与有记录的假设"],
-      ["Diligent", "围绕风险意识搭建实时工具"],
+      ["Monitor", "实时看板监控市场指标"],
+      ["Compare", "跨模块比较研究上下文"],
+      ["Review", "便于复核和后续跟踪的输出"],
     ],
     sections: {
-      eyebrow: "平台板块",
-      title: "公开观点层，私密运营层。",
+      eyebrow: "工作台",
+      title: "研究页面，加上受控的市场监控系统。",
       subtitle:
-        "Daily Summary、Prediction Market、中国期权 VIX 与 Stock Grader 保持在受控访问之后。公开页面聚焦研究、策略与投资主题发现。",
+        "公开页面承载研究材料和进行中的 thesis。量化指标监控是进入中国期权 VIX、Prediction Market、Daily Summary 和 Stock Grader 的受控入口。",
     },
     pillars: [
       {
         label: "01",
-        title: "研究基础",
-        text: "独立市场研究、策略文章和进行中的 thesis 构成公开网站的清晰内容骨架。",
+        title: "研究语境",
+        text: "研究文章和进行中的 thesis 提供对市场信号的人类可读解释背景。",
       },
       {
         label: "02",
-        title: "系统化情报",
-        text: "私密看板把波动率、预测市场、市场日历和评分模型转化为可执行的运营信号。",
+        title: "量化指标监控",
+        text: "内部模块跟踪波动率、预测市场、每日市场摘要和股票评分输出。",
       },
       {
         label: "03",
-        title: "受控访问",
-        text: "内部工具保持登录、会话和权限隔离，不混入公开公司展示页面。",
+        title: "操作工作流",
+        text: "界面面向需要反复浏览、比较和复核指标的科研人员与工作人员。",
       },
     ],
-    private: {
-      title: "需要内部看板？",
-      text:
-        "授权用户可进入 Private Access，访问实时监控、预测市场信号、每日简报和评分系统。",
-      action: "进入 Private Access",
-    },
     metrics: [
-      ["10K+", "社区成员"],
-      ["1,200+", "研究报告"],
-      ["80+", "覆盖市场"],
-      ["独立", "无利益冲突"],
+      ["4", "监控模块"],
+      ["12h", "浏览器会话"],
+      ["Live", "市场数据流"],
+      ["Internal", "内部研究流程"],
     ],
-    footer: "为全球市场参与者提供独立金融研究与策略系统。",
+    footer: "面向量化研究和市场监控的内部情报工作台。",
     contact: "联系我们",
     contactHint: "发送邮件",
     copyright: "© 2026 YSJLab. 保留所有权利。",
@@ -164,13 +148,6 @@ export default function Home() {
               >
                 {t.hero.primaryCta}
                 <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-              <Link
-                href="/access"
-                className="inline-flex min-h-12 items-center justify-center border border-white/30 bg-white/10 px-6 text-sm font-black text-white transition hover:bg-white/18"
-              >
-                <LockKeyhole className="mr-2 h-4 w-4" />
-                {t.hero.secondaryCta}
               </Link>
             </div>
           </div>
@@ -225,7 +202,7 @@ export default function Home() {
       </section>
 
       <section className="bg-[#111827] px-6 py-16 text-white sm:px-8 lg:px-12">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-[1fr_380px]">
+        <div className="mx-auto max-w-7xl">
           <div className="grid grid-cols-1 gap-px bg-white/12 sm:grid-cols-2 lg:grid-cols-4">
             {t.metrics.map(([value, label], index) => {
               const Icon = metricIcons[index];
@@ -238,23 +215,6 @@ export default function Home() {
               );
             })}
           </div>
-
-          <Link
-            href="/access"
-            className="group flex min-h-[230px] flex-col justify-between border border-[#D7B46A] bg-[#F8F1E3] p-7 text-[#111827] transition hover:bg-[#EAD7AD]"
-          >
-            <div>
-              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center bg-[#111827] text-[#D7B46A]">
-                <LockKeyhole className="h-5 w-5" />
-              </div>
-              <h3 className="text-2xl font-semibold">{t.private.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-[#5F4820]">{t.private.text}</p>
-            </div>
-            <span className="mt-6 inline-flex items-center text-sm font-black">
-              {t.private.action}
-              <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" />
-            </span>
-          </Link>
         </div>
       </section>
 

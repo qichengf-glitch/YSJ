@@ -1,6 +1,6 @@
-# YSJ Partners - Financial Research & Strategy Website
+# YSJLab - Quantitative Market Monitoring Workspace
 
-A modern Next.js 14 website for YSJ Partners, an independent financial research and strategy studio.
+A modern Next.js 14 workspace for internal quantitative research, market monitoring, research notes, and controlled dashboard access.
 
 ## Tech Stack
 
@@ -29,8 +29,9 @@ npm run dev
 /app
   /page.tsx                -> Home page
   /research/page.tsx       -> Research page
-  /strategy/page.tsx       -> Strategy page
-  /prediction-markets/page.tsx -> Prediction Markets page
+  /research/ongoing-thesis -> Ongoing thesis page
+  /access                  -> Quant Monitor access page
+  /prediction-markets/page.tsx -> Prediction Market module
   /layout.tsx              -> Root layout
   /globals.css             -> Global styles
 
@@ -47,5 +48,5 @@ npm run dev
 
 - Bilingual support (English / 中文)
 - Responsive design
-- Modern fintech aesthetic
-- Clean, minimal UI with deep blue accent color
+- YSJ Capital-inspired visual system
+- Controlled access for internal monitoring modules
