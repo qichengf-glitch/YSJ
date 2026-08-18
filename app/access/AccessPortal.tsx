@@ -216,129 +216,80 @@ export default function AccessPortal({ isAuthenticated }: AccessPortalProps) {
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-[#FBFAF7] text-[#111827]">
-      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-10 px-6 py-12 sm:px-8 lg:grid-cols-[minmax(0,0.85fr)_minmax(520px,1.15fr)] lg:px-12 lg:py-16">
-        <div className="flex flex-col justify-between">
+      <section className="mx-auto max-w-7xl px-6 py-12 sm:px-8 lg:px-12 lg:py-16">
+        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <div className="mb-5 inline-flex items-center gap-2 border border-[#D7B46A] bg-[#F8F1E3] px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-[#8A6A2F]">
-              <LockKeyhole className="h-3.5 w-3.5" />
-              {t.eyebrow}
+              {authenticated ? <ShieldCheck className="h-3.5 w-3.5" /> : <LockKeyhole className="h-3.5 w-3.5" />}
+              {authenticated ? t.granted : t.eyebrow}
             </div>
             <h1 className="max-w-4xl text-5xl font-semibold leading-[1.02] text-[#111827] sm:text-6xl lg:text-7xl">
               {t.title}
             </h1>
-            <p className="mt-7 max-w-3xl text-lg leading-8 text-[#5B6472]">
-              {t.subtitle}
-            </p>
+            <p className="mt-7 max-w-3xl text-lg leading-8 text-[#5B6472]">{t.subtitle}</p>
           </div>
-
-          <div className="mt-12 grid max-w-4xl grid-cols-1 gap-px border border-[#E6DDCD] bg-[#E6DDCD] sm:grid-cols-2">
-            <article className="bg-[#111827] p-7 text-white">
-              <div className="text-xs font-black uppercase tracking-[0.22em] text-[#D7B46A]">
-                {t.operatingLayer}
-              </div>
-              <p className="mt-5 text-lg font-semibold leading-8">{t.operatingText}</p>
-            </article>
-            <article className="bg-[#FFFDF8] p-7">
-              <div className="text-xs font-black uppercase tracking-[0.22em] text-[#8A6A2F]">
-                {t.sessionLabel}
-              </div>
-              <p className="mt-5 text-lg font-semibold leading-8 text-[#5F4820]">{t.sessionText}</p>
-            </article>
-          </div>
+          {authenticated ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex h-11 w-fit items-center gap-2 border border-[#E6DDCD] bg-[#FFFDF8] px-4 text-sm font-black text-[#5B6472] transition hover:border-[#D7B46A] hover:text-[#111827]"
+            >
+              <LogOut className="h-4 w-4" />
+              {t.logout}
+            </button>
+          ) : null}
         </div>
 
-        <div className="border border-[#E6DDCD] bg-[#FFFDF8] p-6 shadow-[0_24px_60px_rgba(78,56,21,0.12)]">
-          <div className="mb-5 flex items-center justify-between border-b border-[#E6DDCD] pb-4">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-[#8A6A2F]">
-                YSJLab
-              </div>
-              <div className="mt-1 text-lg font-semibold text-[#111827]">
-                {authenticated ? t.granted : t.eyebrow}
-              </div>
-            </div>
-            <div className="flex h-10 w-10 items-center justify-center bg-[#111827] text-[#D7B46A]">
-              {authenticated ? <ShieldCheck className="h-5 w-5" /> : <LockKeyhole className="h-5 w-5" />}
-            </div>
-          </div>
-
-          {authenticated ? (
-            <div>
-              <div className="mb-6 flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-sm font-black uppercase tracking-[0.16em] text-[#8A6A2F]">
-                    {t.grantedText}
-                  </p>
-                  <div className="mt-3 grid grid-cols-1 gap-2 text-xs font-bold text-[#5B6472] sm:grid-cols-2">
-                    <span className="border border-[#E6DDCD] bg-white px-3 py-2">
-                      {t.sessionLabel}: {t.sessionValue}
-                    </span>
-                    <span className="border border-[#E6DDCD] bg-white px-3 py-2">
-                      {t.dataLayerLabel}: {t.dataLayerValue}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="inline-flex h-10 w-10 items-center justify-center border border-[#E6DDCD] text-[#5B6472] transition hover:border-[#D7B46A] hover:text-[#111827]"
-                  aria-label={t.logout}
+        {authenticated ? (
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            {tools.map((tool) => {
+              const Icon = tool.icon;
+              return (
+                <Link
+                  key={tool.href}
+                  href={tool.href}
+                  className="group border border-[#E6DDCD] bg-[#FFFDF8]/82 p-6 shadow-[0_18px_48px_rgba(78,56,21,0.08)] backdrop-blur-xl transition hover:border-[#D7B46A] hover:bg-white hover:shadow-[0_24px_60px_rgba(78,56,21,0.14)]"
                 >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                {tools.map((tool) => {
-                  const Icon = tool.icon;
-                  return (
-                    <Link
-                      key={tool.href}
-                      href={tool.href}
-                      className="group border border-[#E6DDCD] bg-[#FBFAF7] p-5 transition hover:border-[#D7B46A] hover:bg-white hover:shadow-[0_18px_44px_rgba(78,56,21,0.10)]"
-                    >
-                      <span className="flex items-start justify-between gap-4">
-                        <span className="flex min-w-0 items-start gap-4">
-                          <span className="mt-0.5 inline-flex h-11 w-11 flex-none items-center justify-center bg-[#F8F1E3] text-[#8A6A2F]">
-                            <Icon className="h-5 w-5" />
-                          </span>
-                          <span className="min-w-0">
-                            <span className="flex flex-wrap items-center gap-2">
-                              <span className="text-base font-black text-[#111827]">{tool.title}</span>
-                              <span className="border border-[#D7B46A] bg-[#F8F1E3] px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#8A6A2F]">
-                                {tool.status}
-                              </span>
-                            </span>
-                            <span className="mt-1 block text-sm leading-6 text-[#5B6472]">
-                              {tool.description}
-                            </span>
+                  <span className="flex items-start justify-between gap-4">
+                    <span className="flex min-w-0 items-start gap-4">
+                      <span className="inline-flex h-12 w-12 flex-none items-center justify-center bg-[#F8F1E3] text-[#8A6A2F]">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="flex flex-wrap items-center gap-2">
+                          <span className="text-lg font-black text-[#111827]">{tool.title}</span>
+                          <span className="border border-[#D7B46A] bg-[#F8F1E3] px-2 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-[#8A6A2F]">
+                            {tool.status}
                           </span>
                         </span>
-                        <span className="inline-flex flex-none items-center gap-1 text-sm font-black text-[#8A6A2F]">
-                          {t.open}
-                          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
-                        </span>
+                        <span className="mt-2 block text-sm leading-6 text-[#5B6472]">{tool.description}</span>
                       </span>
-                      <span className="mt-4 grid grid-cols-1 gap-4 border-t border-[#E6DDCD] pt-4 sm:grid-cols-[150px_minmax(0,1fr)]">
-                        <span className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#8A6A2F]">
-                          <Database className="h-4 w-4" />
-                          {tool.cadence}
+                    </span>
+                    <span className="inline-flex flex-none items-center gap-1 text-sm font-black text-[#8A6A2F]">
+                      {t.open}
+                      <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                    </span>
+                  </span>
+                  <span className="mt-6 block border-t border-[#E6DDCD] pt-5">
+                    <span className="mb-3 inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#8A6A2F]">
+                      <Database className="h-4 w-4" />
+                      {tool.cadence}
+                    </span>
+                    <span className="grid gap-2 text-sm leading-5 text-[#5B6472]">
+                      {tool.bullets.map((bullet) => (
+                        <span key={bullet} className="flex gap-2">
+                          <span className="mt-2 h-1.5 w-1.5 flex-none bg-[#D7B46A]" />
+                          <span>{bullet}</span>
                         </span>
-                        <span className="grid gap-1 text-sm leading-5 text-[#5B6472]">
-                          {tool.bullets.map((bullet) => (
-                            <span key={bullet} className="flex gap-2">
-                              <span className="mt-2 h-1.5 w-1.5 flex-none bg-[#D7B46A]" />
-                              <span>{bullet}</span>
-                            </span>
-                          ))}
-                        </span>
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ) : (
+                      ))}
+                    </span>
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="max-w-xl border border-[#E6DDCD] bg-[#FFFDF8] p-6 shadow-[0_24px_60px_rgba(78,56,21,0.12)]">
             <form onSubmit={handleSubmit} className="space-y-4">
               <label className="block">
                 <span className="text-sm font-black text-[#111827]">{t.passcode}</span>
@@ -364,8 +315,8 @@ export default function AccessPortal({ isAuthenticated }: AccessPortalProps) {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </button>
             </form>
-          )}
-        </div>
+          </div>
+        )}
       </section>
     </main>
   );
