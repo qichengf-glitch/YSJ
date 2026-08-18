@@ -20,6 +20,9 @@ export CN_VIX_BACKEND_URL="${CN_VIX_BACKEND_URL:-http://127.0.0.1:8765}"
 export VIX_DASHBOARD_PUBLIC_URL="${VIX_DASHBOARD_PUBLIC_URL:-/api/cn-option-vix-dashboard/index.html}"
 export DASHBOARD_HOST="${DASHBOARD_HOST:-127.0.0.1}"
 export DASHBOARD_PORT="${DASHBOARD_PORT:-8765}"
+export STOCK_GRADER_DATA_DIR="${STOCK_GRADER_DATA_DIR:-$DATA_DIR/stock_grader}"
+export STOCK_GRADER_REPORT_DIR="${STOCK_GRADER_REPORT_DIR:-$STOCK_GRADER_DATA_DIR/reports}"
+export STOCK_GRADER_LOG_DIR="${STOCK_GRADER_LOG_DIR:-$STOCK_GRADER_DATA_DIR/logs}"
 
 seed_sqlite() {
   local source="$1"
@@ -64,6 +67,11 @@ PY
 }
 
 seed_vix_sqlite_if_empty "$ROOT/cn_option_vix/data/live_vix.sqlite" "$CN_VIX_DB"
+mkdir -p "$STOCK_GRADER_REPORT_DIR" "$STOCK_GRADER_LOG_DIR"
+if [[ -d "$ROOT/stock_grader/data/reports" ]] && ! compgen -G "$STOCK_GRADER_REPORT_DIR/full_scores_*.csv" >/dev/null; then
+  cp "$ROOT"/stock_grader/data/reports/full_scores_*.csv "$STOCK_GRADER_REPORT_DIR"/ 2>/dev/null || true
+  echo "Seeded Stock Grader reports from package snapshot."
+fi
 
 PIDS=()
 cleanup() {
@@ -102,6 +110,17 @@ if [[ -d "$ROOT/cn_option_vix" ]]; then
   echo "CN VIX service started on ${DASHBOARD_HOST}:${DASHBOARD_PORT}"
 else
   echo "WARNING: cn_option_vix directory not found."
+fi
+
+if [[ -d "$ROOT/stock_grader" && -x "$ROOT/stock_grader/.venv/bin/python" ]]; then
+  (
+    cd "$ROOT/stock_grader"
+    exec .venv/bin/python scheduler.py
+  ) &
+  PIDS+=("$!")
+  echo "Stock Grader weekly scheduler started."
+else
+  echo "WARNING: stock_grader scheduler not started; missing directory or Python environment."
 fi
 
 echo "Next.js starting on 0.0.0.0:${PORT}"

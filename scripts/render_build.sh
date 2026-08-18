@@ -39,4 +39,12 @@ else
   echo "No cn_option_vix directory found; skipping CN VIX Python install."
 fi
 
+if [[ -d "$ROOT/stock_grader" ]]; then
+  "$PYTHON_BIN" -m venv "$ROOT/stock_grader/.venv"
+  "$ROOT/stock_grader/.venv/bin/python" -m pip install --upgrade pip
+  "$ROOT/stock_grader/.venv/bin/python" -m pip install -r "$ROOT/stock_grader/requirements.txt"
+else
+  echo "No stock_grader directory found; skipping Stock Grader Python install."
+fi
+
 npm run build
