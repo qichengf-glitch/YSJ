@@ -73,6 +73,9 @@ def run_refresh(reason: str) -> int:
     timeout_seconds = int(os.environ.get("STOCK_GRADER_REFRESH_TIMEOUT_SECONDS", "21600"))
     log_path = LOG_DIR / "stock_grader_scheduler.log"
     started = datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    env = os.environ.copy()
+    env.setdefault("STOCK_GRADER_RESUME_TODAY", "true")
+    env.setdefault("STOCK_GRADER_FETCH_CACHE", "true")
     with log_path.open("a", encoding="utf-8") as log:
         log.write(f"\n[{started}] starting Stock Grader refresh ({reason}): {' '.join(cmd)}\n")
         log.flush()
@@ -83,6 +86,7 @@ def run_refresh(reason: str) -> int:
                 stdout=log,
                 stderr=subprocess.STDOUT,
                 check=False,
+                env=env,
                 timeout=timeout_seconds,
             )
             returncode = result.returncode

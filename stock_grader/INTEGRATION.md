@@ -17,9 +17,10 @@ STOCK_GRADER_DATA_DIR=/var/data/stock_grader
 STOCK_GRADER_REPORT_DIR=/var/data/stock_grader/reports
 ```
 
-The checked-in `full_scores_20260804.csv` is a seed report so the page has data
-before the first production run. On Render, `scripts/render_start.sh` seeds that
-report into the persistent report directory if no production report exists yet.
+Checked-in `full_scores_*.csv` files are package seed reports so the page has
+data before or between production runs. On Render, `scripts/render_start.sh`
+copies any packaged report that is missing from the persistent report directory
+without overwriting existing production reports.
 
 ## Production Cadence
 
@@ -35,8 +36,12 @@ The production refresh command is:
 
 ```bash
 cd stock_grader
-python3 run.py --grade-all --force --no-llm
+python3 run.py --grade-all --force --no-llm --resume-today
 ```
+
+`--resume-today` reuses completed same-day snapshots if a refresh is interrupted
+or restarted. In-process fetch caching is enabled for scheduled runs so repeated
+peer-company fetches can be reused inside the same refresh.
 
 The LLM tier is disabled by default for scheduled runs because discretionary
 categories are reviewed through the admin override layer. Set
@@ -53,6 +58,9 @@ STOCK_GRADER_WEEKLY_DAY=MON
 STOCK_GRADER_WEEKLY_HOUR=7
 STOCK_GRADER_WEEKLY_MINUTE=0
 STOCK_GRADER_REFRESH_TIMEOUT_SECONDS=21600
+STOCK_GRADER_RESUME_TODAY=true
+STOCK_GRADER_FETCH_CACHE=true
+STOCK_GRADER_FETCH_CACHE_MAX=256
 ```
 
 The first production refresh can take longer than later runs because peer sets

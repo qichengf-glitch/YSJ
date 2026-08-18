@@ -8,6 +8,7 @@ USAGE
   python run.py --grade AAOI                  full grade of one ticker
   python run.py --grade-all                   grade everything the triggers queue
   python run.py --grade-all --force           grade everything regardless
+  python run.py --grade-all --resume-today    reuse today's completed snapshots
   python run.py --diff AAOI                   diff the two most recent snapshots
   python run.py --report                      write updates CSV for all tickers
   python run.py --write-excel path/to.xlsx    apply scores into a copy
@@ -281,7 +282,8 @@ def cmd_weekly(universe: dict, rubric: dict) -> int:
     return 0
 
 
-def cmd_grade_all(universe: dict, rubric: dict, force: bool, use_llm: bool) -> int:
+def cmd_grade_all(universe: dict, rubric: dict, force: bool, use_llm: bool,
+                  resume_today: bool = False) -> int:
     settings = universe.get("settings", {})
     sec_ua = settings.get("sec_user_agent", "Research research@example.com")
     tickers = list((universe.get("tickers") or {}).keys())
@@ -290,6 +292,13 @@ def cmd_grade_all(universe: dict, rubric: dict, force: bool, use_llm: bool) -> i
     block_index = state.build_block_index(tickers)
 
     for ticker in tickers:
+        if resume_today:
+            snap = state.load_snapshot(state.snapshot_path(ticker, today_str()))
+            if snap:
+                LOG.info("[%s] using today's saved snapshot", ticker)
+                results[ticker] = state.result_from_snapshot(snap)
+                continue
+
         if not force:
             try:
                 b = fetch_all(ticker, sec_ua, use_sec=False, use_scrape_fallback=False)
@@ -393,6 +402,8 @@ def main() -> int:
     p.add_argument("--grade", metavar="TICKER", help="full grade of one ticker")
     p.add_argument("--grade-all", action="store_true", help="grade the queued universe")
     p.add_argument("--force", action="store_true", help="ignore triggers")
+    p.add_argument("--resume-today", action="store_true",
+                   help="reuse any full snapshots already written today")
     p.add_argument("--diff", metavar="TICKER", help="diff two most recent snapshots")
     p.add_argument("--report", action="store_true", help="write the updates CSV")
     p.add_argument("--write-excel", metavar="XLSX", help="apply scores into a copy")
@@ -426,7 +437,10 @@ def main() -> int:
                                  refresh_peers=args.refresh_peers)
         return 0 if res else 1
     if args.grade_all:
-        return cmd_grade_all(universe, rubric, args.force, use_llm)
+        resume_today = args.resume_today or os.environ.get(
+            "STOCK_GRADER_RESUME_TODAY", ""
+        ).strip().lower() in {"1", "true", "yes", "on"}
+        return cmd_grade_all(universe, rubric, args.force, use_llm, resume_today)
     if args.diff:
         return cmd_diff(args.diff, universe)
     if args.report:

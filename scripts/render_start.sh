@@ -68,9 +68,16 @@ PY
 
 seed_vix_sqlite_if_empty "$ROOT/cn_option_vix/data/live_vix.sqlite" "$CN_VIX_DB"
 mkdir -p "$STOCK_GRADER_REPORT_DIR" "$STOCK_GRADER_LOG_DIR"
-if [[ -d "$ROOT/stock_grader/data/reports" ]] && ! compgen -G "$STOCK_GRADER_REPORT_DIR/full_scores_*.csv" >/dev/null; then
-  cp "$ROOT"/stock_grader/data/reports/full_scores_*.csv "$STOCK_GRADER_REPORT_DIR"/ 2>/dev/null || true
-  echo "Seeded Stock Grader reports from package snapshot."
+if [[ -d "$ROOT/stock_grader/data/reports" ]]; then
+  shopt -s nullglob
+  for report in "$ROOT"/stock_grader/data/reports/full_scores_*.csv; do
+    target="$STOCK_GRADER_REPORT_DIR/$(basename "$report")"
+    if [[ ! -f "$target" ]]; then
+      cp "$report" "$target"
+      echo "Seeded Stock Grader report $(basename "$report")."
+    fi
+  done
+  shopt -u nullglob
 fi
 
 PIDS=()

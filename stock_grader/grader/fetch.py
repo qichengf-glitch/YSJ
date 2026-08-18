@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import os
 import time
+from collections import OrderedDict
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -47,6 +48,7 @@ SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
 
 _FX_CACHE: dict = {}
 _SEC_TICKER_CACHE: Optional[dict] = None
+_FETCH_ALL_CACHE: OrderedDict = OrderedDict()
 
 
 # ===========================================================================
@@ -386,6 +388,14 @@ def get_fx_rate(from_ccy: str, to_ccy: str) -> float:
 def fetch_all(ticker: str, sec_user_agent: str, use_sec: bool = True,
               use_scrape_fallback: bool = True) -> DataBundle:
     """Fetch every source for one ticker and resolve the currency question."""
+    cache_enabled = os.environ.get("STOCK_GRADER_FETCH_CACHE", "true").strip().lower()
+    cacheable = cache_enabled in {"1", "true", "yes", "on"}
+    cache_key = (ticker.upper(), bool(use_sec), bool(use_scrape_fallback))
+    if cacheable and cache_key in _FETCH_ALL_CACHE:
+        _FETCH_ALL_CACHE.move_to_end(cache_key)
+        LOG.info("[%s] fetching... reused in-process cache", ticker)
+        return _FETCH_ALL_CACHE[cache_key]
+
     LOG.info("[%s] fetching...", ticker)
     b = DataBundle(ticker)
     fetch_yfinance(ticker, b)
@@ -404,4 +414,10 @@ def fetch_all(ticker: str, sec_user_agent: str, use_sec: bool = True,
         b.fx_rate = get_fx_rate(b.financial_currency, b.price_currency)
         LOG.info("[%s] statements in %s, price in %s -- applying FX %.4f",
                  ticker, b.financial_currency, b.price_currency, b.fx_rate)
+    if cacheable:
+        max_entries = int(os.environ.get("STOCK_GRADER_FETCH_CACHE_MAX", "256"))
+        _FETCH_ALL_CACHE[cache_key] = b
+        _FETCH_ALL_CACHE.move_to_end(cache_key)
+        while len(_FETCH_ALL_CACHE) > max_entries:
+            _FETCH_ALL_CACHE.popitem(last=False)
     return b
