@@ -47,4 +47,12 @@ else
   echo "No stock_grader directory found; skipping Stock Grader Python install."
 fi
 
+if [[ -d "$ROOT/daily_summary_backend" ]]; then
+  "$PYTHON_BIN" -m venv "$ROOT/daily_summary_backend/.venv"
+  "$ROOT/daily_summary_backend/.venv/bin/python" -m pip install --upgrade pip
+  "$ROOT/daily_summary_backend/.venv/bin/python" -m pip install -r "$ROOT/daily_summary_backend/requirements.txt"
+else
+  echo "No daily_summary_backend directory found; skipping Daily Summary Python install."
+fi
+
 npm run build

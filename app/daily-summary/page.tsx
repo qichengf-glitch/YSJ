@@ -15,7 +15,7 @@ export default function DailySummaryPage() {
   }
 
   return (
-    <main className="h-[calc(100vh-4rem)] bg-[#f0f2f5]">
+    <main className="min-h-[calc(100vh-4rem)] bg-[#f0f2f5]">
       <DailySummaryFrame />
     </main>
   );
