@@ -58,6 +58,8 @@ type LiveResponse = {
   counts?: Record<string, number>;
 };
 
+type LiveChannelKey = "a_share" | "us_stock" | "forex" | "commodity";
+
 const channelMeta = {
   a_share: {
     titleZh: "A股",
@@ -122,6 +124,17 @@ function overallLabel(value: string | undefined, isChinese: boolean) {
   };
   const item = labels[value ?? ""] ?? ["待生成", "Pending", "bg-[#F8FAFC] text-[#7B879C]"];
   return { label: isChinese ? item[0] : item[1], className: item[2] };
+}
+
+function liveLabel(isChinese: boolean) {
+  return {
+    label: isChinese ? "实时" : "Live",
+    className: "bg-white/80 text-[#5F4820]",
+  };
+}
+
+function liveKeyForChannel(channel: (typeof channels)[number]): LiveChannelKey {
+  return channel === "us" ? "us_stock" : channel;
 }
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -254,6 +267,7 @@ export default function DailySummaryFrame() {
       .sort((a, b) => String(b.time ?? "").localeCompare(String(a.time ?? "")))
       .slice(0, 12);
   }, [live]);
+  const hasLiveData = latestRecords.length > 0;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#FBFAF7]">
@@ -262,15 +276,25 @@ export default function DailySummaryFrame() {
         title={isChinese ? "每日市场日报" : "Daily Summary"}
         subtitle={
           isChinese
-            ? "金十实时新闻、Claude 事件打分与跨资产日报。"
-            : "Jin10 realtime news, Claude event scoring, and cross-asset daily brief."
+            ? "金十实时新闻与跨资产市场日报。"
+            : "Jin10 realtime market news and cross-asset daily brief."
         }
         icon={<CalendarClock className="h-5 w-5" />}
         meta={
           <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#8A6A2F]">
             <span className="inline-flex h-9 items-center gap-2 border border-[#E6DDCD] bg-white/70 px-3">
               <Database className="h-4 w-4" />
-              {summary?.summary_available ? (isChinese ? "实时日报" : "Live digest") : isChinese ? "等待生成" : "Pending"}
+              {summary?.summary_available
+                ? isChinese
+                  ? "实时日报"
+                  : "Live digest"
+                : hasLiveData
+                  ? isChinese
+                    ? "实时新闻流"
+                    : "Live feed"
+                  : isChinese
+                    ? "等待数据"
+                    : "Pending"}
             </span>
             <span className="inline-flex h-9 items-center border border-[#E6DDCD] bg-white/70 px-3">
               {compactDate(summary?.generated_at)}
@@ -302,7 +326,14 @@ export default function DailySummaryFrame() {
             const meta = channelMeta[channel];
             const Icon = meta.icon;
             const digest = summary?.summaries?.[channel];
-            const label = overallLabel(digest?.overall, isChinese);
+            const liveRows = live?.data?.[liveKeyForChannel(channel)] ?? [];
+            const hasDigest = Boolean(digest?.summary);
+            const label = hasDigest
+              ? overallLabel(digest?.overall, isChinese)
+              : liveRows.length
+                ? liveLabel(isChinese)
+                : overallLabel(undefined, isChinese);
+            const inputCount = (summary?.counts?.[channel] ?? 0) || liveRows.length;
             return (
               <article key={channel} className={`min-h-[360px] border p-5 shadow-[0_14px_34px_rgba(78,56,21,0.07)] ${meta.tone}`}>
                 <div className="flex items-start justify-between gap-3">
@@ -324,14 +355,29 @@ export default function DailySummaryFrame() {
 
                 <div className="mt-5 border-y border-current/10 py-4">
                   <div className="text-2xl font-semibold leading-snug text-[#111827]">
-                    {digest?.summary || (isChinese ? "暂无结构化摘要" : "No structured digest yet")}
+                    {digest?.summary ||
+                      liveRows[0]?.content ||
+                      (isChinese ? "等待实时数据" : "Waiting for realtime data")}
                   </div>
                   <div className="mt-2 text-xs font-black uppercase tracking-[0.14em] opacity-65">
-                    {(summary?.counts?.[channel] ?? 0).toLocaleString()} {isChinese ? "条输入" : "inputs"}
+                    {inputCount.toLocaleString()}{" "}
+                    {hasDigest ? (isChinese ? "条日报输入" : "digest inputs") : isChinese ? "条实时新闻" : "live items"}
                   </div>
                 </div>
 
                 <DigestRows digest={digest} />
+                {!hasDigest && liveRows.length ? (
+                  <div className="mt-4 space-y-3">
+                    {liveRows.slice(0, 3).map((record) => (
+                      <div key={`${record.id}-${record.time}`} className="border-l-2 border-current/25 bg-white/70 px-3 py-2">
+                        <div className="text-[11px] font-black uppercase tracking-[0.12em] opacity-60">
+                          {record.time?.slice(5, 16) || "-"}
+                        </div>
+                        <p className="mt-1 text-sm leading-6 text-[#364152]">{record.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
               </article>
             );
           })}
