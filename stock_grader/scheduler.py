@@ -102,7 +102,7 @@ def run_refresh(reason: str) -> int:
 
 def main() -> int:
     tz = scheduler_timezone()
-    run_on_start = bool_env("STOCK_GRADER_UPDATE_ON_START", True)
+    run_on_start = bool_env("STOCK_GRADER_UPDATE_ON_START", False)
     skip_if_today = bool_env("STOCK_GRADER_SKIP_IF_REPORT_TODAY", True)
 
     if run_on_start and not (skip_if_today and report_exists_today(tz)):

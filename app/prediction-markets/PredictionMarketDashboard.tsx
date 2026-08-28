@@ -174,17 +174,17 @@ function changeTone(value: number | null | undefined) {
 
 function bucketTone(bucket: string) {
   if (bucket === "rates_usd") {
-    return "border-[#D6E4FF] bg-[#EEF2FF] text-[#273B9A]";
+    return "border-[#D7B46A] bg-[#F8F1E3] text-[#5F4820]";
   }
   if (bucket === "geo_commodities") {
     return "border-amber-200 bg-amber-50 text-amber-700";
   }
-  return "border-[#E7ECF5] bg-[#F8FAFC] text-[#5B6780]";
+  return "border-[#E6DDCD] bg-[#FFFDF8] text-[#5B6472]";
 }
 
 function signalTone(signal: string) {
   if (signal.includes("重定价") || signal.includes("反转")) {
-    return "bg-[#EEF2FF] text-[#273B9A]";
+    return "bg-[#F8F1E3] text-[#5F4820]";
   }
   if (signal.includes("拥挤")) {
     return "bg-amber-50 text-amber-700";
@@ -192,7 +192,7 @@ function signalTone(signal: string) {
   if (signal.includes("低")) {
     return "bg-[#F8FAFC] text-[#7B879C]";
   }
-  return "bg-emerald-50 text-emerald-700";
+  return "bg-[#111827] text-[#F0D694]";
 }
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -210,7 +210,7 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 function MiniHistory({ market }: { market: PredictionMarket }) {
   const points = market.history ?? [];
   if (points.length < 2) {
-    return <div className="h-16 rounded-xl border border-dashed border-[#E7ECF5] bg-[#F8FAFC]" />;
+    return <div className="h-16 border border-dashed border-[#E6DDCD] bg-[#FFFDF8]" />;
   }
   const width = 240;
   const height = 64;
@@ -228,7 +228,7 @@ function MiniHistory({ market }: { market: PredictionMarket }) {
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="h-16 w-full">
-      <path d={path} fill="none" stroke="#4F63F6" strokeWidth="3" strokeLinecap="round" />
+      <path d={path} fill="none" stroke="#D7B46A" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -350,18 +350,18 @@ export default function PredictionMarketDashboard() {
     overview?.volume_leaders?.length ? overview.volume_leaders : topSpike ? [topSpike] : [];
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] text-[#18233A]">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(215,180,106,0.16),transparent_30%),linear-gradient(180deg,#FBFAF7_0%,#F5EFE4_100%)] text-[#111827]">
       <QuantModuleHeader
         title="Prediction Market"
         subtitle="Polymarket macro probability, liquidity, and tracked-wallet activity."
         icon={<Signal className="h-5 w-5" />}
         meta={
-          <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#8A6A2F]">
-            <span className="inline-flex h-9 items-center gap-2 border border-[#E6DDCD] bg-white px-3">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#F0D694]">
+            <span className="inline-flex h-9 items-center gap-2 border border-[#D7B46A]/45 bg-white/8 px-3">
               <DatabaseZap className="h-4 w-4" />
               Scheduled sync
             </span>
-            <span className="inline-flex h-9 items-center gap-2 border border-[#E6DDCD] bg-white px-3">
+            <span className="inline-flex h-9 items-center gap-2 border border-[#D7B46A]/45 bg-white/8 px-3">
               <Clock3 className="h-4 w-4" />
               {compactDate(overview?.fetched_at)}
             </span>
@@ -370,23 +370,23 @@ export default function PredictionMarketDashboard() {
       />
       <section className="mx-auto max-w-7xl px-5 py-6 sm:px-8 lg:px-12">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
+            <div className="border border-[#E6DDCD] bg-[#FFFDF8]/84 px-4 py-3 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Markets</div>
               <div className="mt-1 text-xl font-black">{overview?.market_count ?? "-"}</div>
             </div>
-            <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
+            <div className="border border-[#E6DDCD] bg-[#FFFDF8]/84 px-4 py-3 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Top Up</div>
               <div className={`mt-1 text-xl font-black ${changeTone(topUp?.change_7d_pp)}`}>
                 {signedPct(topUp?.change_7d_pp)}
               </div>
             </div>
-            <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
+            <div className="border border-[#E6DDCD] bg-[#FFFDF8]/84 px-4 py-3 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Top Down</div>
               <div className={`mt-1 text-xl font-black ${changeTone(topDown?.change_7d_pp)}`}>
                 {signedPct(topDown?.change_7d_pp)}
               </div>
             </div>
-            <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
+            <div className="border border-[#E6DDCD] bg-[#FFFDF8]/84 px-4 py-3 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
               <div className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">
                 <Clock3 className="h-3 w-3" />
                 Synced
@@ -401,8 +401,8 @@ export default function PredictionMarketDashboard() {
               key={item.bucket}
               type="button"
               onClick={() => setBucket(item.bucket as BucketKey)}
-              className={`rounded-2xl border bg-white p-4 text-left transition hover:border-[#A8B2FF] ${
-                bucket === item.bucket ? "border-[#A8B2FF] shadow-[0_16px_36px_rgba(79,99,246,0.10)]" : "border-[#E7ECF5]"
+              className={`border bg-[#FFFDF8]/84 p-4 text-left shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl transition hover:border-[#D7B46A] ${
+                bucket === item.bucket ? "border-[#D7B46A] shadow-[0_18px_44px_rgba(78,56,21,0.13)]" : "border-[#E6DDCD]"
               }`}
             >
               <div className="flex items-center justify-between gap-3">
@@ -429,15 +429,15 @@ export default function PredictionMarketDashboard() {
           <button
             type="button"
             onClick={() => setBucket("all")}
-            className={`rounded-2xl border bg-white p-4 text-left transition hover:border-[#A8B2FF] ${
-              bucket === "all" ? "border-[#A8B2FF] shadow-[0_16px_36px_rgba(79,99,246,0.10)]" : "border-[#E7ECF5]"
+            className={`border bg-[#FFFDF8]/84 p-4 text-left shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl transition hover:border-[#D7B46A] ${
+              bucket === "all" ? "border-[#D7B46A] shadow-[0_18px_44px_rgba(78,56,21,0.13)]" : "border-[#E6DDCD]"
             }`}
           >
             <div className="flex items-center justify-between gap-3">
               <span className="rounded-full border border-[#E7ECF5] bg-[#F8FAFC] px-2.5 py-1 text-xs font-black text-[#5B6780]">
                 All Macro
               </span>
-              <BarChart3 className="h-4 w-4 text-[#4F63F6]" />
+              <BarChart3 className="h-4 w-4 text-[#8A6A2F]" />
             </div>
             <p className="mt-3 min-h-10 text-sm font-semibold leading-5 text-[#5B6780]">
               Combined rates, USD, geopolitical, commodity, and macro risk markets.
@@ -453,15 +453,15 @@ export default function PredictionMarketDashboard() {
         ) : null}
 
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_390px]">
-          <section className="min-w-0 rounded-2xl border border-[#E7ECF5] bg-white shadow-[0_18px_45px_rgba(39,59,154,0.08)]">
-            <div className="grid grid-cols-1 gap-3 border-b border-[#E7ECF5] p-4 md:grid-cols-[minmax(180px,1fr)_180px_160px_150px]">
+          <section className="min-w-0 border border-[#E6DDCD] bg-[#FFFDF8]/88 shadow-[0_18px_45px_rgba(78,56,21,0.08)] backdrop-blur-xl">
+            <div className="grid grid-cols-1 gap-3 border-b border-[#E6DDCD] p-4 md:grid-cols-[minmax(180px,1fr)_180px_160px_150px]">
               <label className="relative block">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA5BA]" />
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search event or question"
-                  className="h-11 w-full rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] pl-10 pr-3 text-sm font-semibold outline-none transition focus:border-[#A8B2FF] focus:ring-2 focus:ring-[#A8B2FF]/25"
+                  className="h-11 w-full border border-[#E6DDCD] bg-white/80 pl-10 pr-3 text-sm font-semibold outline-none transition focus:border-[#D7B46A] focus:ring-2 focus:ring-[#D7B46A]/25"
                 />
               </label>
               <label className="relative block">
@@ -469,7 +469,7 @@ export default function PredictionMarketDashboard() {
                 <select
                   value={bucket}
                   onChange={(event) => setBucket(event.target.value as BucketKey)}
-                  className="h-11 w-full rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] pl-10 pr-3 text-sm font-semibold outline-none transition focus:border-[#A8B2FF] focus:ring-2 focus:ring-[#A8B2FF]/25"
+                  className="h-11 w-full border border-[#E6DDCD] bg-white/80 pl-10 pr-3 text-sm font-semibold outline-none transition focus:border-[#D7B46A] focus:ring-2 focus:ring-[#D7B46A]/25"
                 >
                   <option value="all">All buckets</option>
                   <option value="rates_usd">Rates / USD</option>
@@ -481,7 +481,7 @@ export default function PredictionMarketDashboard() {
                 <select
                   value={sortMode}
                   onChange={(event) => setSortMode(event.target.value as "volume" | "move" | "signal" | "spike")}
-                  className="h-11 w-full rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] pl-10 pr-3 text-sm font-semibold outline-none transition focus:border-[#A8B2FF] focus:ring-2 focus:ring-[#A8B2FF]/25"
+                  className="h-11 w-full border border-[#E6DDCD] bg-white/80 pl-10 pr-3 text-sm font-semibold outline-none transition focus:border-[#D7B46A] focus:ring-2 focus:ring-[#D7B46A]/25"
                 >
                   <option value="volume">7D volume</option>
                   <option value="move">7D move</option>
@@ -493,7 +493,7 @@ export default function PredictionMarketDashboard() {
                 type="button"
                 onClick={syncData}
                 disabled={syncing}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#18233A] px-4 text-sm font-black text-white transition hover:bg-[#273B9A] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-11 items-center justify-center gap-2 bg-[#111827] px-4 text-sm font-black text-white transition hover:bg-[#2B3445] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <RefreshCw className={`h-4 w-4 ${syncing ? "animate-spin" : ""}`} />
                 {syncing ? "Syncing" : "Sync"}
@@ -503,7 +503,7 @@ export default function PredictionMarketDashboard() {
             <div className="overflow-x-auto">
               <table className="min-w-[980px] w-full border-collapse text-left text-sm">
                 <thead>
-                  <tr className="border-b border-[#E7ECF5] bg-[#F8FAFC] text-[10px] uppercase tracking-[0.14em] text-[#7B879C]">
+                  <tr className="border-b border-[#E6DDCD] bg-[#F8F1E3] text-[10px] uppercase tracking-[0.14em] text-[#8A6A2F]">
                     <th className="w-[38%] px-4 py-3">Market</th>
                     <th className="px-3 py-3">Bucket</th>
                     <th className="px-3 py-3 text-right">Probability</th>
@@ -525,7 +525,7 @@ export default function PredictionMarketDashboard() {
                         key={market.condition_id}
                         onClick={() => setSelectedId(market.condition_id)}
                         className={`cursor-pointer border-b border-[#EEF2F7] transition hover:bg-[#F8FAFC] ${
-                          selected?.condition_id === market.condition_id ? "bg-[#EEF2FF]" : ""
+                        selected?.condition_id === market.condition_id ? "bg-[#F8F1E3]" : ""
                         }`}
                       >
                         <td className="px-4 py-3">
@@ -568,44 +568,44 @@ export default function PredictionMarketDashboard() {
             </div>
           </section>
 
-          <aside className="rounded-2xl border border-[#E7ECF5] bg-white p-4 shadow-[0_18px_45px_rgba(39,59,154,0.08)]">
+          <aside className="border border-[#E6DDCD] bg-[#FFFDF8]/88 p-4 shadow-[0_18px_45px_rgba(78,56,21,0.08)] backdrop-blur-xl lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto">
             {selected ? (
               <div>
-                <div className="flex items-start justify-between gap-3 border-b border-[#E7ECF5] pb-4">
+                <div className="flex items-start justify-between gap-3 border-b border-[#E6DDCD] pb-4">
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#9AA5BA]">Selected</div>
                     <h2 className="mt-2 text-lg font-black leading-6">{selected.question}</h2>
                   </div>
-                  {detailLoading ? <RefreshCw className="h-4 w-4 animate-spin text-[#4F63F6]" /> : null}
+                  {detailLoading ? <RefreshCw className="h-4 w-4 animate-spin text-[#8A6A2F]" /> : null}
                 </div>
 
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] p-3">
+                  <div className="border border-[#E6DDCD] bg-white/70 p-3">
                     <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Now</div>
                     <div className="mt-1 text-2xl font-black">{pct(selected.prob_pct)}</div>
                   </div>
-                  <div className="rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] p-3">
+                  <div className="border border-[#E6DDCD] bg-white/70 p-3">
                     <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">7D</div>
                     <div className={`mt-1 text-2xl font-black ${changeTone(selected.change_7d_pp)}`}>
                       {signedPct(selected.change_7d_pp)}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] p-3">
+                  <div className="border border-[#E6DDCD] bg-white/70 p-3">
                     <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Bid / Ask</div>
                     <div className="mt-1 text-lg font-black">
                       {pct(selected.bid_pct)} / {pct(selected.ask_pct)}
                     </div>
                   </div>
-                  <div className="rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] p-3">
+                  <div className="border border-[#E6DDCD] bg-white/70 p-3">
                     <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Liquidity</div>
                     <div className="mt-1 text-lg font-black">{money(selected.liquidity)}</div>
                   </div>
                 </div>
 
-                <div className="mt-4 rounded-xl border border-[#E7ECF5] bg-white p-3">
+                <div className="mt-4 border border-[#E6DDCD] bg-white/70 p-3">
                   <div className="mb-2 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm font-black">
-                      <LineChart className="h-4 w-4 text-[#4F63F6]" />
+                      <LineChart className="h-4 w-4 text-[#8A6A2F]" />
                       Probability History
                     </div>
                     <div className="text-xs font-bold text-[#7B879C]">7D</div>
@@ -613,9 +613,9 @@ export default function PredictionMarketDashboard() {
                   <MiniHistory market={selected} />
                 </div>
 
-                <div className="mt-4 rounded-xl border border-[#E7ECF5] bg-white p-3">
+                <div className="mt-4 border border-[#E6DDCD] bg-white/70 p-3">
                   <div className="flex items-center gap-2 text-sm font-black">
-                    <DatabaseZap className="h-4 w-4 text-[#4F63F6]" />
+                    <DatabaseZap className="h-4 w-4 text-[#8A6A2F]" />
                     Asset Readthrough
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -630,10 +630,10 @@ export default function PredictionMarketDashboard() {
                   </p>
                 </div>
 
-                <div className="mt-4 rounded-xl border border-[#E7ECF5] bg-white p-3">
+                <div className="mt-4 border border-[#E6DDCD] bg-white/70 p-3">
                   <div className="mb-3 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm font-black">
-                      <Users className="h-4 w-4 text-[#4F63F6]" />
+                      <Users className="h-4 w-4 text-[#8A6A2F]" />
                       Tracked Holders
                     </div>
                     <span className="text-xs font-bold text-[#7B879C]">
@@ -643,7 +643,7 @@ export default function PredictionMarketDashboard() {
                   <div className="space-y-2">
                     {(selected.whale_holders ?? []).length ? (
                       selected.whale_holders?.map((holder) => (
-                        <div key={`${holder.address}-${holder.outcome}`} className="rounded-lg bg-[#F8FAFC] p-3">
+                          <div key={`${holder.address}-${holder.outcome}`} className="bg-[#FBFAF7] p-3">
                           <div className="flex items-center justify-between gap-3">
                             <div className="min-w-0">
                               <div className="truncate text-sm font-black">{holder.name}</div>
@@ -657,7 +657,7 @@ export default function PredictionMarketDashboard() {
                         </div>
                       ))
                     ) : (
-                      <div className="rounded-lg bg-[#F8FAFC] p-3 text-sm font-semibold text-[#7B879C]">
+                      <div className="bg-[#FBFAF7] p-3 text-sm font-semibold text-[#7B879C]">
                         No tracked holder snapshot for this market yet.
                       </div>
                     )}
@@ -665,7 +665,7 @@ export default function PredictionMarketDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl border border-dashed border-[#E7ECF5] p-5 text-sm font-semibold text-[#7B879C]">
+              <div className="border border-dashed border-[#E6DDCD] p-5 text-sm font-semibold text-[#7B879C]">
                 Select a market to inspect probability, impact, and holder detail.
               </div>
             )}
@@ -673,7 +673,7 @@ export default function PredictionMarketDashboard() {
         </div>
 
         <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <section className="rounded-2xl border border-[#E7ECF5] bg-white p-4">
+          <section className="border border-[#E6DDCD] bg-[#FFFDF8]/88 p-4 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
             <div className="flex items-center gap-2 text-sm font-black">
               <TrendingUp className="h-4 w-4 text-emerald-700" />
               Largest Up Repricing
@@ -684,7 +684,7 @@ export default function PredictionMarketDashboard() {
                   key={market.condition_id}
                   type="button"
                   onClick={() => setSelectedId(market.condition_id)}
-                  className="w-full rounded-xl bg-[#F8FAFC] p-3 text-left transition hover:bg-[#EEF2FF]"
+                  className="w-full bg-white/70 p-3 text-left transition hover:bg-[#F8F1E3]"
                 >
                   <div className="line-clamp-2 text-sm font-black">{market.question}</div>
                   <div className="mt-2 text-sm font-black text-emerald-700">{signedPct(market.change_7d_pp)}</div>
@@ -692,7 +692,7 @@ export default function PredictionMarketDashboard() {
               ))}
             </div>
           </section>
-          <section className="rounded-2xl border border-[#E7ECF5] bg-white p-4">
+          <section className="border border-[#E6DDCD] bg-[#FFFDF8]/88 p-4 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
             <div className="flex items-center gap-2 text-sm font-black">
               <TrendingDown className="h-4 w-4 text-rose-700" />
               Largest Down Repricing
@@ -703,7 +703,7 @@ export default function PredictionMarketDashboard() {
                   key={market.condition_id}
                   type="button"
                   onClick={() => setSelectedId(market.condition_id)}
-                  className="w-full rounded-xl bg-[#F8FAFC] p-3 text-left transition hover:bg-[#EEF2FF]"
+                  className="w-full bg-white/70 p-3 text-left transition hover:bg-[#F8F1E3]"
                 >
                   <div className="line-clamp-2 text-sm font-black">{market.question}</div>
                   <div className="mt-2 text-sm font-black text-rose-700">{signedPct(market.change_7d_pp)}</div>
@@ -711,9 +711,9 @@ export default function PredictionMarketDashboard() {
               ))}
             </div>
           </section>
-          <section className="rounded-2xl border border-[#E7ECF5] bg-white p-4">
+          <section className="border border-[#E6DDCD] bg-[#FFFDF8]/88 p-4 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
             <div className="flex items-center gap-2 text-sm font-black">
-              <Signal className="h-4 w-4 text-[#4F63F6]" />
+              <Signal className="h-4 w-4 text-[#8A6A2F]" />
               Volume Spike Watch
             </div>
             <div className="mt-3 space-y-3">
@@ -722,10 +722,10 @@ export default function PredictionMarketDashboard() {
                   key={market.condition_id}
                   type="button"
                   onClick={() => setSelectedId(market.condition_id)}
-                  className="w-full rounded-xl bg-[#F8FAFC] p-3 text-left transition hover:bg-[#EEF2FF]"
+                  className="w-full bg-white/70 p-3 text-left transition hover:bg-[#F8F1E3]"
                 >
                   <div className="line-clamp-2 text-sm font-black">{market.question}</div>
-                  <div className="mt-2 text-sm font-black text-[#273B9A]">
+                  <div className="mt-2 text-sm font-black text-[#8A6A2F]">
                     {market.volume_spike_ratio ? `${market.volume_spike_ratio.toFixed(1)}x` : "No local baseline"} · {money(market.volume_24h)}
                   </div>
                 </button>
@@ -735,9 +735,9 @@ export default function PredictionMarketDashboard() {
         </div>
 
         {state.whales?.top_traders_24h?.length ? (
-          <section className="mt-4 rounded-2xl border border-[#E7ECF5] bg-white p-4">
+          <section className="mt-4 border border-[#E6DDCD] bg-[#FFFDF8]/88 p-4 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
             <div className="flex items-center gap-2 text-sm font-black">
-              <Users className="h-4 w-4 text-[#4F63F6]" />
+              <Users className="h-4 w-4 text-[#8A6A2F]" />
               Tracked Wallet Activity
             </div>
             <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -746,7 +746,7 @@ export default function PredictionMarketDashboard() {
                   key={`${trader.address}-${trader.condition_id}`}
                   type="button"
                   onClick={() => setSelectedId(trader.condition_id)}
-                  className="rounded-xl bg-[#F8FAFC] p-3 text-left transition hover:bg-[#EEF2FF]"
+                  className="bg-white/70 p-3 text-left transition hover:bg-[#F8F1E3]"
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0">

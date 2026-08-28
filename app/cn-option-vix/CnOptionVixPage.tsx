@@ -37,12 +37,12 @@ export default function CnOptionVixPage({ dashboardUrl }: CnOptionVixPageProps) 
         subtitle={t.subtitle}
         icon={<BarChart3 className="h-5 w-5" />}
         meta={
-          <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#8A6A2F]">
-            <span className="inline-flex h-9 items-center gap-2 border border-[#E6DDCD] bg-white px-3">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-[#F0D694]">
+            <span className="inline-flex h-9 items-center gap-2 border border-[#D7B46A]/45 bg-white/8 px-3">
               <RadioTower className="h-4 w-4" />
               {t.cadence}
             </span>
-            <span className="inline-flex h-9 items-center gap-2 border border-[#E6DDCD] bg-white px-3">
+            <span className="inline-flex h-9 items-center gap-2 border border-[#D7B46A]/45 bg-white/8 px-3">
               <Database className="h-4 w-4" />
               {t.storage}
             </span>

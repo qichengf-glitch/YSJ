@@ -31,7 +31,9 @@ npm run dev
   /research/page.tsx       -> Research page
   /research/ongoing-thesis -> Ongoing thesis page
   /access                  -> Quant Monitor access page
+  /cn-option-vix           -> CN Option VIX module
   /prediction-markets/page.tsx -> Prediction Market module
+  /stock-grader            -> Stock Grader module
   /layout.tsx              -> Root layout
   /globals.css             -> Global styles
 

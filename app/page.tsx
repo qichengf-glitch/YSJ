@@ -19,7 +19,7 @@ const content = {
       kicker: "Quantitative Market Monitoring",
       title: "Market Intelligence for Quant Research.",
       copy:
-        "A focused workspace for internal research staff to review market indicators, volatility regimes, event probabilities, daily briefs, and scoring outputs.",
+        "A focused workspace for internal research staff to review market indicators, volatility regimes, event probabilities, and scoring outputs.",
       primaryCta: "Explore Research",
     },
     values: [
@@ -31,7 +31,7 @@ const content = {
       eyebrow: "Workspace",
       title: "Research pages plus monitored market systems.",
       subtitle:
-        "The public pages hold research material and ongoing theses. Quant Monitor is the controlled entry point for CN Option VIX, Prediction Market, Daily Summary, and Stock Grader.",
+        "The public pages hold research material and ongoing theses. Quant Monitor is the controlled entry point for CN Option VIX, Prediction Market, and Stock Grader.",
     },
     pillars: [
       {
@@ -42,7 +42,7 @@ const content = {
       {
         label: "02",
         title: "Quant Monitor",
-        text: "Internal modules track volatility, prediction markets, daily market summaries, and equity scoring outputs.",
+        text: "Internal modules track volatility, prediction markets, and equity scoring outputs.",
       },
       {
         label: "03",
@@ -51,7 +51,7 @@ const content = {
       },
     ],
     metrics: [
-      ["4", "Monitoring Modules"],
+      ["3", "Monitoring Modules"],
       ["12h", "Browser Session"],
       ["Live", "Market Feeds"],
       ["Internal", "Research Workflow"],
@@ -67,7 +67,7 @@ const content = {
       kicker: "量化指标监控",
       title: "面向量化研究的市场情报工作台。",
       copy:
-        "供内部科研人员和工作人员查看市场指标、波动率状态、事件概率、每日简报与评分输出。",
+        "供内部科研人员和工作人员查看市场指标、波动率状态、事件概率与评分输出。",
       primaryCta: "浏览研究",
     },
     values: [
@@ -79,7 +79,7 @@ const content = {
       eyebrow: "工作台",
       title: "研究页面，加上受控的市场监控系统。",
       subtitle:
-        "公开页面承载研究材料和进行中的 thesis。量化指标监控是进入中国期权 VIX、Prediction Market、Daily Summary 和 Stock Grader 的受控入口。",
+        "公开页面承载研究材料和进行中的 thesis。量化指标监控是进入中国期权 VIX、Prediction Market 和 Stock Grader 的受控入口。",
     },
     pillars: [
       {
@@ -90,7 +90,7 @@ const content = {
       {
         label: "02",
         title: "量化指标监控",
-        text: "内部模块跟踪波动率、预测市场、每日市场摘要和股票评分输出。",
+        text: "内部模块跟踪波动率、预测市场和股票评分输出。",
       },
       {
         label: "03",
@@ -99,7 +99,7 @@ const content = {
       },
     ],
     metrics: [
-      ["4", "监控模块"],
+      ["3", "监控模块"],
       ["12h", "浏览器会话"],
       ["Live", "市场数据流"],
       ["Internal", "内部研究流程"],

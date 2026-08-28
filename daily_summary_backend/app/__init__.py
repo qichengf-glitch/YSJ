@@ -1,1 +1,0 @@
-"""Daily Summary backend package."""

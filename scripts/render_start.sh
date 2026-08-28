@@ -23,8 +23,6 @@ export DASHBOARD_PORT="${DASHBOARD_PORT:-8765}"
 export STOCK_GRADER_DATA_DIR="${STOCK_GRADER_DATA_DIR:-$DATA_DIR/stock_grader}"
 export STOCK_GRADER_REPORT_DIR="${STOCK_GRADER_REPORT_DIR:-$STOCK_GRADER_DATA_DIR/reports}"
 export STOCK_GRADER_LOG_DIR="${STOCK_GRADER_LOG_DIR:-$STOCK_GRADER_DATA_DIR/logs}"
-export DAILY_SUMMARY_DATA_DIR="${DAILY_SUMMARY_DATA_DIR:-$DATA_DIR/daily_summary}"
-export DAILY_SUMMARY_BACKEND_URL="${DAILY_SUMMARY_BACKEND_URL:-http://127.0.0.1:8010}"
 
 seed_sqlite() {
   local source="$1"
@@ -70,7 +68,6 @@ PY
 
 seed_vix_sqlite_if_empty "$ROOT/cn_option_vix/data/live_vix.sqlite" "$CN_VIX_DB"
 mkdir -p "$STOCK_GRADER_REPORT_DIR" "$STOCK_GRADER_LOG_DIR"
-mkdir -p "$DAILY_SUMMARY_DATA_DIR"
 if [[ -d "$ROOT/stock_grader/data/reports" ]]; then
   shopt -s nullglob
   for report in "$ROOT"/stock_grader/data/reports/full_scores_*.csv; do
@@ -131,17 +128,6 @@ if [[ -d "$ROOT/stock_grader" && -x "$ROOT/stock_grader/.venv/bin/python" ]]; th
   echo "Stock Grader weekly scheduler started."
 else
   echo "WARNING: stock_grader scheduler not started; missing directory or Python environment."
-fi
-
-if [[ -d "$ROOT/daily_summary_backend" && -x "$ROOT/daily_summary_backend/.venv/bin/python" ]]; then
-  (
-    cd "$ROOT/daily_summary_backend"
-    exec .venv/bin/python -m uvicorn app.main:app --host 127.0.0.1 --port 8010
-  ) &
-  PIDS+=("$!")
-  echo "Daily Summary backend started on 127.0.0.1:8010"
-else
-  echo "WARNING: daily_summary_backend not started; missing directory or Python environment."
 fi
 
 echo "Next.js starting on 0.0.0.0:${PORT}"

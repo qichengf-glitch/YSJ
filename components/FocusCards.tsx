@@ -36,7 +36,7 @@ const localizedItems = {
     {
       title: "Quant Monitor",
       description:
-        "Access-controlled monitoring for VIX, prediction markets, daily summaries, and stock scoring.",
+        "Access-controlled monitoring for VIX, prediction markets, and stock scoring.",
       alt: "Probability chart and market monitoring illustration",
     },
   ],
@@ -53,7 +53,7 @@ const localizedItems = {
     },
     {
       title: "量化指标监控",
-      description: "受控访问 VIX、预测市场、每日简报与股票评分等内部监控模块。",
+      description: "受控访问 VIX、预测市场与股票评分等内部监控模块。",
       alt: "概率图表和市场结果插图",
     },
   ],

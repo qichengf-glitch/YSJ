@@ -44,7 +44,7 @@ function scoreTone(score: number | null) {
     return "border-emerald-200 bg-emerald-50 text-emerald-700";
   }
   if (score >= 6) {
-    return "border-[#D6E4FF] bg-[#EEF2FF] text-[#273B9A]";
+    return "border-[#D7B46A] bg-[#F8F1E3] text-[#5F4820]";
   }
   if (score >= 4) {
     return "border-amber-200 bg-amber-50 text-amber-700";
@@ -207,13 +207,13 @@ export default function StockGraderAdminConsole({
 
   if (!isAdmin) {
     return (
-      <main className="min-h-screen bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] px-6 py-10 text-[#18233A]">
-        <section className="mx-auto max-w-md rounded-2xl border border-[#E7ECF5] bg-white p-6 shadow-[0_18px_45px_rgba(39,59,154,0.10)]">
-          <Link href="/stock-grader" className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-[#4F63F6]">
+      <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(215,180,106,0.16),transparent_30%),linear-gradient(180deg,#FBFAF7_0%,#F5EFE4_100%)] px-6 py-10 text-[#111827]">
+        <section className="mx-auto max-w-md border border-[#E6DDCD] bg-[#FFFDF8]/88 p-6 shadow-[0_18px_45px_rgba(78,56,21,0.10)] backdrop-blur-xl">
+          <Link href="/stock-grader" className="mb-6 inline-flex items-center gap-2 text-sm font-bold text-[#8A6A2F]">
             <ArrowLeft className="h-4 w-4" />
             Stock Grader
           </Link>
-          <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[#EEF2FF] text-[#4F63F6]">
+          <div className="mb-5 inline-flex h-11 w-11 items-center justify-center bg-[#111827] text-[#D7B46A]">
             <LockKeyhole className="h-5 w-5" />
           </div>
           <h1 className="text-2xl font-black">Admin Override Console</h1>
@@ -221,7 +221,7 @@ export default function StockGraderAdminConsole({
             Edit only discretionary Stock Grader categories. Each ticker/category keeps one active override.
           </p>
           {!isConfigured ? (
-            <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+            <div className="mt-5 border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
               Set STOCK_GRADER_ADMIN_PASSCODE before using this console.
             </div>
           ) : (
@@ -231,14 +231,14 @@ export default function StockGraderAdminConsole({
                 value={passcode}
                 onChange={(event) => setPasscode(event.target.value)}
                 placeholder="Admin passcode"
-                className="h-11 w-full rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] px-3 text-sm font-semibold outline-none focus:border-[#A8B2FF] focus:ring-2 focus:ring-[#A8B2FF]/25"
+                className="h-11 w-full border border-[#E6DDCD] bg-white/80 px-3 text-sm font-semibold outline-none focus:border-[#D7B46A] focus:ring-2 focus:ring-[#D7B46A]/25"
                 required
               />
               {error ? <p className="text-sm font-semibold text-rose-600">{error}</p> : null}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#4F63F6] px-5 text-sm font-bold text-white transition hover:bg-[#273B9A] disabled:opacity-60"
+                className="inline-flex h-11 w-full items-center justify-center bg-[#111827] px-5 text-sm font-bold text-white transition hover:bg-[#2B3445] disabled:opacity-60"
               >
                 {isSubmitting ? "Verifying..." : "Enter Admin"}
               </button>
@@ -250,30 +250,30 @@ export default function StockGraderAdminConsole({
   }
 
   return (
-    <main className="min-h-screen bg-[linear-gradient(180deg,#FFFFFF_0%,#F8FAFC_100%)] text-[#18233A]">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(215,180,106,0.16),transparent_30%),linear-gradient(180deg,#FBFAF7_0%,#F5EFE4_100%)] text-[#111827]">
       <section className="mx-auto max-w-7xl px-5 py-6 sm:px-8 lg:px-12">
-        <div className="flex flex-col gap-5 border-b border-[#E7ECF5] pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex flex-col gap-5 border-b border-[#E6DDCD] pb-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <Link href="/stock-grader" className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-[#4F63F6]">
+            <Link href="/stock-grader" className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-[#8A6A2F]">
               <ArrowLeft className="h-4 w-4" />
               Stock Grader
             </Link>
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#E7ECF5] bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#4F63F6]">
+            <div className="inline-flex items-center gap-2 border border-[#D7B46A] bg-[#F8F1E3] px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-[#8A6A2F]">
               <ShieldCheck className="h-3.5 w-3.5" />
               Admin Override Layer
             </div>
             <h1 className="mt-4 text-3xl font-black leading-tight sm:text-4xl">Discretionary Review Queue</h1>
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
+            <div className="border border-[#E6DDCD] bg-[#FFFDF8]/84 px-4 py-3 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Active</div>
               <div className="mt-1 text-xl font-black">{payload.summary.manualOverrideCount}</div>
             </div>
-            <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
+            <div className="border border-[#E6DDCD] bg-[#FFFDF8]/84 px-4 py-3 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Tickers</div>
               <div className="mt-1 text-xl font-black">{payload.summary.manualTickerCount}</div>
             </div>
-            <div className="rounded-xl border border-[#E7ECF5] bg-white px-4 py-3">
+            <div className="border border-[#E6DDCD] bg-[#FFFDF8]/84 px-4 py-3 shadow-[0_14px_34px_rgba(78,56,21,0.06)] backdrop-blur-xl">
               <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#9AA5BA]">Report</div>
               <div className="mt-1 text-sm font-black">{payload.latestFullScoreDate ?? "-"}</div>
             </div>
@@ -281,14 +281,14 @@ export default function StockGraderAdminConsole({
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)_360px]">
-          <aside className="rounded-2xl border border-[#E7ECF5] bg-white p-4 shadow-[0_18px_45px_rgba(39,59,154,0.08)]">
+          <aside className="border border-[#E6DDCD] bg-[#FFFDF8]/88 p-4 shadow-[0_18px_45px_rgba(78,56,21,0.08)] backdrop-blur-xl">
             <label className="relative block">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9AA5BA]" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search ticker"
-                className="h-11 w-full rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] pl-10 pr-3 text-sm font-semibold outline-none focus:border-[#A8B2FF] focus:ring-2 focus:ring-[#A8B2FF]/25"
+                className="h-11 w-full border border-[#E6DDCD] bg-white/80 pl-10 pr-3 text-sm font-semibold outline-none focus:border-[#D7B46A] focus:ring-2 focus:ring-[#D7B46A]/25"
               />
             </label>
             <div className="mt-4 max-h-[680px] space-y-2 overflow-y-auto pr-1">
@@ -297,10 +297,10 @@ export default function StockGraderAdminConsole({
                   key={item.ticker}
                   type="button"
                   onClick={() => handleTickerChange(item.ticker)}
-                  className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-left transition ${
+                  className={`flex w-full items-center justify-between border px-3 py-2 text-left transition ${
                     selectedTicker === item.ticker
-                      ? "border-[#A8B2FF] bg-[#EEF2FF]"
-                      : "border-[#E7ECF5] bg-[#F8FAFC] hover:bg-white"
+                      ? "border-[#D7B46A] bg-[#F8F1E3]"
+                      : "border-[#E6DDCD] bg-white/70 hover:bg-white"
                   }`}
                 >
                   <span>
@@ -309,7 +309,7 @@ export default function StockGraderAdminConsole({
                       {item.hasManualOverride ? "Manual override" : "System score"}
                     </span>
                   </span>
-                  <span className={`rounded-lg border px-2 py-1 text-xs font-black ${scoreTone(item.composite0To10)}`}>
+                  <span className={`border px-2 py-1 text-xs font-black ${scoreTone(item.composite0To10)}`}>
                     {item.composite0To10?.toFixed(1) ?? "-"}
                   </span>
                 </button>
@@ -317,14 +317,14 @@ export default function StockGraderAdminConsole({
             </div>
           </aside>
 
-          <section className="rounded-2xl border border-[#E7ECF5] bg-white p-4 shadow-[0_18px_45px_rgba(39,59,154,0.08)]">
-            <div className="flex items-start justify-between gap-3 border-b border-[#E7ECF5] pb-4">
+          <section className="border border-[#E6DDCD] bg-[#FFFDF8]/88 p-4 shadow-[0_18px_45px_rgba(78,56,21,0.08)] backdrop-blur-xl">
+            <div className="flex items-start justify-between gap-3 border-b border-[#E6DDCD] pb-4">
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#A8B2FF]">Selected</div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8A6A2F]">Selected</div>
                 <div className="mt-1 text-3xl font-black">{selected?.ticker ?? "-"}</div>
                 <div className="mt-1 text-xs font-semibold text-[#5B6780]">{selected?.archetype}</div>
               </div>
-              <span className={`rounded-xl border px-3 py-2 text-lg font-black ${scoreTone(selected?.composite0To10 ?? null)}`}>
+              <span className={`border px-3 py-2 text-lg font-black ${scoreTone(selected?.composite0To10 ?? null)}`}>
                 {selected?.composite0To10?.toFixed(1) ?? "-"}
               </span>
             </div>
@@ -338,10 +338,10 @@ export default function StockGraderAdminConsole({
                     key={item.key}
                     type="button"
                     onClick={() => handleCategoryChange(item.key)}
-                    className={`rounded-xl border p-4 text-left transition ${
+                    className={`border p-4 text-left transition ${
                       categoryKey === item.key
-                        ? "border-[#A8B2FF] bg-[#EEF2FF]"
-                        : "border-[#E7ECF5] bg-[#F8FAFC] hover:bg-white"
+                        ? "border-[#D7B46A] bg-[#F8F1E3]"
+                        : "border-[#E6DDCD] bg-white/70 hover:bg-white"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -351,7 +351,7 @@ export default function StockGraderAdminConsole({
                           {active ? "Manual active" : "System baseline"}
                         </div>
                       </div>
-                      <span className={`rounded-lg border px-2 py-1 text-sm font-black ${scoreTone(category?.score ?? null)}`}>
+                      <span className={`border px-2 py-1 text-sm font-black ${scoreTone(category?.score ?? null)}`}>
                         {category?.score ?? "-"}
                       </span>
                     </div>
@@ -361,14 +361,14 @@ export default function StockGraderAdminConsole({
               })}
             </div>
 
-            <form onSubmit={saveOverride} className="mt-5 rounded-2xl border border-[#E7ECF5] bg-[#F8FAFC] p-4">
+            <form onSubmit={saveOverride} className="mt-5 border border-[#E6DDCD] bg-white/70 p-4">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
                 <label className="block">
                   <span className="text-xs font-bold uppercase tracking-[0.12em] text-[#7B879C]">Category</span>
                   <select
                     value={categoryKey}
                     onChange={(event) => handleCategoryChange(event.target.value)}
-                    className="mt-2 h-11 w-full rounded-xl border border-[#E7ECF5] bg-white px-3 text-sm font-semibold outline-none focus:border-[#A8B2FF]"
+                    className="mt-2 h-11 w-full border border-[#E6DDCD] bg-white px-3 text-sm font-semibold outline-none focus:border-[#D7B46A]"
                   >
                     {editableCategories.map((item) => (
                       <option key={item.key} value={item.key}>
@@ -386,7 +386,7 @@ export default function StockGraderAdminConsole({
                     step={1}
                     value={score}
                     onChange={(event) => setScore(Number(event.target.value))}
-                    className="mt-2 h-11 w-full rounded-xl border border-[#E7ECF5] bg-white px-3 text-sm font-semibold outline-none focus:border-[#A8B2FF]"
+                    className="mt-2 h-11 w-full border border-[#E6DDCD] bg-white px-3 text-sm font-semibold outline-none focus:border-[#D7B46A]"
                   />
                 </label>
                 <label className="block">
@@ -394,7 +394,7 @@ export default function StockGraderAdminConsole({
                   <select
                     value={confidence}
                     onChange={(event) => setConfidence(event.target.value as "low" | "medium" | "high")}
-                    className="mt-2 h-11 w-full rounded-xl border border-[#E7ECF5] bg-white px-3 text-sm font-semibold outline-none focus:border-[#A8B2FF]"
+                    className="mt-2 h-11 w-full border border-[#E6DDCD] bg-white px-3 text-sm font-semibold outline-none focus:border-[#D7B46A]"
                   >
                     <option value="low">low</option>
                     <option value="medium">medium</option>
@@ -406,7 +406,7 @@ export default function StockGraderAdminConsole({
                   <input
                     value={author}
                     onChange={(event) => setAuthor(event.target.value)}
-                    className="mt-2 h-11 w-full rounded-xl border border-[#E7ECF5] bg-white px-3 text-sm font-semibold outline-none focus:border-[#A8B2FF]"
+                    className="mt-2 h-11 w-full border border-[#E6DDCD] bg-white px-3 text-sm font-semibold outline-none focus:border-[#D7B46A]"
                   />
                 </label>
               </div>
@@ -417,14 +417,14 @@ export default function StockGraderAdminConsole({
                   onChange={(event) => setNote(event.target.value)}
                   rows={5}
                   placeholder="Why should this category override the system baseline?"
-                  className="mt-2 w-full rounded-xl border border-[#E7ECF5] bg-white px-3 py-3 text-sm font-semibold leading-6 outline-none focus:border-[#A8B2FF]"
+                  className="mt-2 w-full border border-[#E6DDCD] bg-white px-3 py-3 text-sm font-semibold leading-6 outline-none focus:border-[#D7B46A]"
                 />
               </label>
               <div className="mt-4 flex flex-col gap-3 sm:flex-row">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-[#4F63F6] px-5 text-sm font-bold text-white transition hover:bg-[#273B9A] disabled:opacity-60"
+                  className="inline-flex h-11 items-center justify-center gap-2 bg-[#111827] px-5 text-sm font-bold text-white transition hover:bg-[#2B3445] disabled:opacity-60"
                 >
                   <Save className="h-4 w-4" />
                   Save Override
@@ -433,7 +433,7 @@ export default function StockGraderAdminConsole({
                   type="button"
                   onClick={() => deleteOverride()}
                   disabled={isSubmitting}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-[#E7ECF5] bg-white px-5 text-sm font-bold text-[#5B6780] transition hover:border-rose-200 hover:text-rose-700 disabled:opacity-60"
+                  className="inline-flex h-11 items-center justify-center gap-2 border border-[#E6DDCD] bg-white px-5 text-sm font-bold text-[#5B6780] transition hover:border-rose-200 hover:text-rose-700 disabled:opacity-60"
                 >
                   <RotateCcw className="h-4 w-4" />
                   Revert to System
@@ -449,12 +449,12 @@ export default function StockGraderAdminConsole({
             </form>
           </section>
 
-          <aside className="rounded-2xl border border-[#E7ECF5] bg-white p-4 shadow-[0_18px_45px_rgba(39,59,154,0.08)]">
+          <aside className="border border-[#E6DDCD] bg-[#FFFDF8]/88 p-4 shadow-[0_18px_45px_rgba(78,56,21,0.08)] backdrop-blur-xl">
             <div className="mb-3 text-sm font-black">Active Override Cards</div>
             <div className="max-h-[760px] space-y-3 overflow-y-auto pr-1">
               {payload.overrides.length ? (
                 payload.overrides.map((override) => (
-                  <div key={overrideId(override.ticker, override.categoryKey)} className="rounded-xl border border-[#E7ECF5] bg-[#F8FAFC] p-3">
+                  <div key={overrideId(override.ticker, override.categoryKey)} className="border border-[#E6DDCD] bg-white/70 p-3">
                     <div className="flex items-start justify-between gap-3">
                       <button type="button" onClick={() => loadOverride(override)} className="min-w-0 text-left">
                         <div className="text-sm font-black">
@@ -464,7 +464,7 @@ export default function StockGraderAdminConsole({
                           {override.author} · {override.updatedAt.slice(0, 10)}
                         </div>
                       </button>
-                      <span className={`rounded-lg border px-2 py-1 text-sm font-black ${scoreTone(override.score)}`}>
+                      <span className={`border px-2 py-1 text-sm font-black ${scoreTone(override.score)}`}>
                         {override.score}
                       </span>
                     </div>
@@ -480,7 +480,7 @@ export default function StockGraderAdminConsole({
                   </div>
                 ))
               ) : (
-                <div className="rounded-xl bg-[#F8FAFC] p-4 text-sm font-semibold text-[#7B879C]">
+                <div className="bg-white/70 p-4 text-sm font-semibold text-[#7B879C]">
                   No manual overrides yet.
                 </div>
               )}
