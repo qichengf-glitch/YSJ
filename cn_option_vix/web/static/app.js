@@ -8,6 +8,7 @@
     latestStatus: null,
     pollTimer: null,
     countdownTimer: null,
+    candle: null,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -19,6 +20,7 @@
   const fmt = (v, digits = 2) => { const number = finiteValue(v); return number == null ? '—' : number.toFixed(digits); };
   const signed = (v) => { const number = finiteValue(v); return number == null ? '—' : `${number >= 0 ? '+' : ''}${number.toFixed(2)}`; };
   const signClass = (v) => { const number = finiteValue(v); return number == null ? '' : number >= 0 ? 'positive' : 'negative'; };
+  const dailyMove = (v) => { const number = finiteValue(v); return number == null ? '—' : `${(number / 16).toFixed(2)}%`; };
   const parseLocal = (text) => text ? new Date(text.replace(' ', 'T') + '+08:00') : null;
   const dateLabel = (text) => {
     if (!text) return '—';
@@ -63,7 +65,16 @@
       el.style.setProperty('--series-color', card.color);
       el.innerHTML = `
         <div class="metric-head"><span>${card.label}</span><span class="metric-dot"></span></div>
-        <div class="metric-value">${fmt(card.value)}</div>
+        <div class="metric-primary">
+          <div>
+            <span>VIX</span>
+            <strong>${fmt(card.value)}</strong>
+          </div>
+          <div>
+            <span>VIX / 16</span>
+            <strong>${dailyMove(card.value)}</strong>
+          </div>
+        </div>
         <div class="metric-subrow">
           <span>5m Δ <strong class="metric-change ${signClass(card.change)}">${signed(card.change)}</strong></span>
           <span>${card.key === 'overall' ? 'Benchmark' : 'vs Overall'} <strong class="metric-spread ${signClass(card.spread)}">${card.key === 'overall' ? '' : signed(card.spread)}</strong></span>
@@ -187,7 +198,7 @@
     terminal.toolbar = element;
   }
 
-  function makeTerminal({ resolution, chartId, legendId, tooltipId, labelsId, emptyId, toggleId, noteId }) {
+  function makeTerminal({ resolution, chartId, legendId, tooltipId, labelsId, emptyId, noteId }) {
     const container = $(chartId);
     const actualByTime = new Map();
     const chart = LightweightCharts.createChart(container, {
@@ -232,7 +243,7 @@
     const terminal = {
       resolution, chart, lineSeries: {}, spreadSeries: {}, actualByTime,
       points: [], mapped: [], toolbar: null, tooltip: $(tooltipId), empty: $(emptyId), labelLayer: $(labelsId),
-      viewToggle: $(toggleId), displayNote: $(noteId), viewMode: 'indexed', hasInitialFit: false,
+      displayNote: $(noteId), hasInitialFit: false,
     };
 
     state.config.series.forEach(meta => {
@@ -272,12 +283,6 @@
     createToolbar($(legendId), terminal);
     requestAnimationFrame(() => sizePanes(terminal));
     new ResizeObserver(() => requestAnimationFrame(() => sizePanes(terminal))).observe(container);
-    if (terminal.viewToggle) {
-      terminal.viewToggle.querySelectorAll('[data-mode]').forEach(button => {
-        button.addEventListener('click', () => setViewMode(terminal, button.dataset.mode));
-      });
-    }
-    container.closest('.chart-card')?.setAttribute('data-view-mode', terminal.viewMode);
 
     chart.subscribeCrosshairMove(param => {
       if (param.time == null || !terminal.actualByTime.has(Number(param.time))) {
@@ -342,28 +347,21 @@
     });
   }
 
-  function mainSeriesValue(terminal, meta, point, baseValue) {
+  function mainSeriesValue(terminal, meta, point) {
     const raw = Number(point[meta.key]);
     if (!Number.isFinite(raw)) return null;
-    if (terminal.viewMode === 'indexed') {
-      return Number.isFinite(baseValue) && baseValue !== 0 ? 100 * raw / baseValue : null;
-    }
     return raw;
   }
 
   function renderMainSeries(terminal) {
     state.config.series.forEach(meta => {
-      const baseItem = terminal.mapped.find(item => Number.isFinite(Number(item.point[meta.key])));
-      const baseValue = baseItem ? Number(baseItem.point[meta.key]) : null;
       const data = terminal.mapped.map(item => ({
         time: item.chartTime,
-        value: mainSeriesValue(terminal, meta, item.point, baseValue),
+        value: mainSeriesValue(terminal, meta, item.point),
       })).filter(item => item.value != null && Number.isFinite(item.value));
       terminal.lineSeries[meta.key].setData(data);
       terminal.lineSeries[meta.key].applyOptions({
-        priceFormat: terminal.viewMode === 'indexed'
-          ? { type: 'price', precision: 1, minMove: 0.1 }
-          : { type: 'price', precision: 2, minMove: 0.01 },
+        priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
       });
     });
     try {
@@ -372,23 +370,6 @@
     } catch (err) {
       console.debug('main scale fallback', err);
     }
-  }
-
-  function setViewMode(terminal, mode) {
-    if (!['level', 'indexed'].includes(mode) || terminal.viewMode === mode) return;
-    terminal.viewMode = mode;
-    terminal.viewToggle?.querySelectorAll('[data-mode]').forEach(button => {
-      button.classList.toggle('active', button.dataset.mode === mode);
-    });
-    terminal.viewToggle?.closest('.chart-card')?.setAttribute('data-view-mode', mode);
-    if (terminal.displayNote) {
-      terminal.displayNote.textContent = mode === 'indexed'
-        ? `Indexed view rebases every chain to 100 at the first ${terminal.resolution === '5m' ? 'loaded five-minute' : '2026 half-day'} observation. Exact VIX levels remain in cards and tooltip.`
-        : 'Level view shows the exact model-free VIX values. Select a chain to isolate it with Overall and tighten the comparison scale.';
-    }
-    renderMainSeries(terminal);
-    applyTerminalFocus(terminal);
-    renderTooltip(terminal, terminal.points.length ? terminal.points[terminal.points.length - 1] : null);
   }
 
   function setTerminalData(terminal, points) {
@@ -439,14 +420,7 @@
     const time = `<span class="tooltip-time">${fullDateTime(point.timestamp)}${point.session ? ` · ${point.session}` : ''}</span>`;
     const values = state.config.series.map(meta => {
       const spread = meta.key === 'overall' ? null : point[`spread_${meta.key}_overall`];
-      let indexed = '';
-      if (terminal.viewMode === 'indexed') {
-        const basePoint = terminal.points.find(p => Number.isFinite(Number(p[meta.key])));
-        const base = basePoint ? Number(basePoint[meta.key]) : null;
-        const current = Number(point[meta.key]);
-        if (Number.isFinite(base) && base !== 0 && Number.isFinite(current)) indexed = `<small>idx ${fmt(100 * current / base, 1)}</small>`;
-      }
-      return `<span class="tooltip-item"><span style="color:${meta.color}">${meta.label}</span><b>${fmt(point[meta.key])}</b>${indexed}${spread == null ? '' : `<em class="${signClass(spread)}">${signed(spread)}</em>`}</span>`;
+      return `<span class="tooltip-item"><span style="color:${meta.color}">${meta.label}</span><b>${fmt(point[meta.key])}</b>${spread == null ? '' : `<em class="${signClass(spread)}">${signed(spread)}</em>`}</span>`;
     }).join('');
     terminal.tooltip.innerHTML = time + values;
   }
@@ -454,6 +428,7 @@
   function setFocus(key) {
     state.focus = key;
     Object.values(state.terminals).forEach(applyTerminalFocus);
+    renderCandleChart();
     updateFocusClasses();
   }
 
@@ -499,6 +474,165 @@
       card.classList.toggle('active', state.focus === card.dataset.key);
       card.classList.toggle('dimmed', state.focus != null && state.focus !== card.dataset.key && card.dataset.key !== 'overall');
     });
+  }
+
+  function createCandleToolbar(element) {
+    element.innerHTML = '';
+    state.config.series.forEach(meta => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'series-pill';
+      button.dataset.key = meta.key;
+      button.style.setProperty('--pill-color', meta.color);
+      button.innerHTML = `<span class="swatch"></span>${meta.label}`;
+      button.addEventListener('click', () => setFocus(meta.key));
+      element.appendChild(button);
+    });
+  }
+
+  function candleTargetMeta() {
+    const key = state.focus || 'overall';
+    return state.config.series.find(meta => meta.key === key) || state.config.series[0];
+  }
+
+  function makeCandleTerminal({ chartId, legendId, tooltipId, emptyId }) {
+    const container = $(chartId);
+    const actualByTime = new Map();
+    const chart = LightweightCharts.createChart(container, {
+      autoSize: true,
+      layout: {
+        background: { type: 'solid', color: '#ffffff' },
+        textColor: '#7a8495',
+        fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
+        fontSize: 10,
+      },
+      grid: { vertLines: { visible: false }, horzLines: { color: '#edf0f4', style: 0 } },
+      localization: {
+        locale: 'en-GB',
+        timeFormatter: (time) => actualByTime.get(Number(time))?.crosshairLabel || '',
+      },
+      rightPriceScale: { borderVisible: false, scaleMargins: { top: 0.08, bottom: 0.08 }, minimumWidth: 57 },
+      timeScale: {
+        borderVisible: false,
+        timeVisible: false,
+        secondsVisible: false,
+        rightOffset: 3,
+        barSpacing: 7.0,
+        minBarSpacing: 2.0,
+        tickMarkFormatter: (time) => actualByTime.get(Number(time))?.axisLabel || '',
+      },
+      crosshair: {
+        mode: LightweightCharts.CrosshairMode.Normal,
+        vertLine: { color: '#8792a5', width: 1, style: 2, labelBackgroundColor: '#263248' },
+        horzLine: { color: '#aeb6c3', width: 1, style: 2, labelVisible: false },
+      },
+      handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true },
+      handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
+    });
+    const series = chart.addSeries(LightweightCharts.CandlestickSeries, {
+      upColor: '#c63f48',
+      downColor: '#14805a',
+      borderUpColor: '#c63f48',
+      borderDownColor: '#14805a',
+      wickUpColor: '#c63f48',
+      wickDownColor: '#14805a',
+      priceLineVisible: false,
+      lastValueVisible: true,
+      priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+    });
+    const terminal = {
+      chart, series, actualByTime, points: [], mapped: [], tooltip: $(tooltipId), empty: $(emptyId), hasInitialFit: false,
+    };
+    createCandleToolbar($(legendId));
+    chart.subscribeCrosshairMove(param => {
+      if (param.time == null || !actualByTime.has(Number(param.time))) {
+        renderCandleTooltip(null);
+        return;
+      }
+      renderCandleTooltip(actualByTime.get(Number(param.time)));
+    });
+    return terminal;
+  }
+
+  function aggregate15m(points, key) {
+    const groups = new Map();
+    points.forEach(point => {
+      const value = Number(point[key]);
+      const date = parseLocal(point.timestamp);
+      if (!Number.isFinite(value) || !date || Number.isNaN(date.getTime())) return;
+      const day = point.timestamp.slice(0, 10);
+      const totalMinutes = date.getHours() * 60 + date.getMinutes();
+      const endMinutes = Math.ceil(totalMinutes / 15) * 15;
+      const endHour = Math.floor(endMinutes / 60);
+      const endMinute = endMinutes % 60;
+      const bucket = `${day} ${String(endHour).padStart(2, '0')}:${String(endMinute).padStart(2, '0')}:00`;
+      if (!groups.has(bucket)) groups.set(bucket, []);
+      groups.get(bucket).push({ point, value });
+    });
+    return [...groups.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([timestamp, rows]) => {
+      const values = rows.map(row => row.value);
+      const date = parseLocal(timestamp);
+      return {
+        time: Math.floor(date.getTime() / 1000),
+        timestamp,
+        open: values[0],
+        high: Math.max(...values),
+        low: Math.min(...values),
+        close: values[values.length - 1],
+        count: values.length,
+      };
+    });
+  }
+
+  function renderCandleTooltip(candle) {
+    const terminal = state.candle;
+    if (!terminal) return;
+    const meta = candleTargetMeta();
+    if (!candle) {
+      terminal.tooltip.innerHTML = `<span>Select a chain to inspect 15-minute VIX candles.</span>`;
+      return;
+    }
+    const directionClass = candle.close >= candle.open ? 'positive' : 'negative';
+    terminal.tooltip.innerHTML = `
+      <span class="tooltip-time">${fullDateTime(candle.timestamp)}</span>
+      <span class="tooltip-item"><span style="color:${meta.color}">${meta.label}</span><b>${fmt(candle.close)}</b><em class="${directionClass}">${signed(candle.close - candle.open)}</em></span>
+      <span class="tooltip-item">O <b>${fmt(candle.open)}</b></span>
+      <span class="tooltip-item">H <b>${fmt(candle.high)}</b></span>
+      <span class="tooltip-item">L <b>${fmt(candle.low)}</b></span>`;
+  }
+
+  function renderCandleChart() {
+    const terminal = state.candle;
+    if (!terminal) return;
+    const meta = candleTargetMeta();
+    const candles = aggregate15m(terminal.points, meta.key);
+    terminal.actualByTime.clear();
+    candles.forEach((candle, index) => {
+      const previous = index ? candles[index - 1].timestamp.slice(0, 10) : null;
+      terminal.actualByTime.set(candle.time, {
+        ...candle,
+        axisLabel: candle.timestamp.slice(0, 10) !== previous ? compactDate(candle.timestamp) : '',
+        crosshairLabel: fullDateTime(candle.timestamp),
+      });
+    });
+    terminal.series.setData(candles.map(candle => ({
+      time: candle.time,
+      open: candle.open,
+      high: candle.high,
+      low: candle.low,
+      close: candle.close,
+    })));
+    terminal.empty.classList.toggle('hidden', candles.length > 0);
+    $('candleTarget').textContent = meta.label;
+    $('fifteenMinutePointCount').textContent = `${candles.length.toLocaleString()} candles`;
+    document.querySelectorAll('#legend15m [data-key]').forEach(el => {
+      el.classList.toggle('active', el.dataset.key === meta.key);
+    });
+    if (candles.length && !terminal.hasInitialFit) {
+      terminal.chart.timeScale().fitContent();
+      terminal.hasInitialFit = true;
+    }
+    renderCandleTooltip(candles.length ? candles[candles.length - 1] : null);
   }
 
   function renderStatus(status) {
@@ -563,6 +697,8 @@
       renderStatus(status);
       setTerminalData(state.terminals.five, five.points);
       setTerminalData(state.terminals.half, half.points);
+      state.candle.points = five.points;
+      renderCandleChart();
       $('fiveMinutePointCount').textContent = `${five.count.toLocaleString()} points`;
       $('halfdayPointCount').textContent = `${half.count.toLocaleString()} points`;
       $('footerRefresh').textContent = `Browser refresh: ${new Date().toLocaleTimeString('en-GB', { hour12: false })}`;
@@ -579,8 +715,9 @@
     state.config = await api('/api/config');
     const build = $('buildId');
     if (build) build.textContent = `Build: ${state.config.build_id}`;
-    state.terminals.five = makeTerminal({ resolution: '5m', chartId: 'chart5m', legendId: 'legend5m', tooltipId: 'tooltip5m', labelsId: 'paneLabels5m', emptyId: 'empty5m', toggleId: 'viewToggle5m', noteId: 'displayNote5m' });
-    state.terminals.half = makeTerminal({ resolution: 'halfday', chartId: 'chartHalfday', legendId: 'legendHalfday', tooltipId: 'tooltipHalfday', labelsId: 'paneLabelsHalfday', emptyId: 'emptyHalfday', toggleId: 'viewToggleHalfday', noteId: 'displayNoteHalfday' });
+    state.terminals.five = makeTerminal({ resolution: '5m', chartId: 'chart5m', legendId: 'legend5m', tooltipId: 'tooltip5m', labelsId: 'paneLabels5m', emptyId: 'empty5m', noteId: 'displayNote5m' });
+    state.candle = makeCandleTerminal({ chartId: 'chart15m', legendId: 'legend15m', tooltipId: 'tooltip15m', emptyId: 'empty15m' });
+    state.terminals.half = makeTerminal({ resolution: 'halfday', chartId: 'chartHalfday', legendId: 'legendHalfday', tooltipId: 'tooltipHalfday', labelsId: 'paneLabelsHalfday', emptyId: 'emptyHalfday', noteId: 'displayNoteHalfday' });
     await refresh();
     state.pollTimer = setInterval(refresh, state.config.poll_seconds * 1000);
     state.countdownTimer = setInterval(updateCountdowns, 1000);
