@@ -9,6 +9,10 @@
     pollTimer: null,
     countdownTimer: null,
     candle: null,
+    latestCards: [],
+    averageRows: [],
+    averagePayload: null,
+    contextKey: null,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -35,12 +39,6 @@
     const d = parseLocal(text);
     return d ? new Intl.DateTimeFormat('en-GB', { year: 'numeric', month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Shanghai' }).format(d) : '—';
   };
-  const rgba = (hex, alpha) => {
-    const h = hex.replace('#', '');
-    const n = parseInt(h, 16);
-    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
-  };
-
   const CN_VIX_API_PROXY_PREFIX = window.location.pathname.startsWith('/api/cn-option-vix-dashboard')
     ? '/api/cn-option-vix-dashboard'
     : '';
@@ -55,17 +53,41 @@
   }
 
   function renderCards(payload) {
+    state.latestCards = payload.cards || [];
     const container = $('metricCards');
     container.innerHTML = '';
-    payload.cards.forEach(card => {
+    state.latestCards.forEach(card => {
+      const row = state.averageRows.find(item => item.key === card.key) || {};
+      const relativeBlock = [20, 60].map(window => {
+        const isBenchmark = card.key === 'overall';
+        return `
+          <div class="card-stat-window">
+            <span>${window}D Rel</span>
+            <div>
+              <b class="${isBenchmark ? '' : signClass(row[`spread_mean_${window}`])}">${isBenchmark ? '—' : signed(row[`spread_mean_${window}`])}</b>
+              <small>Mean</small>
+            </div>
+            <div>
+              <b>${isBenchmark ? '—' : fmt(row[`spread_std_${window}`])}</b>
+              <small>SD</small>
+            </div>
+            <div>
+              <b>${isBenchmark ? '—' : fmt(row[`spread_variance_${window}`])}</b>
+              <small>Var</small>
+            </div>
+          </div>`;
+      }).join('');
       const el = document.createElement('button');
       el.type = 'button';
       el.className = 'metric-card';
       el.dataset.key = card.key;
       el.style.setProperty('--series-color', card.color);
       el.innerHTML = `
-        <div class="metric-head"><span>${card.label}</span><span class="metric-dot"></span></div>
-        <div class="metric-primary">
+        <div class="metric-head">
+          <span>${card.label}</span>
+          <span class="metric-dot"></span>
+        </div>
+        <div class="metric-hero">
           <div>
             <span>VIX</span>
             <strong>${fmt(card.value)}</strong>
@@ -78,103 +100,115 @@
         <div class="metric-subrow">
           <span>5m Δ <strong class="metric-change ${signClass(card.change)}">${signed(card.change)}</strong></span>
           <span>${card.key === 'overall' ? 'Benchmark' : 'vs Overall'} <strong class="metric-spread ${signClass(card.spread)}">${card.key === 'overall' ? '' : signed(card.spread)}</strong></span>
-        </div>`;
-      el.addEventListener('click', () => setFocus(state.focus === card.key ? null : card.key));
+        </div>
+        <div class="card-stat-grid">${relativeBlock}</div>
+        <span class="card-action">Details</span>`;
+      el.addEventListener('click', () => {
+        setFocus(card.key);
+        openContextDrawer(card.key);
+      });
       container.appendChild(el);
     });
     updateFocusClasses();
   }
 
   function renderAverages(payload) {
+    state.averagePayload = payload;
+    state.averageRows = payload.rows || [];
     $('averageAsOf').textContent = `As of ${fullDateTime(payload.asof)}`;
     $('averageCoverage').textContent = `${payload.available_trading_days ?? 0} trading days`;
-    const relativeBody = $('relativeRows');
-    const levelGrid = $('levelGrid');
-    if (!payload.rows || !payload.rows.length) {
-      relativeBody.innerHTML = '<tr><td colspan="4" class="table-loading">No half-day history available.</td></tr>';
-      levelGrid.innerHTML = '<div class="level-loading">No VIX level history available.</div>';
-      return;
-    }
+    if (state.contextKey) renderContextDrawer(state.contextKey);
+  }
 
-    const regimeFor = (row) => {
-      const avg20 = finiteValue(row.avg_20);
-      const avg60 = finiteValue(row.avg_60);
-      const delta = avg20 == null || avg60 == null ? null : avg20 - avg60;
-      if (delta == null || Math.abs(delta) < 0.10) return { className: 'neutral', text: 'NEUTRAL' };
-      return delta > 0
-        ? { className: 'rising', text: 'RISING' }
-        : { className: 'cooling', text: 'COOLING' };
-    };
+  function regimeFor(row) {
+    const avg20 = finiteValue(row?.avg_20);
+    const avg60 = finiteValue(row?.avg_60);
+    const delta = avg20 == null || avg60 == null ? null : avg20 - avg60;
+    if (delta == null || Math.abs(delta) < 0.10) return { className: 'neutral', text: 'NEUTRAL' };
+    return delta > 0
+      ? { className: 'rising', text: 'RISING' }
+      : { className: 'cooling', text: 'COOLING' };
+  }
 
-    const relativeWindow = (row, window) => {
-      if (row.key === 'overall') {
-        return `
-          <div class="relative-benchmark">
-            <strong>Benchmark</strong>
-            <span>Sector - Overall is not applicable</span>
-          </div>`;
-      }
-      const count = row[`spread_count_${window}`] ?? 0;
-      const mean = row[`spread_mean_${window}`];
-      return `
-        <div class="relative-window">
-          <div class="relative-metric relative-mean">
-            <span>Mean</span>
-            <strong class="${signClass(mean)}">${signed(mean)}</strong>
-          </div>
-          <div class="relative-metric">
-            <span>SD</span>
-            <strong>${fmt(row[`spread_std_${window}`])}</strong>
-          </div>
-          <div class="relative-metric">
-            <span>Var</span>
-            <strong>${fmt(row[`spread_variance_${window}`])}</strong>
-          </div>
-          <small>n=${count}</small>
-        </div>`;
-    };
-
-    relativeBody.innerHTML = payload.rows.map(row => {
-      const regime = regimeFor(row);
-      const currentRelative = row.key === 'overall'
-        ? '<div class="current-relative benchmark-label">Benchmark</div>'
-        : `<div class="current-relative"><span>vs Overall</span><strong class="${signClass(row.latest_spread)}">${signed(row.latest_spread)}</strong></div>`;
-      return `<tr>
-        <td>
-          <div class="chain-cell">
-            <span class="average-series" style="--series-color:${row.color}"><span class="average-series-dot"></span>${row.label}</span>
-            <span class="regime-chip ${regime.className}">${regime.text}</span>
-          </div>
-        </td>
-        <td>
-          <div class="current-cell">
-            <strong class="current-vix">${fmt(row.latest)}</strong>
-            ${currentRelative}
-          </div>
-        </td>
-        <td>${relativeWindow(row, 20)}</td>
-        <td>${relativeWindow(row, 60)}</td>
-      </tr>`;
-    }).join('');
-
-    const levelWindow = (row, window) => `
-      <div class="level-window">
-        <div class="level-window-title">${window}D</div>
-        <div class="level-stat"><span>Average</span><strong>${fmt(row[`avg_${window}`])}</strong></div>
-        <div class="level-stat"><span>Delta vs Avg</span><strong class="${signClass(row[`vs_avg_${window}`])}">${signed(row[`vs_avg_${window}`])}</strong></div>
-        <div class="level-stat"><span>Variance</span><strong>${fmt(row[`variance_${window}`])}</strong></div>
+  function contextWindow(row, window, mode) {
+    const relative = mode === 'relative';
+    const isBenchmark = row?.key === 'overall' && relative;
+    return `
+      <div class="context-window">
+        <div class="context-window-title">${window}D ${relative ? 'Relative Spread' : 'VIX Level'}</div>
+        <div class="context-stat">
+          <span>${relative ? 'Mean' : 'Average'}</span>
+          <strong class="${relative ? signClass(row?.[`spread_mean_${window}`]) : ''}">${isBenchmark ? '—' : relative ? signed(row?.[`spread_mean_${window}`]) : fmt(row?.[`avg_${window}`])}</strong>
+        </div>
+        <div class="context-stat">
+          <span>${relative ? 'SD' : 'Delta vs Avg'}</span>
+          <strong class="${relative ? '' : signClass(row?.[`vs_avg_${window}`])}">${isBenchmark ? '—' : relative ? fmt(row?.[`spread_std_${window}`]) : signed(row?.[`vs_avg_${window}`])}</strong>
+        </div>
+        <div class="context-stat">
+          <span>Variance</span>
+          <strong>${isBenchmark ? '—' : fmt(row?.[`${relative ? 'spread_variance' : 'variance'}_${window}`])}</strong>
+        </div>
       </div>`;
+  }
 
-    levelGrid.innerHTML = payload.rows.map(row => `
-      <article class="level-mini-card" style="--series-color:${row.color}">
-        <div class="level-mini-head">
-          <span class="average-series"><span class="average-series-dot"></span>${row.label}</span>
+  function renderContextDrawer(key) {
+    const card = state.latestCards.find(item => item.key === key);
+    const row = state.averageRows.find(item => item.key === key) || {};
+    if (!card) return;
+    const regime = regimeFor(row);
+    $('contextTitle').textContent = card.label;
+    $('contextDetails').innerHTML = `
+      <section class="context-snapshot" style="--series-color:${card.color}">
+        <div>
+          <span>Current VIX</span>
+          <strong>${fmt(card.value)}</strong>
         </div>
-        <div class="level-window-grid">
-          ${levelWindow(row, 20)}
-          ${levelWindow(row, 60)}
+        <div>
+          <span>VIX / 16</span>
+          <strong>${dailyMove(card.value)}</strong>
         </div>
-      </article>`).join('');
+        <div>
+          <span>5m Delta</span>
+          <strong class="${signClass(card.change)}">${signed(card.change)}</strong>
+        </div>
+        <div>
+          <span>${card.key === 'overall' ? 'Benchmark' : 'vs Overall'}</span>
+          <strong class="${signClass(card.spread)}">${card.key === 'overall' ? '—' : signed(card.spread)}</strong>
+        </div>
+      </section>
+      <section class="context-block">
+        <div class="context-block-head">
+          <span>Regime</span>
+          <strong class="regime-chip ${regime.className}">${regime.text}</strong>
+        </div>
+        <div class="context-window-grid">
+          ${contextWindow(row, 20, 'relative')}
+          ${contextWindow(row, 60, 'relative')}
+        </div>
+      </section>
+      <section class="context-block">
+        <div class="context-block-head">
+          <span>VIX Level Context</span>
+          <strong>${state.averagePayload ? `${state.averagePayload.available_trading_days ?? 0} days` : '—'}</strong>
+        </div>
+        <div class="context-window-grid">
+          ${contextWindow(row, 20, 'level')}
+          ${contextWindow(row, 60, 'level')}
+        </div>
+      </section>
+    `;
+  }
+
+  function openContextDrawer(key) {
+    state.contextKey = key;
+    renderContextDrawer(key);
+    $('contextDrawer').classList.add('open');
+    $('contextDrawer').setAttribute('aria-hidden', 'false');
+  }
+
+  function closeContextDrawer() {
+    $('contextDrawer').classList.remove('open');
+    $('contextDrawer').setAttribute('aria-hidden', 'true');
   }
 
   function createToolbar(element, terminal) {
@@ -198,7 +232,7 @@
     terminal.toolbar = element;
   }
 
-  function makeTerminal({ resolution, chartId, legendId, tooltipId, labelsId, emptyId, noteId }) {
+  function makeTerminal({ resolution, chartId, legendId, tooltipId, emptyId }) {
     const container = $(chartId);
     const actualByTime = new Map();
     const chart = LightweightCharts.createChart(container, {
@@ -208,7 +242,6 @@
         textColor: '#7a8495',
         fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif',
         fontSize: 10,
-        panes: { separatorColor: '#e9edf2', separatorHoverColor: '#dce2ea', enableResize: false },
       },
       grid: { vertLines: { visible: false }, horzLines: { color: '#edf0f4', style: 0 } },
       localization: {
@@ -241,9 +274,9 @@
     });
 
     const terminal = {
-      resolution, chart, lineSeries: {}, spreadSeries: {}, actualByTime,
-      points: [], mapped: [], toolbar: null, tooltip: $(tooltipId), empty: $(emptyId), labelLayer: $(labelsId),
-      displayNote: $(noteId), hasInitialFit: false,
+      resolution, chart, container, lineSeries: {}, actualByTime,
+      points: [], mapped: [], toolbar: null, tooltip: $(tooltipId), empty: $(emptyId),
+      hasInitialFit: false,
     };
 
     state.config.series.forEach(meta => {
@@ -262,27 +295,7 @@
       terminal.lineSeries[meta.key] = series;
     });
 
-    state.config.spreads.forEach((meta, i) => {
-      const series = chart.addSeries(LightweightCharts.BaselineSeries, {
-        baseValue: { type: 'price', price: 0 },
-        topLineColor: meta.color,
-        topFillColor1: rgba(meta.color, .38),
-        topFillColor2: rgba(meta.color, .06),
-        bottomLineColor: '#c7555d',
-        bottomFillColor1: 'rgba(199,85,93,.08)',
-        bottomFillColor2: 'rgba(199,85,93,.36)',
-        lineWidth: 1,
-        lastValueVisible: true,
-        priceLineVisible: false,
-        crosshairMarkerVisible: false,
-        priceFormat: { type: 'price', precision: 1, minMove: 0.1 },
-      }, i + 1);
-      terminal.spreadSeries[meta.group] = series;
-    });
-
     createToolbar($(legendId), terminal);
-    requestAnimationFrame(() => sizePanes(terminal));
-    new ResizeObserver(() => requestAnimationFrame(() => sizePanes(terminal))).observe(container);
 
     chart.subscribeCrosshairMove(param => {
       if (param.time == null || !terminal.actualByTime.has(Number(param.time))) {
@@ -292,31 +305,6 @@
       renderTooltip(terminal, terminal.actualByTime.get(Number(param.time)).point);
     });
     return terminal;
-  }
-
-  function sizePanes(terminal) {
-    const panes = terminal.chart.panes();
-    if (panes.length < 6) return;
-    panes[0].setHeight(335);
-    for (let i = 1; i < 6; i++) panes[i].setHeight(55);
-    renderPaneLabels(terminal);
-  }
-
-  function renderPaneLabels(terminal) {
-    terminal.labelLayer.innerHTML = '';
-    const panes = terminal.chart.panes();
-    if (panes.length < 6) return;
-    let top = panes[0].getHeight();
-    state.config.spreads.forEach((meta, i) => {
-      const el = document.createElement('div');
-      el.className = 'pane-label';
-      el.dataset.group = meta.group;
-      el.style.setProperty('--pane-color', meta.color);
-      el.style.top = `${top + 8}px`;
-      el.textContent = meta.label;
-      terminal.labelLayer.appendChild(el);
-      top += panes[i + 1].getHeight();
-    });
   }
 
   function chartPoints(points, resolution) {
@@ -379,30 +367,7 @@
     terminal.mapped = mapped;
     mapped.forEach(item => terminal.actualByTime.set(item.chartTime, item));
     renderMainSeries(terminal);
-    state.config.spreads.forEach(meta => {
-      terminal.spreadSeries[meta.group].setData(mapped
-        .filter(item => item.point[meta.key] != null)
-        .map(item => ({ time: item.chartTime, value: Number(item.point[meta.key]) })));
-    });
     terminal.empty.classList.toggle('hidden', points.length > 0);
-
-    // All five spread panes use the same symmetric scale, so their magnitudes
-    // are visually comparable rather than independently auto-scaled.
-    const spreadValues = [];
-    points.forEach(point => state.config.spreads.forEach(meta => {
-      const value = Number(point[meta.key]);
-      if (Number.isFinite(value)) spreadValues.push(Math.abs(value));
-    }));
-    const spreadLimit = Math.max(1, ...spreadValues) * 1.12;
-    for (let paneIndex = 1; paneIndex <= 5; paneIndex++) {
-      try {
-        const scale = terminal.chart.priceScale('right', paneIndex);
-        scale.setAutoScale(false);
-        scale.setVisibleRange({ from: -spreadLimit, to: spreadLimit });
-      } catch (err) {
-        console.debug('spread scale fallback', err);
-      }
-    }
 
     if (points.length && !terminal.hasInitialFit) {
       terminal.chart.timeScale().fitContent();
@@ -414,7 +379,7 @@
 
   function renderTooltip(terminal, point) {
     if (!point) {
-      terminal.tooltip.innerHTML = '<span>Move across the chart to inspect all VIX values and spreads.</span>';
+      terminal.tooltip.innerHTML = '<span>Move across the chart to inspect VIX levels.</span>';
       return;
     }
     const time = `<span class="tooltip-time">${fullDateTime(point.timestamp)}${point.session ? ` · ${point.session}` : ''}</span>`;
@@ -430,6 +395,10 @@
     Object.values(state.terminals).forEach(applyTerminalFocus);
     renderCandleChart();
     updateFocusClasses();
+    if (key && $('contextDrawer')?.classList.contains('open')) {
+      state.contextKey = key;
+      renderContextDrawer(key);
+    }
   }
 
   function applyTerminalFocus(terminal) {
@@ -439,18 +408,6 @@
         visible: strong,
         color: meta.color,
         lineWidth: meta.key === 'overall' || meta.key === state.focus ? 3 : 2,
-        lastValueVisible: strong,
-      });
-    });
-    state.config.spreads.forEach(meta => {
-      const strong = state.focus == null || state.focus === meta.group;
-      terminal.spreadSeries[meta.group].applyOptions({
-        topLineColor: strong ? meta.color : rgba(meta.color, .12),
-        topFillColor1: rgba(meta.color, strong ? .38 : .07),
-        topFillColor2: rgba(meta.color, strong ? .06 : .01),
-        bottomLineColor: strong ? '#c7555d' : 'rgba(199,85,93,.12)',
-        bottomFillColor1: strong ? 'rgba(199,85,93,.08)' : 'rgba(199,85,93,.01)',
-        bottomFillColor2: strong ? 'rgba(199,85,93,.36)' : 'rgba(199,85,93,.07)',
         lastValueVisible: strong,
       });
     });
@@ -464,9 +421,6 @@
         el.classList.toggle('active', state.focus == null || el.dataset.key === state.focus);
       });
     }
-    terminal.labelLayer.querySelectorAll('.pane-label').forEach(el => {
-      el.style.opacity = state.focus == null || el.dataset.group === state.focus ? '1' : '.30';
-    });
   }
 
   function updateFocusClasses() {
@@ -692,8 +646,8 @@
       const [latest, status, five, half, averages] = await Promise.all([
         api('/api/latest'), api('/api/status'), api('/api/series?resolution=5m'), api('/api/series?resolution=halfday'), api('/api/averages')
       ]);
-      renderCards(latest);
       renderAverages(averages);
+      renderCards(latest);
       renderStatus(status);
       setTerminalData(state.terminals.five, five.points);
       setTerminalData(state.terminals.half, half.points);
@@ -715,9 +669,9 @@
     state.config = await api('/api/config');
     const build = $('buildId');
     if (build) build.textContent = `Build: ${state.config.build_id}`;
-    state.terminals.five = makeTerminal({ resolution: '5m', chartId: 'chart5m', legendId: 'legend5m', tooltipId: 'tooltip5m', labelsId: 'paneLabels5m', emptyId: 'empty5m', noteId: 'displayNote5m' });
+    state.terminals.five = makeTerminal({ resolution: '5m', chartId: 'chart5m', legendId: 'legend5m', tooltipId: 'tooltip5m', emptyId: 'empty5m' });
     state.candle = makeCandleTerminal({ chartId: 'chart15m', legendId: 'legend15m', tooltipId: 'tooltip15m', emptyId: 'empty15m' });
-    state.terminals.half = makeTerminal({ resolution: 'halfday', chartId: 'chartHalfday', legendId: 'legendHalfday', tooltipId: 'tooltipHalfday', labelsId: 'paneLabelsHalfday', emptyId: 'emptyHalfday', noteId: 'displayNoteHalfday' });
+    state.terminals.half = makeTerminal({ resolution: 'halfday', chartId: 'chartHalfday', legendId: 'legendHalfday', tooltipId: 'tooltipHalfday', emptyId: 'emptyHalfday' });
     await refresh();
     state.pollTimer = setInterval(refresh, state.config.poll_seconds * 1000);
     state.countdownTimer = setInterval(updateCountdowns, 1000);
@@ -732,6 +686,7 @@
     $('qualityDrawer').classList.remove('open');
     $('qualityDrawer').setAttribute('aria-hidden', 'true');
   }));
+  document.querySelectorAll('[data-close-context]').forEach(el => el.addEventListener('click', closeContextDrawer));
 
   init().catch(err => {
     console.error(err);

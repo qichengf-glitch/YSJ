@@ -44,7 +44,7 @@ LABELS = {
     "hard_tech": "Hard Tech",
 }
 
-BUILD_ID = "20260828-vix-level-candles-v1"
+BUILD_ID = "20260828-vix-command-panel-v1"
 
 app = FastAPI(title="China Option Volatility Monitor", version="1.4.0")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")

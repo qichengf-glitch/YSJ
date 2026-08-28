@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>China Option Volatility Monitor</title>
   <meta name="description" content="Live multi-index option volatility monitoring terminal" />
-  <link rel="stylesheet" href="static/styles.css?v=20260828-vix-level-candles-v1" />
+  <link rel="stylesheet" href="static/styles.css?v=20260828-vix-command-panel-v1" />
   <script src="https://unpkg.com/lightweight-charts@5.2.0/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
@@ -27,117 +27,64 @@
 
     <main>
       <section id="metricCards" class="metric-grid" aria-label="Latest VIX values"></section>
-      <section class="operator-strip" aria-label="Operator readout">
-        <div>
-          <div class="section-kicker">OPERATOR READOUT</div>
-          <strong>VIX / 16 is shown as the implied one-day move.</strong>
-        </div>
-        <span>Use the cards to select a chain; the 15-minute candle panel follows the selected chain.</span>
-      </section>
 
-      <section class="relative-card" aria-labelledby="relativeHeading">
-        <div class="statistics-header">
-          <div>
-            <div class="section-kicker">PRIMARY MONITOR</div>
-            <h2 id="relativeHeading">Current &amp; Relative Spread Monitor</h2>
-            <p>Current uses the latest complete 5-minute observation. Relative spread = sector VIX - Overall VIX; 20D / 60D statistics use one matched half-day observation per trading date.</p>
-          </div>
-          <div class="statistics-meta-stack">
-            <div class="average-meta"><span id="averageAsOf">As of —</span><strong id="averageCoverage">— trading days</strong></div>
-            <div class="sign-convention" aria-label="A-share sign convention">
-              <span class="sign-chip positive">+ Positive</span>
-              <span class="sign-chip negative">- Negative</span>
+      <section class="market-workspace" aria-label="Intraday VIX workspace">
+        <section class="chart-card compact-chart" data-resolution="5m">
+          <div class="card-header">
+            <div>
+              <div class="section-kicker">INTRADAY</div>
+              <h2>5-Minute VIX Level</h2>
+              <p>Latest five trading days · line monitor</p>
+            </div>
+            <div class="module-meta module-meta-stacked">
+              <div class="module-stat"><span class="live-chip"><span></span>5-MIN LIVE</span><strong id="fiveMinutePointCount">— points</strong></div>
             </div>
           </div>
-        </div>
-        <div class="relative-table-wrap">
-          <table class="relative-table">
-            <thead>
-              <tr>
-                <th>VIX chain<span class="th-sub">Regime</span></th>
-                <th>Current<span class="th-sub">VIX · vs Overall</span></th>
-                <th>20D relative spread<span class="th-sub">Mean · SD · Var</span></th>
-                <th>60D relative spread<span class="th-sub">Mean · SD · Var</span></th>
-              </tr>
-            </thead>
-            <tbody id="relativeRows"><tr><td colspan="4" class="table-loading">Loading current and relative-spread statistics...</td></tr></tbody>
-          </table>
-        </div>
-        <div class="statistics-note"><strong>SD</strong> is sample standard deviation in VIX points; <strong>Var</strong> is sample variance in VIX points squared. Positive signed values are red and negative signed values are green under the A-share convention.</div>
+          <div id="legend5m" class="series-toolbar"></div>
+          <div class="tooltip-panel" id="tooltip5m"><span>Move across the chart to inspect VIX levels.</span></div>
+          <div class="chart-shell">
+            <div id="chart5m" class="chart-container"></div>
+            <div id="empty5m" class="empty-state hidden">No five-minute data yet. Run the dashboard bootstrap first.</div>
+          </div>
+        </section>
+
+        <section class="chart-card compact-chart candle-card" data-resolution="15m">
+          <div class="card-header">
+            <div>
+              <div class="section-kicker">INTRADAY CANDLE</div>
+              <h2>15-Minute VIX Candles</h2>
+              <p>Aggregated from 5-minute VIX · red up, green down</p>
+            </div>
+            <div class="module-meta module-meta-stacked">
+              <div class="module-stat"><span class="candle-chip">15-MIN OHLC</span><strong id="candleTarget">Overall</strong></div>
+              <strong id="fifteenMinutePointCount">— candles</strong>
+            </div>
+          </div>
+          <div id="legend15m" class="series-toolbar"></div>
+          <div class="tooltip-panel" id="tooltip15m"><span>Select a chain to inspect 15-minute VIX candles.</span></div>
+          <div class="candle-shell">
+            <div id="chart15m" class="chart-container"></div>
+            <div id="empty15m" class="empty-state hidden">No five-minute data available for 15-minute aggregation.</div>
+          </div>
+        </section>
       </section>
 
-      <section class="level-card" aria-labelledby="levelHeading">
-        <div class="level-header">
-          <div>
-            <div class="section-kicker">SECONDARY CONTEXT</div>
-            <h2 id="levelHeading">20D / 60D VIX Level Context</h2>
-            <p>Absolute VIX level statistics are separated from the primary relative-spread monitor for faster reading.</p>
-          </div>
-          <span class="secondary-badge">REFERENCE PANEL</span>
-        </div>
-        <div id="levelGrid" class="level-grid">
-          <div class="level-loading">Loading VIX level statistics...</div>
-        </div>
-      </section>
-
-      <section class="chart-card" data-resolution="5m">
-        <div class="card-header">
-          <div>
-            <div class="section-kicker">INTRADAY</div>
-            <h2>Latest 5 Trading Days</h2>
-            <p>Native 5-minute observations · equally spaced trading intervals</p>
-          </div>
-          <div class="module-meta module-meta-stacked">
-            <div class="module-stat"><span class="live-chip"><span></span>5-MIN LIVE</span><strong id="fiveMinutePointCount">— points</strong></div>
-          </div>
-        </div>
-        <div id="legend5m" class="series-toolbar"></div>
-        <div class="display-note" id="displayNote5m">Chart displays exact model-free VIX levels; relative spreads remain in the lower panes.</div>
-        <div class="tooltip-panel" id="tooltip5m"><span>Move across the chart to inspect all VIX values and spreads.</span></div>
-        <div class="chart-shell">
-          <div id="chart5m" class="chart-container"></div>
-          <div id="paneLabels5m" class="pane-label-layer"></div>
-          <div id="empty5m" class="empty-state hidden">No five-minute data yet. Run the dashboard bootstrap first.</div>
-        </div>
-      </section>
-
-      <section class="chart-card candle-card" data-resolution="15m">
-        <div class="card-header">
-          <div>
-            <div class="section-kicker">INTRADAY CANDLE</div>
-            <h2>15-Minute VIX Level Candles</h2>
-            <p>Aggregated from native 5-minute VIX observations · China convention: red up, green down</p>
-          </div>
-          <div class="module-meta module-meta-stacked">
-            <div class="module-stat"><span class="candle-chip">15-MIN OHLC</span><strong id="candleTarget">Overall</strong></div>
-            <strong id="fifteenMinutePointCount">— candles</strong>
-          </div>
-        </div>
-        <div id="legend15m" class="series-toolbar"></div>
-        <div class="tooltip-panel" id="tooltip15m"><span>Select a chain to inspect 15-minute VIX candles.</span></div>
-        <div class="candle-shell">
-          <div id="chart15m" class="chart-container"></div>
-          <div id="empty15m" class="empty-state hidden">No five-minute data available for 15-minute aggregation.</div>
-        </div>
-      </section>
-
-      <section class="chart-card" data-resolution="halfday">
+      <section class="chart-card ytd-chart" data-resolution="halfday">
         <div class="card-header">
           <div>
             <div class="section-kicker">MEDIUM-TERM CONTEXT</div>
             <h2>2026 Year to Date</h2>
-            <p>From the first available 2026 trading session · AM 11:30 and PM 15:00 observations</p>
+            <p>Half-day VIX level path · AM 11:30 and PM 15:00 observations</p>
           </div>
           <div class="module-meta module-meta-stacked">
+            <div class="average-meta"><span id="averageAsOf">As of —</span><strong id="averageCoverage">— trading days</strong></div>
             <div class="module-stat"><span class="halfday-chip">2026 YTD · HALF-DAY</span><strong id="halfdayPointCount">— points</strong></div>
           </div>
         </div>
         <div id="legendHalfday" class="series-toolbar"></div>
-        <div class="display-note" id="displayNoteHalfday">Chart displays exact model-free VIX levels from the first available 2026 observation.</div>
-        <div class="tooltip-panel" id="tooltipHalfday"><span>Move across the chart to inspect all VIX values and spreads.</span></div>
+        <div class="tooltip-panel" id="tooltipHalfday"><span>Move across the chart to inspect VIX levels.</span></div>
         <div class="chart-shell">
           <div id="chartHalfday" class="chart-container"></div>
-          <div id="paneLabelsHalfday" class="pane-label-layer"></div>
           <div id="emptyHalfday" class="empty-state hidden">No half-day history yet. Import the existing 30-minute history.</div>
         </div>
       </section>
@@ -160,6 +107,14 @@
     </div>
   </aside>
 
-  <script src="static/app.js?v=20260828-vix-level-candles-v1"></script>
+  <aside id="contextDrawer" class="drawer" aria-hidden="true">
+    <div class="drawer-backdrop" data-close-context></div>
+    <div class="drawer-panel context-panel">
+      <div class="drawer-header"><div><div class="section-kicker">SECONDARY CONTEXT</div><h3 id="contextTitle">VIX Chain</h3></div><button type="button" data-close-context>×</button></div>
+      <div id="contextDetails" class="context-details"></div>
+    </div>
+  </aside>
+
+  <script src="static/app.js?v=20260828-vix-command-panel-v1"></script>
 </body>
 </html>
