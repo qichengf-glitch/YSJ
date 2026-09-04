@@ -45,9 +45,9 @@ const quantModules = {
       icon: TrendingUp,
     },
     {
-      label: "A-Share Data",
-      detail: "ClickHouse market bars",
-      href: "/a-share-data",
+      label: "A-Share Strategy",
+      detail: "Tick-stock-panel workspace",
+      href: "/a-share-strategy-panel",
       icon: Database,
     },
   ],
@@ -71,9 +71,9 @@ const quantModules = {
       icon: TrendingUp,
     },
     {
-      label: "A股数据",
-      detail: "ClickHouse 行情底座",
-      href: "/a-share-data",
+      label: "A股策略面板",
+      detail: "tick-stock-panel 工作台",
+      href: "/a-share-strategy-panel",
       icon: Database,
     },
   ],
@@ -94,7 +94,8 @@ export default function Navbar() {
     pathname.startsWith("/cn-option-vix") ||
     pathname.startsWith("/prediction-markets") ||
     pathname.startsWith("/stock-grader") ||
-    pathname.startsWith("/a-share-data");
+    pathname.startsWith("/a-share-data") ||
+    pathname.startsWith("/a-share-strategy-panel");
 
   return (
     <nav className="sticky top-0 z-50 border-b border-[#E6DDCD] bg-[#FBFAF7]/94 backdrop-blur">
