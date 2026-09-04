@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, BarChart3, ChevronDown, TrendingUp } from "lucide-react";
+import { Activity, BarChart3, ChevronDown, Database, TrendingUp } from "lucide-react";
 import BrandMark from "./BrandMark";
 import LanguageToggle from "./LanguageToggle";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -44,6 +44,12 @@ const quantModules = {
       href: "/stock-grader",
       icon: TrendingUp,
     },
+    {
+      label: "A-Share Data",
+      detail: "ClickHouse market bars",
+      href: "/a-share-data",
+      icon: Database,
+    },
   ],
   zh: [
     {
@@ -64,6 +70,12 @@ const quantModules = {
       href: "/stock-grader",
       icon: TrendingUp,
     },
+    {
+      label: "A股数据",
+      detail: "ClickHouse 行情底座",
+      href: "/a-share-data",
+      icon: Database,
+    },
   ],
 };
 
@@ -81,7 +93,8 @@ export default function Navbar() {
     pathname.startsWith("/access") ||
     pathname.startsWith("/cn-option-vix") ||
     pathname.startsWith("/prediction-markets") ||
-    pathname.startsWith("/stock-grader");
+    pathname.startsWith("/stock-grader") ||
+    pathname.startsWith("/a-share-data");
 
   return (
     <nav className="sticky top-0 z-50 border-b border-[#E6DDCD] bg-[#FBFAF7]/94 backdrop-blur">

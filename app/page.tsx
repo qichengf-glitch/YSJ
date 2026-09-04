@@ -31,7 +31,7 @@ const content = {
       eyebrow: "Workspace",
       title: "Research pages plus monitored market systems.",
       subtitle:
-        "The public pages hold research material and ongoing theses. Quant Monitor is the controlled entry point for CN Option VIX, Prediction Market, and Stock Grader.",
+        "The public pages hold research material and ongoing theses. Quant Monitor is the controlled entry point for CN Option VIX, Prediction Market, Stock Grader, and A-share market data.",
     },
     pillars: [
       {
@@ -51,7 +51,7 @@ const content = {
       },
     ],
     metrics: [
-      ["3", "Monitoring Modules"],
+      ["4", "Monitoring Modules"],
       ["12h", "Browser Session"],
       ["Live", "Market Feeds"],
       ["Internal", "Research Workflow"],
@@ -79,7 +79,7 @@ const content = {
       eyebrow: "工作台",
       title: "研究页面，加上受控的市场监控系统。",
       subtitle:
-        "公开页面承载研究材料和进行中的 thesis。量化指标监控是进入中国期权 VIX、Prediction Market 和 Stock Grader 的受控入口。",
+        "公开页面承载研究材料和进行中的 thesis。量化指标监控是进入中国期权 VIX、Prediction Market、Stock Grader 和 A股数据底座的受控入口。",
     },
     pillars: [
       {
@@ -99,7 +99,7 @@ const content = {
       },
     ],
     metrics: [
-      ["3", "监控模块"],
+      ["4", "监控模块"],
       ["12h", "浏览器会话"],
       ["Live", "市场数据流"],
       ["Internal", "内部研究流程"],

@@ -6,6 +6,7 @@ import {
   Activity,
   ArrowRight,
   BarChart3,
+  Database,
   Gauge,
   LockKeyhole,
   LogOut,
@@ -47,6 +48,11 @@ const copy = {
     stockGraderCadence: "Weekly / manual review",
     stockGraderStatus: "Review",
     stockGraderBullets: ["10-category scorecard", "Admin override audit", "Ticker-level rationale"],
+    dataTitle: "A-Share Data Panel",
+    dataDescription: "ClickHouse-backed China equity bars for monitoring panels and backtests.",
+    dataCadence: "1-minute / daily",
+    dataStatus: "Data",
+    dataBullets: ["Full-market A-share bars", "S3 raw archive", "Tick-stock-panel API contract"],
     open: "Open",
     logout: "Sign out",
   },
@@ -82,6 +88,11 @@ const copy = {
     stockGraderCadence: "每周 / 人工复核",
     stockGraderStatus: "复核",
     stockGraderBullets: ["10 项分类评分", "管理员 override 审计", "个股评分理由追踪"],
+    dataTitle: "A股数据面板",
+    dataDescription: "基于 ClickHouse 的中国股票行情数据，用于监控面板和后续回测。",
+    dataCadence: "1 分钟 / 日线",
+    dataStatus: "数据",
+    dataBullets: ["全市场 A 股行情", "S3 原始归档", "tick-stock-panel 接口契约"],
     open: "打开",
     logout: "退出登录",
   },
@@ -184,6 +195,15 @@ export default function AccessPortal({ isAuthenticated }: AccessPortalProps) {
       href: "/stock-grader",
       icon: TrendingUp,
     },
+    {
+      title: t.dataTitle,
+      description: t.dataDescription,
+      cadence: t.dataCadence,
+      status: t.dataStatus,
+      bullets: t.dataBullets,
+      href: "/a-share-data",
+      icon: Database,
+    },
   ];
 
   return (
@@ -213,7 +233,7 @@ export default function AccessPortal({ isAuthenticated }: AccessPortalProps) {
         </div>
 
         {authenticated ? (
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-4">
             {tools.map((tool) => {
               const Icon = tool.icon;
               return (
