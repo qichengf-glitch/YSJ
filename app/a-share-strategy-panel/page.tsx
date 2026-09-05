@@ -14,5 +14,5 @@ export default function AShareStrategyPanelPage() {
     redirect("/access");
   }
 
-  return <AShareStrategyPanelFrame panelUrl="/tick-panel/" />;
+  return <AShareStrategyPanelFrame panelUrl="/tick-panel" />;
 }

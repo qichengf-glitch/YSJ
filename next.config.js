@@ -32,10 +32,6 @@ const nextConfig = {
           destination: `${tickStockPanelOrigin}/assets/:path*`,
         },
         {
-          source: "/api/:path*",
-          destination: `${tickStockPanelOrigin}/api/:path*`,
-        },
-        {
           source: "/favicon.svg",
           destination: `${tickStockPanelOrigin}/favicon.svg`,
         },
