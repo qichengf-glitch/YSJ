@@ -14,10 +14,5 @@ export default function AShareStrategyPanelPage() {
     redirect("/access");
   }
 
-  const panelUrl =
-    process.env.TICK_STOCK_PANEL_URL ||
-    process.env.NEXT_PUBLIC_TICK_STOCK_PANEL_URL ||
-    "http://35.77.76.249:3018";
-
-  return <AShareStrategyPanelFrame panelUrl={panelUrl} />;
+  return <AShareStrategyPanelFrame panelUrl="/tick-panel/" />;
 }
