@@ -1,18 +1,10 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { ACCESS_COOKIE, verifyAccessToken } from "@/lib/access";
-import AShareStrategyPanelFrame from "./AShareStrategyPanelFrame";
+import { permanentRedirect } from "next/navigation";
 
 export const metadata = {
-  title: "A-Share Strategy Panel | YSJ Lab",
-  description: "Internal tick-stock-panel workspace for A-share monitoring and backtesting.",
+  title: "Chanlun Panel | YSJ Lab",
+  description: "Chanlun Panel",
 };
 
 export default function AShareStrategyPanelPage() {
-  const token = cookies().get(ACCESS_COOKIE)?.value;
-  if (!verifyAccessToken(token)) {
-    redirect("/access");
-  }
-
-  return <AShareStrategyPanelFrame panelUrl="/tick-panel" />;
+  permanentRedirect("https://chanlun.ysjfund.com");
 }
